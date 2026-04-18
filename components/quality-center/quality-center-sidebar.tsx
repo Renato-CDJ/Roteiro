@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Home, User, Users, Star, BookOpen, Megaphone, FileText, HelpCircle, Shield, MessageCircle } from "lucide-react"
+import { Home, BookOpen, Megaphone, FileText, HelpCircle, Shield, MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface QualityCenterSidebarProps {
