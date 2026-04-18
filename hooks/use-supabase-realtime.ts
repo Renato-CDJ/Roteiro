@@ -9,6 +9,8 @@ import type { User, QualityPost, QualityComment } from "@/lib/types"
 export function useSupabaseUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const channelRef = useRef<any>(null)
+  const mountedRef = useRef(true)
 
   const fetchUsers = useCallback(async () => {
     const supabase = createClient()
@@ -17,29 +19,36 @@ export function useSupabaseUsers() {
       .select("*")
       .order("created_at", { ascending: true })
 
-    if (!error && data) {
+    if (!error && data && mountedRef.current) {
       setUsers(data.map(mapSupabaseUser))
     }
-    setLoading(false)
+    if (mountedRef.current) setLoading(false)
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     fetchUsers()
 
     const supabase = createClient()
-    const channel = supabase
-      .channel("users-changes")
+    const channelId = `users-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    
+    channelRef.current = supabase
+      .channel(channelId)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "users" },
         () => {
-          fetchUsers()
+          if (mountedRef.current) fetchUsers()
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      mountedRef.current = false
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, [fetchUsers])
 
@@ -50,6 +59,8 @@ export function useSupabaseUsers() {
 export function useQualityPosts() {
   const [posts, setPosts] = useState<QualityPost[]>([])
   const [loading, setLoading] = useState(true)
+  const channelRef = useRef<any>(null)
+  const mountedRef = useRef(true)
 
   const fetchPosts = useCallback(async () => {
     const supabase = createClient()
@@ -63,7 +74,7 @@ export function useQualityPosts() {
 
     if (error) {
       console.error("[Supabase] Error fetching posts:", error)
-      setLoading(false)
+      if (mountedRef.current) setLoading(false)
       return
     }
 
@@ -106,30 +117,39 @@ export function useQualityPosts() {
       comments: commentsMap.get(p.id) || [],
     }))
 
-    setPosts(mappedPosts)
-    setLoading(false)
+    if (mountedRef.current) {
+      setPosts(mappedPosts)
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     fetchPosts()
 
     const supabase = createClient()
-    const channel = supabase
-      .channel("quality-posts-changes")
+    const channelId = `quality-posts-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    
+    channelRef.current = supabase
+      .channel(channelId)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "quality_posts" },
-        () => fetchPosts()
+        () => { if (mountedRef.current) fetchPosts() }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "quality_comments" },
-        () => fetchPosts()
+        () => { if (mountedRef.current) fetchPosts() }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      mountedRef.current = false
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, [fetchPosts])
 
@@ -140,6 +160,8 @@ export function useQualityPosts() {
 export function useAdminQuestions(filterByUserId?: string) {
   const [questions, setQuestions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const channelRef = useRef<any>(null)
+  const mountedRef = useRef(true)
 
   const fetchQuestions = useCallback(async () => {
     const supabase = createClient()
@@ -154,7 +176,7 @@ export function useAdminQuestions(filterByUserId?: string) {
 
     const { data, error } = await query
 
-    if (!error && data) {
+    if (!error && data && mountedRef.current) {
       const mapped = data.map((d) => ({
         id: d.id,
         question: d.question,
@@ -173,24 +195,31 @@ export function useAdminQuestions(filterByUserId?: string) {
       }))
       setQuestions(mapped)
     }
-    setLoading(false)
+    if (mountedRef.current) setLoading(false)
   }, [filterByUserId])
 
   useEffect(() => {
+    mountedRef.current = true
     fetchQuestions()
 
     const supabase = createClient()
-    const channel = supabase
-      .channel("admin-questions-changes")
+    const channelId = `admin-questions-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    
+    channelRef.current = supabase
+      .channel(channelId)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "admin_questions" },
-        () => fetchQuestions()
+        () => { if (mountedRef.current) fetchQuestions() }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      mountedRef.current = false
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, [fetchQuestions])
 
@@ -462,6 +491,8 @@ export async function getQualityStatsSupabase(): Promise<{
 export function useFeedbacks() {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const channelRef = useRef<any>(null)
+  const mountedRef = useRef(true)
 
   const fetchFeedbacks = useCallback(async () => {
     const supabase = createClient()
@@ -470,7 +501,7 @@ export function useFeedbacks() {
       .select("*")
       .order("created_at", { ascending: false })
 
-    if (!error && data) {
+    if (!error && data && mountedRef.current) {
       const mapped = data.map((f) => ({
         id: f.id,
         type: f.type,
@@ -482,24 +513,31 @@ export function useFeedbacks() {
       }))
       setFeedbacks(mapped)
     }
-    setLoading(false)
+    if (mountedRef.current) setLoading(false)
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     fetchFeedbacks()
 
     const supabase = createClient()
-    const channel = supabase
-      .channel("feedbacks-changes")
+    const channelId = `feedbacks-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    
+    channelRef.current = supabase
+      .channel(channelId)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "feedbacks" },
-        () => fetchFeedbacks()
+        () => { if (mountedRef.current) fetchFeedbacks() }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      mountedRef.current = false
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, [fetchFeedbacks])
 

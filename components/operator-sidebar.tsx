@@ -19,23 +19,82 @@ interface OperatorSidebarProps {
   currentStep?: ScriptStep | null
 }
 
-const FilteredList = memo(function FilteredList({
+// Componente de item memoizado para evitar re-renders
+const ListItem = memo(function ListItem({
+  item,
+  onClick,
+  type,
+}: {
+  item: any
+  onClick: () => void
+  type: "tabulation" | "situation" | "channel"
+}) {
+  return (
+    <button
+      key={item.id}
+      onClick={onClick}
+      className="w-full text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] border-slate-600 bg-slate-700 dark:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-600"
+    >
+      <div className="flex items-start gap-4">
+        {type === "tabulation" ? (
+          <div
+            className="mt-1.5 w-4 h-4 rounded-full flex-shrink-0 ring-2 ring-slate-600 shadow-sm"
+            style={{ backgroundColor: item.color }}
+          />
+        ) : (
+          <div className="mt-1 p-2 rounded-lg bg-background shadow-sm border border-border">
+            {type === "situation" ? (
+              <AlertCircle className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <Radio className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-lg mb-2 text-white">{item.name}</h3>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-200">
+            {type === "channel" ? item.contact : item.description}
+          </p>
+        </div>
+      </div>
+    </button>
+  )
+})
+
+// Componente de lista virtualizada simples para melhor performance
+const VirtualizedList = memo(function VirtualizedList({
   items,
   searchQuery,
   onItemClick,
-  renderItem,
+  type,
+  maxVisible = 50,
 }: {
   items: any[]
   searchQuery: string
   onItemClick: (item: any) => void
-  renderItem: (item: any, onClick: () => void) => React.ReactNode
+  type: "tabulation" | "situation" | "channel"
+  maxVisible?: number
 }) {
-  const filteredItems = useMemo(
-    () => items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [items, searchQuery],
-  )
+  const filteredItems = useMemo(() => {
+    const query = searchQuery.toLowerCase()
+    return items.filter((item) => item.name.toLowerCase().includes(query))
+  }, [items, searchQuery])
 
-  return <div className="space-y-3">{filteredItems.map((item) => renderItem(item, () => onItemClick(item)))}</div>
+  // Limitar itens visíveis para evitar travamentos
+  const visibleItems = useMemo(() => filteredItems.slice(0, maxVisible), [filteredItems, maxVisible])
+
+  return (
+    <div className="space-y-3">
+      {visibleItems.map((item) => (
+        <ListItem key={item.id} item={item} onClick={() => onItemClick(item)} type={type} />
+      ))}
+      {filteredItems.length > maxVisible && (
+        <p className="text-sm text-muted-foreground text-center py-2">
+          Mostrando {maxVisible} de {filteredItems.length} itens. Use a busca para filtrar.
+        </p>
+      )}
+    </div>
+  )
 })
 
 export const OperatorSidebar = memo(function OperatorSidebar({ isOpen, productCategory, currentStep }: OperatorSidebarProps) {
@@ -488,28 +547,11 @@ export const OperatorSidebar = memo(function OperatorSidebar({ isOpen, productCa
               />
             </div>
 
-            <FilteredList
+            <VirtualizedList
               items={tabulations}
               searchQuery={tabulationSearchQuery}
               onItemClick={handleTabulationClick}
-              renderItem={(tab, onClick) => (
-                <button
-                  key={tab.id}
-                  onClick={onClick}
-                  className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] border-slate-600 bg-slate-700 dark:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-600`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="mt-1.5 w-4 h-4 rounded-full flex-shrink-0 ring-2 ring-slate-600 shadow-sm"
-                      style={{ backgroundColor: tab.color }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-2 text-white">{tab.name}</h3>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-200">{tab.description}</p>
-                    </div>
-                  </div>
-                </button>
-              )}
+              type="tabulation"
             />
           </div>
         </DialogContent>
@@ -534,29 +576,11 @@ export const OperatorSidebar = memo(function OperatorSidebar({ isOpen, productCa
               />
             </div>
 
-            <FilteredList
+            <VirtualizedList
               items={situations}
               searchQuery={situationSearchQuery}
               onItemClick={handleSituationClick}
-              renderItem={(situation, onClick) => (
-                <button
-                  key={situation.id}
-                  onClick={onClick}
-                  className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] border-slate-600 bg-slate-700 dark:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-600`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 p-2 rounded-lg bg-background shadow-sm border border-border">
-                      <AlertCircle className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-2 text-white">{situation.name}</h3>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-200">
-                        {situation.description}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              )}
+              type="situation"
             />
           </div>
         </DialogContent>
@@ -581,27 +605,11 @@ export const OperatorSidebar = memo(function OperatorSidebar({ isOpen, productCa
               />
             </div>
 
-            <FilteredList
+            <VirtualizedList
               items={channels}
               searchQuery={channelSearchQuery}
               onItemClick={handleChannelClick}
-              renderItem={(channel, onClick) => (
-                <button
-                  key={channel.id}
-                  onClick={onClick}
-                  className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] border-slate-600 bg-slate-700 dark:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-600`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 p-2 rounded-lg bg-background shadow-sm border border-border">
-                      <Radio className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-2 text-white">{channel.name}</h3>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-200">{channel.contact}</p>
-                    </div>
-                  </div>
-                </button>
-              )}
+              type="channel"
             />
           </div>
         </DialogContent>

@@ -184,13 +184,25 @@ export function useCachedScript(scriptId: string | null) {
  * Hook para acessar tabulações do cache
  */
 export function useCachedTabulations() {
-  const [tabulations, setTabulations] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tabulations, setTabulations] = useState<any[]>(() => getCachedTabulations())
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Carregar do cache inicial
     const cached = getCachedTabulations()
-    setTabulations(cached)
+    if (cached.length > 0) {
+      setTabulations(cached)
+    }
     setLoading(false)
+
+    // Escutar atualizações do cache
+    const handleCacheUpdate = () => {
+      const updated = getCachedTabulations()
+      setTabulations(updated)
+    }
+
+    window.addEventListener("cache-updated", handleCacheUpdate)
+    return () => window.removeEventListener("cache-updated", handleCacheUpdate)
   }, [])
 
   return { tabulations, loading }
@@ -200,13 +212,25 @@ export function useCachedTabulations() {
  * Hook para acessar situações do cache
  */
 export function useCachedSituations() {
-  const [situations, setSituations] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [situations, setSituations] = useState<any[]>(() => getCachedSituations())
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Carregar do cache inicial
     const cached = getCachedSituations()
-    setSituations(cached)
+    if (cached.length > 0) {
+      setSituations(cached)
+    }
     setLoading(false)
+
+    // Escutar atualizações do cache
+    const handleCacheUpdate = () => {
+      const updated = getCachedSituations()
+      setSituations(updated)
+    }
+
+    window.addEventListener("cache-updated", handleCacheUpdate)
+    return () => window.removeEventListener("cache-updated", handleCacheUpdate)
   }, [])
 
   return { situations, loading }
@@ -216,13 +240,25 @@ export function useCachedSituations() {
  * Hook para acessar canais do cache
  */
 export function useCachedChannels() {
-  const [channels, setChannels] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [channels, setChannels] = useState<any[]>(() => getCachedChannels())
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Carregar do cache inicial
     const cached = getCachedChannels()
-    setChannels(cached)
+    if (cached.length > 0) {
+      setChannels(cached)
+    }
     setLoading(false)
+
+    // Escutar atualizações do cache
+    const handleCacheUpdate = () => {
+      const updated = getCachedChannels()
+      setChannels(updated)
+    }
+
+    window.addEventListener("cache-updated", handleCacheUpdate)
+    return () => window.removeEventListener("cache-updated", handleCacheUpdate)
   }, [])
 
   return { channels, loading }
