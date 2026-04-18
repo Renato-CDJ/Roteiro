@@ -10,13 +10,11 @@ import { QualityCenterAdminPanel } from "./quality-center-admin-panel"
 import { useAllUsers, useAdminQuestions } from "@/hooks/use-supabase-realtime"
 
 // Verifica se o usuario pode acessar o painel admin
-// Admins com role "admin" podem acessar (exceto tipos especificos como "operacao" que nao devem ter acesso)
+// Admins com role "admin" podem acessar - master, monitoria e supervisao
 function canAccessAdminPanel(user: any): boolean {
   if (!user || user.role !== "admin") return false
-  // Admin principal (sem adminType definido), monitoria, qualidade e supervisao podem acessar
-  const adminType = user.adminType || ""
-  const blockedTypes = ["operacao"] // Tipos que NAO devem ter acesso ao painel
-  return !blockedTypes.includes(adminType.toLowerCase())
+  // Todos os admins podem acessar o painel (master, monitoria, supervisao)
+  return true
 }
 
 export function QualityCenterLayout() {
