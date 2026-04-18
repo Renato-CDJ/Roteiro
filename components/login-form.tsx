@@ -134,11 +134,10 @@ export const LoginForm = memo(function LoginForm() {
                 <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
               </div>
             </div>
-            {/* Dica ao lado do icone */}
-            <div className="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500">
-              <Mail className="h-3 w-3" />
-              <span>Digite o login do CRM</span>
-            </div>
+            {/* Dica */}
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              Digite o login do CRM
+            </p>
           </div>
 
           {/* Senha - apenas para admins */}

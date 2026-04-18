@@ -35,7 +35,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6">
+    <div className="login-cursor min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6">
         <div className="w-full max-w-md">
           {/* Titulo */}
           <div className="mb-10 text-center">
