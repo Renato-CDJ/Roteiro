@@ -17,11 +17,13 @@ interface QualityCenterSidebarProps {
 }
 
 // Verifica se o usuario pode acessar o painel admin
-// Apenas admin principal (sem adminType ou adminType vazio) e monitoria podem acessar
+// Admins com role "admin" podem acessar (exceto tipos especificos como "operacao" que nao devem ter acesso)
 function canAccessAdminPanel(user: any): boolean {
   if (!user || user.role !== "admin") return false
-  // Admin principal (sem adminType definido ou vazio) ou monitoria
-  return !user.adminType || user.adminType === "" || user.adminType === "monitoria"
+  // Admin principal (sem adminType definido), monitoria, qualidade e supervisao podem acessar
+  const adminType = user.adminType || ""
+  const blockedTypes = ["operacao"] // Tipos que NAO devem ter acesso ao painel
+  return !blockedTypes.includes(adminType.toLowerCase())
 }
 
 export function QualityCenterSidebar({ 

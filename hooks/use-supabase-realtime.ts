@@ -11,6 +11,7 @@ export function useSupabaseUsers() {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchUsers = useCallback(async () => {
     const supabase = createClient()
@@ -27,24 +28,36 @@ export function useSupabaseUsers() {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchUsers()
 
     const supabase = createClient()
     const channelId = `users-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "users" },
-        () => {
-          if (mountedRef.current) fetchUsers()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "users" },
+      () => {
+        if (mountedRef.current) fetchUsers()
+      }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
         }
-      )
-      .subscribe()
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -61,6 +74,7 @@ export function useQualityPosts() {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchPosts = useCallback(async () => {
     const supabase = createClient()
@@ -125,13 +139,16 @@ export function useQualityPosts() {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchPosts()
 
     const supabase = createClient()
     const channelId = `quality-posts-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "quality_posts" },
@@ -142,10 +159,20 @@ export function useQualityPosts() {
         { event: "*", schema: "public", table: "quality_comments" },
         () => { if (mountedRef.current) fetchPosts() }
       )
-      .subscribe()
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -162,6 +189,7 @@ export function useAdminQuestions(filterByUserId?: string) {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchQuestions = useCallback(async () => {
     const supabase = createClient()
@@ -200,22 +228,34 @@ export function useAdminQuestions(filterByUserId?: string) {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchQuestions()
 
     const supabase = createClient()
     const channelId = `admin-questions-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "admin_questions" },
-        () => { if (mountedRef.current) fetchQuestions() }
-      )
-      .subscribe()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "admin_questions" },
+      () => { if (mountedRef.current) fetchQuestions() }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -493,6 +533,7 @@ export function useFeedbacks() {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchFeedbacks = useCallback(async () => {
     const supabase = createClient()
@@ -518,22 +559,34 @@ export function useFeedbacks() {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchFeedbacks()
 
     const supabase = createClient()
     const channelId = `feedbacks-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "feedbacks" },
-        () => { if (mountedRef.current) fetchFeedbacks() }
-      )
-      .subscribe()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "feedbacks" },
+      () => { if (mountedRef.current) fetchFeedbacks() }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
