@@ -507,15 +507,7 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                   onClick={() => setActiveView("filter-perguntas")}
                 />
               )}
-              {/* Chat com Operadores - apenas para supervisores */}
-              {user?.adminType === "supervisao" && (
-                <SidebarButton
-                  icon={<Users className="h-5 w-5" />}
-                  label="Chat com os Operadores"
-                  active={activeView === "chat-operadores"}
-                  onClick={() => setActiveView("chat-operadores")}
-                />
-              )}
+
               <SidebarButton
                 icon={<BookOpen className="h-5 w-5" />}
                 label="Treinamentos"
@@ -552,7 +544,8 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 />
               </div>
 
-              {isAdmin && (
+              {/* Painel Admin - esconder para supervisores */}
+              {isAdmin && user?.adminType !== "supervisao" && (
                 <>
                   <div className="my-3 border-t border-border" />
                   <SidebarButton
