@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { UserX, Plus, Edit, Trash2, Upload } from "lucide-react"
+import { UserX, Plus, Edit, Trash2, Upload, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import {
   forceLogoutUser,
@@ -28,8 +28,15 @@ import * as XLSX from "xlsx"
 // Dominio padrao para emails de operadores
 const EMAIL_DOMAIN = "@gruporoveri.com"
 
+const ITEMS_PER_PAGE = 50
+
 export function OperatorsTab() {
   const [operators, setOperators] = useState<User[]>([])
+  const [filteredOperators, setFilteredOperators] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingOperator, setEditingOperator] = useState<User | null>(null)
@@ -41,14 +48,33 @@ export function OperatorsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadOperators = async () => {
+    setIsLoading(true)
     const supabase = createClient()
-    const { data, error } = await supabase
+    
+    // Buscar total de operadores
+    const { count } = await supabase
       .from("users")
-      .select("*")
+      .select("*", { count: "exact", head: true })
       .eq("role", "operator")
-      .order("created_at", { ascending: false })
+    
+    setTotalCount(count || 0)
+    
+    // Buscar todos os operadores (Supabase retorna até 1000 por padrão)
+    // Usamos range para buscar em batches se necessário
+    let allOperators: User[] = []
+    let from = 0
+    const batchSize = 1000
+    
+    while (true) {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("role", "operator")
+        .order("name", { ascending: true })
+        .range(from, from + batchSize - 1)
 
-    if (!error && data) {
+      if (error || !data || data.length === 0) break
+
       const ops: User[] = data.map((u) => ({
         id: u.id,
         username: u.username,
@@ -73,8 +99,16 @@ export function OperatorsTab() {
           settings: false,
         },
       }))
-      setOperators(ops)
+      
+      allOperators = [...allOperators, ...ops]
+      
+      if (data.length < batchSize) break
+      from += batchSize
     }
+    
+    setOperators(allOperators)
+    setFilteredOperators(allOperators)
+    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -95,6 +129,29 @@ export function OperatorsTab() {
       supabase.removeChannel(channel)
     }
   }, [])
+
+  // Filtrar operadores quando o termo de busca mudar
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredOperators(operators)
+    } else {
+      const term = searchTerm.toLowerCase()
+      const filtered = operators.filter(
+        (op) =>
+          op.fullName?.toLowerCase().includes(term) ||
+          op.email?.toLowerCase().includes(term) ||
+          op.username?.toLowerCase().includes(term)
+      )
+      setFilteredOperators(filtered)
+    }
+    setCurrentPage(1)
+  }, [searchTerm, operators])
+
+  // Calcular operadores da pagina atual
+  const totalPages = Math.ceil(filteredOperators.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const currentOperators = filteredOperators.slice(startIndex, endIndex)
 
   const handleOpenDialog = () => {
     setFormData({ fullName: "", email: "" })
@@ -422,7 +479,7 @@ export function OperatorsTab() {
         <div>
           <h2 className="text-3xl font-bold">Gerenciar Operadores</h2>
           <p className="text-muted-foreground mt-1">
-            Visualize e gerencie os operadores do sistema ({operators.length} operadores)
+            Visualize e gerencie os operadores do sistema ({totalCount} operadores)
           </p>
         </div>
         <div className="flex gap-3">
@@ -444,36 +501,118 @@ export function OperatorsTab() {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {operators.map((operator) => {
-          return (
-            <Card key={operator.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-3">{operator.fullName}</CardTitle>
-                    <CardDescription className="mt-1">{operator.email || operator.username}</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(operator)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleForceLogout(operator.id)}>
-                      <UserX className="h-4 w-4 mr-2" />
-                      Deslogar
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(operator.id)}>
-                      <Trash2 className="h-4 w-4 mr-2 text-destructive" />
-                      Excluir
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          )
-        })}
+      {/* Busca */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nome ou email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 max-w-md"
+        />
       </div>
+
+      {/* Loading state */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Carregando operadores...</span>
+        </div>
+      ) : (
+        <>
+          {/* Info da pagina */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              Mostrando {startIndex + 1}-{Math.min(endIndex, filteredOperators.length)} de {filteredOperators.length} operadores
+              {searchTerm && ` (filtrado de ${operators.length})`}
+            </span>
+            <span>Pagina {currentPage} de {totalPages || 1}</span>
+          </div>
+
+          <div className="grid gap-4">
+            {currentOperators.map((operator) => {
+              return (
+                <Card key={operator.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-3">{operator.fullName}</CardTitle>
+                        <CardDescription className="mt-1">{operator.email || operator.username}</CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(operator)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleForceLogout(operator.id)}>
+                          <UserX className="h-4 w-4 mr-2" />
+                          Deslogar
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(operator.id)}>
+                          <Trash2 className="h-4 w-4 mr-2 text-destructive" />
+                          Excluir
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              )
+            })}
+          </div>
+
+          {/* Paginacao */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number
+                  if (totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i
+                  } else {
+                    pageNum = currentPage - 2 + i
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="w-9"
+                    >
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Proximo
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
