@@ -114,7 +114,7 @@ export function QualityCenterFeed() {
     setMentionType("all")
     toast({
       title: isQuestionToAdmin || isOperator ? "Pergunta enviada" : "Publicacao criada",
-      description: sendToAdminsOnly 
+      description: !sendToAll 
         ? "Sua mensagem foi enviada para os administradores" 
         : (isQuestionToAdmin || isOperator ? "Sua pergunta foi enviada para o admin" : "Sua publicacao foi criada com sucesso"),
     })

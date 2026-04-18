@@ -48,11 +48,11 @@ export function QualityChatView() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
-  // Filter only quality monitors (adminType === "qualidade" or username starts with "Monitoria")
+  // Filter only quality monitors (adminType === "monitoria" or username starts with "Monitoria")
   const monitors = useMemo(() => {
     return allUsers.filter((u) =>
       u.role === "admin" &&
-      (u.adminType === "qualidade" || u.username?.toLowerCase().startsWith("monitoria") || u.fullName?.toLowerCase().includes("qualidade"))
+      (u.adminType === "monitoria" || u.username?.toLowerCase().startsWith("monitoria") || u.fullName?.toLowerCase().includes("qualidade"))
     )
   }, [allUsers])
 
@@ -293,7 +293,7 @@ export function QualityChatView() {
                     "text-xs mt-1",
                     msg.isFromOperator ? "text-white/70" : "text-muted-foreground"
                   )}>
-                    {formatTimeAgo(msg.createdAt)}
+                    {formatTimeAgo(new Date(msg.createdAt))}
                   </p>
                 </div>
               </div>
