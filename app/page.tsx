@@ -39,7 +39,7 @@ export default function HomePage() {
         <div className="w-full max-w-md">
           {/* Titulo */}
           <div className="mb-10 text-center">
-            <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-4">
+            <h1 className="text-7xl md:text-8xl lg:text-9xl font-black tracking-tight mb-4">
               <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent animate-fade-in">
                 Roteiro
               </span>
