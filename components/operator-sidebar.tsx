@@ -1,16 +1,16 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useMemo, useCallback, memo } from "react"
+import { useState, useMemo, useCallback, memo, lazy, Suspense } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { useCachedTabulations, useCachedSituations, useCachedChannels } from "@/hooks/use-cached-data"
-import { CheckCircle2, Tags, AlertCircle, Radio, List, Search, CalendarIcon, Maximize2 } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CheckCircle2, Tags, AlertCircle, Radio, Search, CalendarIcon, Maximize2, X, ChevronRight, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PromiseCalendarInline } from "@/components/promise-calendar"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge } from "@/components/ui/badge"
 import type { ScriptStep } from "@/lib/types"
 
 interface OperatorSidebarProps {
@@ -19,692 +19,571 @@ interface OperatorSidebarProps {
   currentStep?: ScriptStep | null
 }
 
-// Componente de item memoizado para evitar re-renders
-const ListItem = memo(function ListItem({
+// Tipo para item generico
+interface ListItemData {
+  id: string
+  name: string
+  description?: string
+  color?: string
+  contact?: string
+}
+
+// Componente de item de lista ultra-leve
+const SimpleListItem = memo(function SimpleListItem({
   item,
   onClick,
-  type,
+  isSelected,
 }: {
-  item: any
+  item: ListItemData
   onClick: () => void
-  type: "tabulation" | "situation" | "channel"
+  isSelected?: boolean
 }) {
   return (
     <button
-      key={item.id}
       onClick={onClick}
-      className="w-full text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-[1.01] border-slate-600 bg-slate-700 dark:bg-slate-800 hover:border-slate-500 dark:hover:border-slate-600"
+      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 ${
+        isSelected 
+          ? "bg-orange-500/10 border-orange-500/50 text-orange-500" 
+          : "bg-card border-border/50 hover:bg-muted/50 hover:border-border text-foreground"
+      }`}
     >
-      <div className="flex items-start gap-4">
-        {type === "tabulation" ? (
-          <div
-            className="mt-1.5 w-4 h-4 rounded-full flex-shrink-0 ring-2 ring-slate-600 shadow-sm"
-            style={{ backgroundColor: item.color }}
+      <div className="flex items-center gap-2">
+        {item.color && (
+          <div 
+            className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+            style={{ backgroundColor: item.color }} 
           />
-        ) : (
-          <div className="mt-1 p-2 rounded-lg bg-background shadow-sm border border-border">
-            {type === "situation" ? (
-              <AlertCircle className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <Radio className="h-5 w-5 text-muted-foreground" />
-            )}
-          </div>
         )}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-lg mb-2 text-white">{item.name}</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-200">
-            {type === "channel" ? item.contact : item.description}
-          </p>
-        </div>
+        <span className="text-sm font-medium truncate">{item.name}</span>
+        <ChevronRight className="h-3.5 w-3.5 ml-auto flex-shrink-0 text-muted-foreground" />
       </div>
     </button>
   )
 })
 
-// Componente de lista virtualizada simples para melhor performance
-const VirtualizedList = memo(function VirtualizedList({
-  items,
-  searchQuery,
-  onItemClick,
-  type,
-  maxVisible = 50,
+// Modal de detalhe ultra-leve
+const DetailModal = memo(function DetailModal({
+  open,
+  onClose,
+  title,
+  description,
+  icon,
+  color,
 }: {
-  items: any[]
-  searchQuery: string
-  onItemClick: (item: any) => void
-  type: "tabulation" | "situation" | "channel"
-  maxVisible?: number
+  open: boolean
+  onClose: () => void
+  title: string
+  description?: string
+  icon?: React.ReactNode
+  color?: string
 }) {
-  const filteredItems = useMemo(() => {
-    const query = searchQuery.toLowerCase()
-    return items.filter((item) => item.name.toLowerCase().includes(query))
-  }, [items, searchQuery])
+  if (!open) return null
 
-  // Limitar itens visíveis para evitar travamentos
-  const visibleItems = useMemo(() => filteredItems.slice(0, maxVisible), [filteredItems, maxVisible])
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-border/50">
+        {/* Header compacto */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
+              {color && (
+                <div 
+                  className="w-3 h-3 rounded-full ring-2 ring-white/30" 
+                  style={{ backgroundColor: color }} 
+                />
+              )}
+              {icon}
+              <span className="truncate">{title}</span>
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+        
+        {/* Conteudo */}
+        <div className="p-4">
+          {description ? (
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+              {description}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              Sem descricao disponivel
+            </p>
+          )}
+        </div>
+        
+        {/* Footer */}
+        <div className="p-4 pt-0">
+          <Button 
+            onClick={onClose} 
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+            size="sm"
+          >
+            Fechar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+})
+
+// Modal de lista completa otimizado
+const FullListModal = memo(function FullListModal({
+  open,
+  onClose,
+  title,
+  items,
+  type,
+  onItemClick,
+}: {
+  open: boolean
+  onClose: () => void
+  title: string
+  items: ListItemData[]
+  type: "tabulation" | "situation" | "channel"
+  onItemClick: (item: ListItemData) => void
+}) {
+  const [search, setSearch] = useState("")
+
+  const filteredItems = useMemo(() => {
+    if (!search.trim()) return items
+    const query = search.toLowerCase()
+    return items.filter(item => 
+      item.name.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query)
+    )
+  }, [items, search])
+
+  // Limitar itens visiveis para performance
+  const visibleItems = useMemo(() => filteredItems.slice(0, 100), [filteredItems])
+
+  if (!open) return null
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden border-border/50">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+          <DialogHeader>
+            <DialogTitle className="text-white text-lg font-semibold">
+              {title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {/* Busca */}
+          <div className="relative mt-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+            <Input
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Contador */}
+        <div className="px-4 py-2 bg-muted/30 border-b border-border/50 text-xs text-muted-foreground">
+          {filteredItems.length === items.length 
+            ? `${items.length} itens`
+            : `${filteredItems.length} de ${items.length} itens`
+          }
+        </div>
+        
+        {/* Lista */}
+        <ScrollArea className="flex-1 max-h-[calc(85vh-180px)]">
+          <div className="p-3 space-y-1.5">
+            {visibleItems.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                Nenhum item encontrado
+              </div>
+            ) : (
+              visibleItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onItemClick(item)}
+                  className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group"
+                >
+                  <div className="flex items-start gap-3">
+                    {item.color && (
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0 mt-1 ring-2 ring-border/50" 
+                        style={{ backgroundColor: item.color }} 
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm text-foreground group-hover:text-orange-500 transition-colors">
+                        {item.name}
+                      </h4>
+                      {(item.description || item.contact) && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {type === "channel" ? item.contact : item.description}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-orange-500 transition-colors" />
+                  </div>
+                </button>
+              ))
+            )}
+            {filteredItems.length > 100 && (
+              <p className="text-center py-2 text-xs text-muted-foreground">
+                Mostrando 100 de {filteredItems.length}. Use a busca para filtrar.
+              </p>
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  )
+})
+
+// Componente de conteudo para cada aba - lazy loaded
+const TabContent = memo(function TabContent({
+  type,
+  items,
+  selectedId,
+  onSelectItem,
+  onViewAll,
+}: {
+  type: "tabulation" | "situation" | "channel"
+  items: ListItemData[]
+  selectedId: string
+  onSelectItem: (item: ListItemData) => void
+  onViewAll: () => void
+}) {
+  const titles = {
+    tabulation: "Tabulacoes",
+    situation: "Situacoes",
+    channel: "Canais",
+  }
+
+  // Limitar itens para renderizacao inicial rapida
+  const visibleItems = useMemo(() => items.slice(0, 20), [items])
 
   return (
     <div className="space-y-3">
-      {visibleItems.map((item) => (
-        <ListItem key={item.id} item={item} onClick={() => onItemClick(item)} type={type} />
-      ))}
-      {filteredItems.length > maxVisible && (
-        <p className="text-sm text-muted-foreground text-center py-2">
-          Mostrando {maxVisible} de {filteredItems.length} itens. Use a busca para filtrar.
-        </p>
-      )}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">{titles[type]}</h3>
+        <Badge variant="secondary" className="text-xs">
+          {items.length}
+        </Badge>
+      </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full justify-start text-xs h-8 border-dashed"
+        onClick={onViewAll}
+      >
+        <Search className="h-3.5 w-3.5 mr-2" />
+        Ver todos e buscar
+      </Button>
+      
+      <div className="space-y-1">
+        {visibleItems.map((item) => (
+          <SimpleListItem
+            key={item.id}
+            item={item}
+            onClick={() => onSelectItem(item)}
+            isSelected={selectedId === item.id}
+          />
+        ))}
+        {items.length > 20 && (
+          <button
+            onClick={onViewAll}
+            className="w-full text-center py-2 text-xs text-orange-500 hover:underline"
+          >
+            +{items.length - 20} mais...
+          </button>
+        )}
+      </div>
     </div>
   )
 })
 
-export const OperatorSidebar = memo(function OperatorSidebar({ isOpen, productCategory, currentStep }: OperatorSidebarProps) {
-  const [activeSection, setActiveSection] = useState<"checkTabulation" | "tabulation" | "situation" | "channel" | "calendar">(
-    "calendar",
+// Componente de tabulacao recomendada
+const RecommendedTabulation = memo(function RecommendedTabulation({
+  currentStep,
+  onExpand,
+}: {
+  currentStep?: ScriptStep | null
+  onExpand: (tab: { name: string; description: string }) => void
+}) {
+  if (!currentStep?.tabulations?.length) {
+    return (
+      <div className="rounded-lg border border-dashed border-border/50 p-4 text-center">
+        <CheckCircle2 className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+        <p className="text-xs text-muted-foreground">
+          Nenhuma tabulacao recomendada para esta tela
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      {currentStep.tabulations.map((tabulation, index) => (
+        <button
+          key={tabulation.id || index}
+          onClick={() => onExpand({ name: tabulation.name, description: tabulation.description })}
+          className="w-full text-left p-3 rounded-lg border border-orange-200/50 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-500/5 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 transition-colors group"
+        >
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-medium text-foreground line-clamp-1">
+                {tabulation.name}
+              </h4>
+              {tabulation.description && (
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  {tabulation.description}
+                </p>
+              )}
+            </div>
+            <Maximize2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+          </div>
+        </button>
+      ))}
+    </div>
   )
-  const [expandedTabulation, setExpandedTabulation] = useState<{ name: string; description: string } | null>(null)
+})
 
-  const [selectedTabulation, setSelectedTabulation] = useState("")
-  const [selectedSituation, setSelectedSituation] = useState("")
-  const [selectedChannel, setSelectedChannel] = useState("")
-  const [showSituationDialog, setShowSituationDialog] = useState(false)
-  const [showChannelDialog, setShowChannelDialog] = useState(false)
+export const OperatorSidebar = memo(function OperatorSidebar({ 
+  isOpen, 
+  productCategory, 
+  currentStep 
+}: OperatorSidebarProps) {
+  const [activeSection, setActiveSection] = useState<"calendar" | "checkTabulation" | "tabulation" | "situation" | "channel">("calendar")
+  
+  // Estado para modais - apenas um ativo por vez
+  const [modalState, setModalState] = useState<{
+    type: "detail" | "list" | null
+    listType?: "tabulation" | "situation" | "channel"
+    item?: ListItemData | null
+    title?: string
+  }>({ type: null })
 
-  const [showTabulationFullView, setShowTabulationFullView] = useState(false)
-  const [showTabulationModal, setShowTabulationModal] = useState(false)
-  const [selectedTabulationForModal, setSelectedTabulationForModal] = useState<any>(null)
-  const [tabulationSearchQuery, setTabulationSearchQuery] = useState("")
+  // Estado de selecao
+  const [selectedIds, setSelectedIds] = useState({
+    tabulation: "",
+    situation: "",
+    channel: "",
+  })
 
-  const [showSituationFullView, setShowSituationFullView] = useState(false)
-  const [showSituationModal, setShowSituationModal] = useState(false)
-  const [selectedSituationForModal, setSelectedSituationForModal] = useState<any>(null)
-  const [situationSearchQuery, setSituationSearchQuery] = useState("")
+  // Dados do cache - ja memoizados pelo hook
+  const { tabulations: tabulationsRaw } = useCachedTabulations()
+  const { situations: situationsRaw } = useCachedSituations()
+  const { channels: channelsRaw } = useCachedChannels()
 
-  const [showChannelFullView, setShowChannelFullView] = useState(false)
-  const [showChannelModal, setShowChannelModal] = useState(false)
-  const [selectedChannelForModal, setSelectedChannelForModal] = useState<any>(null)
-  const [channelSearchQuery, setChannelSearchQuery] = useState("")
+  // Mapear dados uma vez
+  const tabulations = useMemo<ListItemData[]>(() => 
+    tabulationsRaw
+      .filter((t: any) => t.is_active !== false)
+      .map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description || "",
+        color: t.color || "#6b7280",
+      }))
+  , [tabulationsRaw])
 
-  // Use cached data from Supabase
-  const { tabulations: tabulationsData } = useCachedTabulations()
-  const { situations: situationsData } = useCachedSituations()
-  const { channels: channelsData } = useCachedChannels()
+  const situations = useMemo<ListItemData[]>(() => 
+    situationsRaw
+      .filter((s: any) => s.is_active !== false)
+      .map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description || "",
+        color: s.color || "#6b7280",
+      }))
+  , [situationsRaw])
 
-  // Map cached data to component format
-  const tabulations = useMemo(() => tabulationsData.map((t: any) => ({
-    id: t.id,
-    name: t.name,
-    description: t.description || "",
-    color: t.color || "#6b7280",
-    isActive: t.is_active !== false,
-  })).filter((t: any) => t.isActive), [tabulationsData])
+  const channels = useMemo<ListItemData[]>(() => 
+    channelsRaw
+      .filter((c: any) => c.is_active !== false)
+      .map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        description: c.description || "",
+        contact: c.icon || "",
+      }))
+  , [channelsRaw])
 
-  const situations = useMemo(() => situationsData.map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    description: s.description || "",
-    color: s.color || "#6b7280",
-    isActive: s.is_active !== false,
-  })).filter((s: any) => s.isActive), [situationsData])
-
-  const channels = useMemo(() => channelsData.map((c: any) => ({
-    id: c.id,
-    name: c.name,
-    description: c.description || "",
-    icon: c.icon || "phone",
-    contact: c.icon || "",
-    isActive: c.is_active !== false,
-  })).filter((c: any) => c.isActive), [channelsData])
-
-  const selectedSituationData = situations.find((s) => s.id === selectedSituation)
-  const selectedChannelData = channels.find((c) => c.id === selectedChannel)
-
-  const filteredTabulations = useMemo(
-    () => tabulations.filter((tab) => tab.name.toLowerCase().includes(tabulationSearchQuery.toLowerCase())),
-    [tabulations, tabulationSearchQuery],
-  )
-
-  const filteredSituations = useMemo(
-    () => situations.filter((sit) => sit.name.toLowerCase().includes(situationSearchQuery.toLowerCase())),
-    [situations, situationSearchQuery],
-  )
-
-  const filteredChannels = useMemo(
-    () => channels.filter((ch) => ch.name.toLowerCase().includes(channelSearchQuery.toLowerCase())),
-    [channels, channelSearchQuery],
-  )
-
-  const handleTabulationClick = useCallback((tabulation: any) => {
-    setSelectedTabulationForModal(tabulation)
-    setShowTabulationModal(true)
+  // Handlers memoizados
+  const handleSelectItem = useCallback((type: "tabulation" | "situation" | "channel", item: ListItemData) => {
+    setSelectedIds(prev => ({ ...prev, [type]: item.id }))
+    setModalState({ 
+      type: "detail", 
+      item,
+      title: item.name,
+    })
   }, [])
 
-  const handleSituationClick = useCallback((situation: any) => {
-    setSelectedSituationForModal(situation)
-    setShowSituationModal(true)
+  const handleOpenList = useCallback((type: "tabulation" | "situation" | "channel") => {
+    const titles = {
+      tabulation: "Todas as Tabulacoes",
+      situation: "Todas as Situacoes", 
+      channel: "Todos os Canais",
+    }
+    setModalState({ type: "list", listType: type, title: titles[type] })
   }, [])
 
-  const handleChannelClick = useCallback((channel: any) => {
-    setSelectedChannelForModal(channel)
-    setShowChannelModal(true)
+  const handleCloseModal = useCallback(() => {
+    setModalState({ type: null })
   }, [])
+
+  const handleExpandTabulation = useCallback((tab: { name: string; description: string }) => {
+    setModalState({
+      type: "detail",
+      item: { id: "recommended", name: tab.name, description: tab.description },
+      title: tab.name,
+    })
+  }, [])
+
+  // Items para lista atual
+  const currentListItems = useMemo(() => {
+    if (modalState.listType === "tabulation") return tabulations
+    if (modalState.listType === "situation") return situations
+    if (modalState.listType === "channel") return channels
+    return []
+  }, [modalState.listType, tabulations, situations, channels])
 
   if (!isOpen) return null
 
   return (
-    <aside className="w-[420px] border-l bg-card flex flex-col h-full">
-      <div className="border-b p-2 grid grid-cols-5 gap-1">
-        {/* 1. Calendario */}
-        <Button
-          variant={activeSection === "calendar" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setActiveSection("calendar")}
-          className={`flex-col h-auto py-2 ${
-            activeSection === "calendar"
-              ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white dark:text-white"
-              : ""
-          }`}
-        >
-          <CalendarIcon className="h-4 w-4 mb-1" />
-          <span className="text-xs truncate w-full">Calen.</span>
-        </Button>
-        {/* 2. Verificar Tabulacao */}
-        <Button
-          variant={activeSection === "checkTabulation" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setActiveSection("checkTabulation")}
-          className={`flex-col h-auto py-2 relative ${
-            activeSection === "checkTabulation"
-              ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white dark:text-white"
-              : ""
-          }`}
-        >
-          <CheckCircle2 className="h-4 w-4 mb-1" />
-          <span className="text-xs truncate w-full">Verif.</span>
-          {currentStep?.tabulations && currentStep.tabulations.length > 0 && activeSection !== "checkTabulation" && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-50" style={{ animation: "ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite" }}></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 shadow-md shadow-green-500/50"></span>
-            </span>
-          )}
-        </Button>
-        {/* 3. Tabulacoes */}
-        <Button
-          variant={activeSection === "tabulation" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setActiveSection("tabulation")}
-          className={`flex-col h-auto py-2 ${
-            activeSection === "tabulation"
-              ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white dark:text-white"
-              : ""
-          }`}
-        >
-          <Tags className="h-4 w-4 mb-1" />
-          <span className="text-xs truncate w-full">Tabu.</span>
-        </Button>
-        {/* 4. Situacoes */}
-        <Button
-          variant={activeSection === "situation" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setActiveSection("situation")}
-          className={`flex-col h-auto py-2 ${
-            activeSection === "situation"
-              ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white dark:text-white"
-              : ""
-          }`}
-        >
-          <AlertCircle className="h-4 w-4 mb-1" />
-          <span className="text-xs truncate w-full">Situ.</span>
-        </Button>
-        {/* 5. Canal */}
-        <Button
-          variant={activeSection === "channel" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setActiveSection("channel")}
-          className={`flex-col h-auto py-2 ${
-            activeSection === "channel"
-              ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white dark:text-white"
-              : ""
-          }`}
-        >
-          <Radio className="h-4 w-4 mb-1" />
-          <span className="text-xs truncate w-full">Canal</span>
-        </Button>
+    <aside className="w-[380px] border-l border-border/50 bg-card flex flex-col h-full">
+      {/* Tabs */}
+      <div className="border-b border-border/50 p-1.5 flex gap-1">
+        {[
+          { id: "calendar" as const, icon: CalendarIcon, label: "Calen." },
+          { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verif.", badge: currentStep?.tabulations?.length },
+          { id: "tabulation" as const, icon: Tags, label: "Tabu." },
+          { id: "situation" as const, icon: AlertCircle, label: "Situ." },
+          { id: "channel" as const, icon: Radio, label: "Canal" },
+        ].map(({ id, icon: Icon, label, badge }) => (
+          <Button
+            key={id}
+            variant={activeSection === id ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection(id)}
+            className={`flex-1 flex-col h-auto py-1.5 px-1 gap-0.5 relative ${
+              activeSection === id
+                ? "bg-orange-500 hover:bg-orange-600 text-white"
+                : "hover:bg-muted/50"
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+            <span className="text-[10px] font-medium">{label}</span>
+            {badge && badge > 0 && activeSection !== id && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 ring-2 ring-card" />
+            )}
+          </Button>
+        ))}
       </div>
 
-      {/* Content area */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {activeSection === "checkTabulation" && (
-          <>
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
+      {/* Conteudo */}
+      <ScrollArea className="flex-1">
+        <div className="p-3">
+          {activeSection === "calendar" && (
+            <div className="space-y-4">
+              <PromiseCalendarInline productCategory={productCategory} />
+              
+              <div className="border-t border-border/50 pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded bg-orange-500">
+                    <CheckCircle2 className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-xs font-semibold">Tabulacao Recomendada</span>
+                </div>
+                <RecommendedTabulation 
+                  currentStep={currentStep} 
+                  onExpand={handleExpandTabulation}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeSection === "checkTabulation" && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600">
                   <CheckCircle2 className="h-4 w-4 text-white" />
                 </div>
-                Tabulação Recomendada
-              </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tabulação sugerida para a tela atual do roteiro
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {currentStep?.tabulations && currentStep.tabulations.length > 0 ? (
-                currentStep.tabulations.map((tabulation, index) => (
-                  <button
-                    type="button"
-                    key={tabulation.id || index}
-                    onClick={() => setExpandedTabulation({ name: tabulation.name, description: tabulation.description })}
-                    className="group relative rounded-xl border-2 border-orange-200/60 dark:border-orange-500/40 bg-white dark:bg-slate-700 p-4 shadow-md hover:shadow-lg hover:border-orange-400 dark:hover:border-orange-400 transition-all duration-200 overflow-hidden w-full text-left cursor-pointer"
-                  >
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-60 transition-opacity">
-                      <Maximize2 className="h-4 w-4 text-orange-500 dark:text-orange-400" />
-                    </div>
-                    <div className="relative">
-                      <div className="flex items-start gap-2 mb-2">
-                        <div className="p-1 rounded-lg bg-orange-500 dark:bg-orange-400 flex-shrink-0 mt-0.5">
-                          <CheckCircle2 className="h-3 w-3 text-white" />
-                        </div>
-                        <h4 className="font-bold text-base text-gray-900 dark:text-white leading-tight break-words">
-                          {tabulation.name}
-                        </h4>
-                      </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap pl-6 break-words line-clamp-3">
-                        {tabulation.description}
-                      </p>
-                    </div>
-                    <div className="mt-2 pl-6">
-                      <span className="text-[10px] text-orange-500 dark:text-orange-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Clique para ampliar
-                      </span>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="rounded-xl border-2 border-muted bg-muted/30 p-6 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="p-3 rounded-full bg-muted">
-                      <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Nenhuma tabulação específica recomendada para esta tela. Continue o atendimento normalmente.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Dialog open={!!expandedTabulation} onOpenChange={() => setExpandedTabulation(null)}>
-            <DialogContent className="sm:max-w-2xl shadow-2xl max-h-[80vh] overflow-y-auto border-2 border-orange-200 dark:border-zinc-700">
-              <DialogHeader className="space-y-3 pb-4 border-b border-border">
-                <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-300">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="bg-gradient-to-r from-orange-600 to-orange-500 dark:from-orange-400 dark:to-orange-300 bg-clip-text text-transparent">
-                    Tabulação Recomendada
-                  </span>
-                </DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-                  Detalhes da tabulação selecionada
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 py-4">
-                <div className="group relative rounded-xl border-2 border-orange-200/60 dark:border-orange-500/40 bg-white dark:bg-slate-700 p-5 md:p-6 shadow-md overflow-hidden">
-                  <div className="absolute top-3 right-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <CheckCircle2 className="h-12 w-12 text-orange-500 dark:text-orange-400" />
-                  </div>
-                  <div className="relative">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="p-1.5 rounded-lg bg-orange-500 dark:bg-orange-400 flex-shrink-0">
-                        <CheckCircle2 className="h-4 w-4 text-white" />
-                      </div>
-                      <h4 className="font-bold text-xl text-gray-900 dark:text-white leading-tight break-words">
-                        {expandedTabulation?.name}
-                      </h4>
-                    </div>
-                    <p className="text-base text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap pl-9 break-words">
-                      {expandedTabulation?.description}
-                    </p>
-                  </div>
+                <div>
+                  <h3 className="text-sm font-semibold">Tabulacao Recomendada</h3>
+                  <p className="text-xs text-muted-foreground">Para a tela atual</p>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-          </>
-        )}
-
-        {activeSection === "tabulation" && (
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-sm">Selecionar Tabulação</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start bg-transparent text-sm"
-                onClick={() => setShowTabulationFullView(true)}
-              >
-                <List className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Visualizar todo conteúdo</span>
-              </Button>
-
-              <Select value={selectedTabulation} onValueChange={setSelectedTabulation}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Escolha uma tabulação" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tabulations.map((tab) => (
-                    <SelectItem key={tab.id} value={tab.id}>
-                      <div className="flex items-center gap-2 max-w-full">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: tab.color }} />
-                        <span className="truncate">{tab.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {selectedTabulation && (
-                <div className="p-3 bg-slate-700 dark:bg-slate-800 rounded-lg text-white border border-border">
-                  <p className="text-sm font-medium break-words">
-                    {tabulations.find((t) => t.id === selectedTabulation)?.name}
-                  </p>
-                  <p className="text-xs text-slate-200 mt-1 break-words whitespace-pre-wrap">
-                    {tabulations.find((t) => t.id === selectedTabulation)?.description}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {activeSection === "situation" && (
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-sm">Status Atual</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start bg-transparent text-sm"
-                onClick={() => setShowSituationFullView(true)}
-              >
-                <List className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Visualizar todo conteúdo</span>
-              </Button>
-
-              {filteredSituations.map((situation) => (
-                <Button
-                  key={situation.id}
-                  variant={selectedSituation === situation.id ? "default" : "outline"}
-                  className={`w-full justify-start text-left ${
-                    selectedSituation === situation.id ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""
-                  }`}
-                  onClick={() => {
-                    setSelectedSituation(situation.id)
-                    setShowSituationDialog(true)
-                  }}
-                >
-                  <span className="truncate w-full">{situation.name}</span>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {activeSection === "channel" && (
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-sm">Canal de Atendimento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start bg-transparent text-sm"
-                onClick={() => setShowChannelFullView(true)}
-              >
-                <List className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Visualizar todo conteúdo</span>
-              </Button>
-
-              {filteredChannels.map((channel) => (
-                <Button
-                  key={channel.id}
-                  variant={selectedChannel === channel.id ? "default" : "outline"}
-                  className={`w-full justify-start text-left ${
-                    selectedChannel === channel.id ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""
-                  }`}
-                  onClick={() => {
-                    setSelectedChannel(channel.id)
-                    setShowChannelDialog(true)
-                  }}
-                >
-                  <span className="truncate w-full">{channel.name}</span>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {activeSection === "calendar" && (
-          <div className="flex flex-col gap-4">
-            <PromiseCalendarInline productCategory={productCategory} />
-
-            <div className="border-t border-border pt-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1 rounded-md bg-gradient-to-br from-orange-500 to-orange-600">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-foreground">Tabulação Recomendada</span>
-              </div>
-
-              {currentStep?.tabulations && currentStep.tabulations.length > 0 ? (
-                <div className="space-y-1.5">
-                  {currentStep.tabulations.map((tabulation, index) => (
-                    <button
-                      type="button"
-                      key={tabulation.id || index}
-                      onClick={() => setExpandedTabulation({ name: tabulation.name, description: tabulation.description })}
-                      className="group flex items-center gap-2 w-full rounded-lg border border-orange-200/60 dark:border-orange-500/30 bg-card hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:border-orange-400 dark:hover:border-orange-400 px-3 py-2 text-left transition-colors duration-150 cursor-pointer"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
-                      <span className="text-xs font-medium text-foreground leading-snug break-words flex-1">
-                        {tabulation.name}
-                      </span>
-                      {tabulation.description && (
-                        <Maximize2 className="h-3 w-3 text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground py-2">
-                  Nenhuma tabulação recomendada para esta tela.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <Dialog open={showTabulationFullView} onOpenChange={setShowTabulationFullView}>
-        <DialogContent className="max-w-6xl max-h-[90vh] bg-card border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-bold text-foreground">Todas as Tabulações</DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              Lista completa de tabulações disponíveis
-            </DialogDescription>
-          </DialogHeader>
-          <div className="overflow-y-auto space-y-4 py-6 pr-4 max-h-[calc(90vh-200px)]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar tabulações..."
-                value={tabulationSearchQuery}
-                onChange={(e) => setTabulationSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-base bg-muted/50 border-border focus:border-primary transition-colors"
+              <RecommendedTabulation 
+                currentStep={currentStep} 
+                onExpand={handleExpandTabulation}
               />
             </div>
+          )}
 
-            <VirtualizedList
-              items={tabulations}
-              searchQuery={tabulationSearchQuery}
-              onItemClick={handleTabulationClick}
+          {activeSection === "tabulation" && (
+            <TabContent
               type="tabulation"
+              items={tabulations}
+              selectedId={selectedIds.tabulation}
+              onSelectItem={(item) => handleSelectItem("tabulation", item)}
+              onViewAll={() => handleOpenList("tabulation")}
             />
-          </div>
-        </DialogContent>
-      </Dialog>
+          )}
 
-      <Dialog open={showSituationFullView} onOpenChange={setShowSituationFullView}>
-        <DialogContent className="max-w-6xl max-h-[90vh] bg-card border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-bold text-foreground">Todas as Situações</DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              Lista completa de situações disponíveis
-            </DialogDescription>
-          </DialogHeader>
-          <div className="overflow-y-auto space-y-4 py-6 pr-4 max-h-[calc(90vh-200px)]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar situações..."
-                value={situationSearchQuery}
-                onChange={(e) => setSituationSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-base bg-muted/50 border-border focus:border-primary transition-colors"
-              />
-            </div>
-
-            <VirtualizedList
-              items={situations}
-              searchQuery={situationSearchQuery}
-              onItemClick={handleSituationClick}
+          {activeSection === "situation" && (
+            <TabContent
               type="situation"
+              items={situations}
+              selectedId={selectedIds.situation}
+              onSelectItem={(item) => handleSelectItem("situation", item)}
+              onViewAll={() => handleOpenList("situation")}
             />
-          </div>
-        </DialogContent>
-      </Dialog>
+          )}
 
-      <Dialog open={showChannelFullView} onOpenChange={setShowChannelFullView}>
-        <DialogContent className="max-w-6xl max-h-[90vh] bg-card border-border">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="text-2xl font-bold text-foreground">Todos os Canais</DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground">
-              Lista completa de canais disponíveis
-            </DialogDescription>
-          </DialogHeader>
-          <div className="overflow-y-auto space-y-4 py-6 pr-4 max-h-[calc(90vh-200px)]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar canais..."
-                value={channelSearchQuery}
-                onChange={(e) => setChannelSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-base bg-muted/50 border-border focus:border-primary transition-colors"
-              />
-            </div>
-
-            <VirtualizedList
-              items={channels}
-              searchQuery={channelSearchQuery}
-              onItemClick={handleChannelClick}
+          {activeSection === "channel" && (
+            <TabContent
               type="channel"
+              items={channels}
+              selectedId={selectedIds.channel}
+              onSelectItem={(item) => handleSelectItem("channel", item)}
+              onViewAll={() => handleOpenList("channel")}
             />
-          </div>
-        </DialogContent>
-      </Dialog>
+          )}
+        </div>
+      </ScrollArea>
 
-      <Dialog open={showTabulationModal} onOpenChange={setShowTabulationModal}>
-        <DialogContent className="max-w-4xl bg-card border-border">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="text-primary text-2xl font-bold text-center">
-              {selectedTabulationForModal?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 text-lg text-foreground leading-relaxed">{selectedTabulationForModal?.description}</div>
-          <Button
-            onClick={() => setShowTabulationModal(false)}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all"
-          >
-            Fechar
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* Modal de detalhe */}
+      <DetailModal
+        open={modalState.type === "detail"}
+        onClose={handleCloseModal}
+        title={modalState.item?.name || ""}
+        description={modalState.item?.description || modalState.item?.contact}
+        color={modalState.item?.color}
+      />
 
-      <Dialog open={showSituationModal} onOpenChange={setShowSituationModal}>
-        <DialogContent className="max-w-4xl bg-card border-border">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="text-primary text-2xl font-bold text-center">
-              {selectedSituationForModal?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 text-lg text-foreground leading-relaxed">{selectedSituationForModal?.description}</div>
-          <Button
-            onClick={() => setShowSituationModal(false)}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all"
-          >
-            Fechar
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showChannelModal} onOpenChange={setShowChannelModal}>
-        <DialogContent className="max-w-4xl bg-card border-border">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="text-primary text-2xl font-bold text-center">
-              {selectedChannelForModal?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 text-lg text-foreground leading-relaxed whitespace-pre-wrap">
-            {selectedChannelForModal?.contact}
-          </div>
-          <Button
-            onClick={() => setShowChannelModal(false)}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all"
-          >
-            Fechar
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* Original situation dialog (from sidebar buttons) */}
-      <Dialog open={showSituationDialog} onOpenChange={setShowSituationDialog}>
-        <DialogContent className="max-w-4xl bg-card border-border">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="text-primary text-2xl font-bold text-center">
-              {selectedSituationData?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 text-lg text-foreground leading-relaxed">{selectedSituationData?.description}</div>
-          <Button
-            onClick={() => setShowSituationDialog(false)}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all"
-          >
-            Fechar
-          </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* Original channel dialog (from sidebar buttons) */}
-      <Dialog open={showChannelDialog} onOpenChange={setShowChannelDialog}>
-        <DialogContent className="max-w-4xl bg-card border-border">
-          <DialogHeader className="pb-4 border-b border-border">
-            <DialogTitle className="text-primary text-2xl font-bold text-center">
-              {selectedChannelData?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6 text-lg text-foreground leading-relaxed whitespace-pre-wrap">
-            {selectedChannelData?.contact}
-          </div>
-          <Button
-            onClick={() => setShowChannelDialog(false)}
-            className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all"
-          >
-            Fechar
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* Modal de lista */}
+      <FullListModal
+        open={modalState.type === "list"}
+        onClose={handleCloseModal}
+        title={modalState.title || ""}
+        items={currentListItems}
+        type={modalState.listType || "tabulation"}
+        onItemClick={(item) => {
+          handleCloseModal()
+          if (modalState.listType) {
+            handleSelectItem(modalState.listType, item)
+          }
+        }}
+      />
     </aside>
   )
 })
