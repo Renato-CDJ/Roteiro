@@ -518,13 +518,6 @@ export function RichTextEditorWYSIWYG({
         💡 Selecione um trecho de texto e use as ferramentas de formatação acima para aplicar estilos diretamente
       </p>
 
-      <style jsx>{`
-        [contenteditable][data-placeholder]:empty:before {
-          content: attr(data-placeholder);
-          color: hsl(var(--muted-foreground));
-          opacity: 0.5;
-        }
-      `}</style>
     </div>
   )
 }

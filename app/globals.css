@@ -259,3 +259,10 @@
 .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
 .animate-gradient { background-size: 200% 200%; animation: gradient 3s ease infinite; }
 .animate-line-expand { animation: line-expand 2s ease-in-out infinite; }
+
+/* Rich text editor placeholder */
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
