@@ -14,9 +14,11 @@ import {
   likePostSupabase,
   voteOnQuizSupabase,
   addCommentSupabase,
+  deleteQualityPostSupabase,
+  editQualityPostSupabase,
 } from "@/hooks/use-supabase-realtime"
 import type { QualityPost } from "@/lib/types"
-import { Send, HelpCircle, Heart, MessageCircle, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield, Archive, Clock } from "lucide-react"
+import { Send, HelpCircle, Heart, MessageCircle, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield, Archive, Clock, Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -24,8 +26,27 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export function QualityCenterFeed() {
   const { user } = useAuth()
@@ -37,6 +58,13 @@ export function QualityCenterFeed() {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
   const [showComments, setShowComments] = useState<Record<string, boolean>>({})
   const [mentionType, setMentionType] = useState<"all" | "qualidade" | "supervisao">("qualidade") // "all" = Todos podem ver, "qualidade" = Monitoria, "supervisao" = Supervisores
+  
+  // Edit/Delete states
+  const [editingPost, setEditingPost] = useState<QualityPost | null>(null)
+  const [editContent, setEditContent] = useState("")
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const MAX_DAILY_POSTS = 3
 
@@ -142,6 +170,64 @@ export function QualityCenterFeed() {
     })
 
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }))
+  }
+
+  const handleEditPost = (post: QualityPost) => {
+    setEditingPost(post)
+    setEditContent(post.content)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingPost || !editContent.trim()) return
+    
+    setIsSaving(true)
+    try {
+      await editQualityPostSupabase(editingPost.id, editContent.trim())
+      toast({
+        title: "Publicacao atualizada",
+        description: "Sua publicacao foi editada com sucesso.",
+      })
+      setEditingPost(null)
+      setEditContent("")
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao editar publicacao",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeletePost = async () => {
+    if (!deletingPostId) return
+    
+    setIsDeleting(true)
+    try {
+      await deleteQualityPostSupabase(deletingPostId)
+      toast({
+        title: "Publicacao excluida",
+        description: "Sua publicacao foi removida com sucesso.",
+      })
+      setDeletingPostId(null)
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao excluir publicacao",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const canEditOrDelete = (post: QualityPost) => {
+    if (!user) return false
+    // Admin pode editar/excluir qualquer post
+    if (user.role === "admin") return true
+    // Usuario pode editar/excluir apenas seus proprios posts
+    return post.authorId === user.id
   }
 
   const getInitials = (name: string) =>
@@ -396,9 +482,30 @@ export function QualityCenterFeed() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Salvar publicacao</DropdownMenuItem>
+                        {canEditOrDelete(post) && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleEditPost(post)}>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Editar publicacao
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => setDeletingPostId(post.id)}
+                              className="text-red-500 focus:text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir publicacao
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                          </>
+                        )}
+                        <DropdownMenuItem>
+                          <Bookmark className="h-4 w-4 mr-2" />
+                          Salvar publicacao
+                        </DropdownMenuItem>
                         <DropdownMenuItem>Copiar link</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-500">Denunciar</DropdownMenuItem>
+                        {!canEditOrDelete(post) && (
+                          <DropdownMenuItem className="text-red-500 focus:text-red-500">Denunciar</DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -554,6 +661,60 @@ export function QualityCenterFeed() {
           })
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingPost} onOpenChange={(open) => !open && setEditingPost(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Editar publicacao</DialogTitle>
+            <DialogDescription>
+              Faca as alteracoes necessarias no conteudo da publicacao.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="Conteudo da publicacao..."
+              className="min-h-[150px] resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingPost(null)} disabled={isSaving}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveEdit} 
+              disabled={!editContent.trim() || isSaving}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {isSaving ? "Salvando..." : "Salvar alteracoes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir publicacao?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acao nao pode ser desfeita. A publicacao sera permanentemente removida do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePost}
+              disabled={isDeleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

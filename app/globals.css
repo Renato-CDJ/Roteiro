@@ -266,3 +266,15 @@
   color: hsl(var(--muted-foreground));
   opacity: 0.5;
 }
+
+/* Cursor laranja para tela de login */
+.login-cursor,
+.login-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23f97316' d='M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.36Z'/%3E%3Cpath fill='%23ea580c' d='M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.36Z' opacity='0.3'/%3E%3C/svg%3E") 0 0, auto;
+}
+
+.login-cursor input,
+.login-cursor textarea,
+.login-cursor [contenteditable] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='10' y='2' width='4' height='20' rx='1' fill='%23f97316'/%3E%3Crect x='6' y='2' width='12' height='3' rx='1' fill='%23f97316'/%3E%3Crect x='6' y='19' width='12' height='3' rx='1' fill='%23f97316'/%3E%3C/svg%3E") 12 12, text;
+}

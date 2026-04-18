@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
 import { AlertCircle, Mail, Lock, Sun, Moon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+
 import { useTheme } from "next-themes"
 import Image from "next/image"
 
@@ -113,34 +113,31 @@ export const LoginForm = memo(function LoginForm() {
             <label htmlFor="email" className="sr-only">
               Email
             </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="relative flex items-center">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10 cursor-help" />
-                  <Input
-                    id="email"
-                    type="text"
-                    placeholder="Login"
-                    value={email}
-                    onChange={(e) => {
-                      const value = e.target.value.split("@")[0]
-                      setEmail(value)
-                      setError("")
-                    }}
-                    required
-                    autoComplete="username"
-                    disabled={isLoading}
-                    className="h-12 pl-10 pr-[140px] text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 rounded-r-none border-r-0"
-                  />
-                  <div className="h-12 px-3 flex items-center bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-200 dark:border-zinc-700 rounded-r-md">
-                    <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
-                  </div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
-                Digite o login do CRM
-              </TooltipContent>
-            </Tooltip>
+            <div className="relative flex items-center">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+              <Input
+                id="email"
+                type="text"
+                placeholder="Login"
+                value={email}
+                onChange={(e) => {
+                  const value = e.target.value.split("@")[0]
+                  setEmail(value)
+                  setError("")
+                }}
+                required
+                autoComplete="username"
+                disabled={isLoading}
+                className="h-12 pl-10 pr-[140px] text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 rounded-r-none border-r-0"
+              />
+              <div className="h-12 px-3 flex items-center bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-200 dark:border-zinc-700 rounded-r-md">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
+              </div>
+            </div>
+            {/* Dica */}
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              Digite o login do CRM
+            </p>
           </div>
 
           {/* Senha - apenas para admins */}
