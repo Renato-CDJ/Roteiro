@@ -397,6 +397,8 @@ export interface QualityPost {
   sendToAll?: boolean // true if sent to all operators
   // Background color for post content area
   backgroundColor?: string // CSS color or color name, defaults to system color
+  // Archive flag - posts older than 24h are archived to localStorage
+  isArchived?: boolean
 }
 
 export interface QualityQuizOption {

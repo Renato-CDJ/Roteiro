@@ -16,7 +16,7 @@ import {
   addCommentSupabase,
 } from "@/hooks/use-supabase-realtime"
 import type { QualityPost } from "@/lib/types"
-import { Send, HelpCircle, Heart, MessageCircle, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield } from "lucide-react"
+import { Send, HelpCircle, Heart, MessageCircle, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield, Archive, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -30,7 +30,8 @@ import {
 export function QualityCenterFeed() {
   const { user } = useAuth()
   const { toast } = useToast()
-  const { posts: allPosts } = useQualityPosts()
+  const [showArchived, setShowArchived] = useState(false)
+  const { posts: allPosts, activePosts, archivedPosts } = useQualityPosts(showArchived)
   const [newPostContent, setNewPostContent] = useState("")
   const [isQuestionToAdmin, setIsQuestionToAdmin] = useState(false)
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
@@ -294,16 +295,65 @@ export function QualityCenterFeed() {
         </Card>
       )}
 
+      {/* Filter Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button
+            variant={!showArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowArchived(false)}
+            className={!showArchived ? "bg-orange-500 hover:bg-orange-600 text-white" : "border-border/50"}
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            Recentes (24h)
+            {activePosts.length > 0 && (
+              <Badge variant="secondary" className="ml-2 bg-white/20 text-inherit">
+                {activePosts.length}
+              </Badge>
+            )}
+          </Button>
+          <Button
+            variant={showArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowArchived(true)}
+            className={showArchived ? "bg-orange-500 hover:bg-orange-600 text-white" : "border-border/50"}
+          >
+            <Archive className="h-4 w-4 mr-2" />
+            Arquivados
+            {archivedPosts.length > 0 && (
+              <Badge variant="secondary" className="ml-2 bg-white/20 text-inherit">
+                {archivedPosts.length}
+              </Badge>
+            )}
+          </Button>
+        </div>
+        {showArchived && (
+          <p className="text-xs text-muted-foreground">
+            Posts com mais de 24h ficam salvos localmente
+          </p>
+        )}
+      </div>
+
       {/* Posts Feed */}
       <div className="space-y-4">
         {posts.length === 0 ? (
           <Card className="bg-card border-border/50">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                <Megaphone className="h-8 w-8 text-muted-foreground" />
+                {showArchived ? (
+                  <Archive className="h-8 w-8 text-muted-foreground" />
+                ) : (
+                  <Megaphone className="h-8 w-8 text-muted-foreground" />
+                )}
               </div>
-              <p className="text-foreground font-medium">Nenhuma publicacao ainda</p>
-              <p className="text-sm text-muted-foreground">Seja o primeiro a publicar!</p>
+              <p className="text-foreground font-medium">
+                {showArchived ? "Nenhum post arquivado" : "Nenhuma publicacao ainda"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {showArchived 
+                  ? "Posts com mais de 24h aparecerao aqui" 
+                  : "Seja o primeiro a publicar!"}
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -324,6 +374,12 @@ export function QualityCenterFeed() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-foreground">{post.authorName}</span>
                           {getPostTypeBadge(post.type)}
+                          {post.isArchived && (
+                            <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/50 bg-amber-500/10">
+                              <Archive className="h-3 w-3 mr-1" />
+                              Arquivado
+                            </Badge>
+                          )}
                           <Badge variant="outline" className="text-xs text-muted-foreground border-border/50">
                             Todos
                           </Badge>

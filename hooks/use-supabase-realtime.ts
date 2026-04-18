@@ -68,13 +68,58 @@ export function useSupabaseUsers() {
   return { users, loading, refetch: fetchUsers }
 }
 
+// Helper para localStorage de posts arquivados
+const ARCHIVED_POSTS_KEY = "quality_posts_archived"
+
+function getArchivedPosts(): QualityPost[] {
+  if (typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem(ARCHIVED_POSTS_KEY)
+    if (!stored) return []
+    const parsed = JSON.parse(stored)
+    return parsed.map((p: any) => ({
+      ...p,
+      createdAt: new Date(p.createdAt),
+      comments: (p.comments || []).map((c: any) => ({
+        ...c,
+        createdAt: new Date(c.createdAt),
+      })),
+    }))
+  } catch {
+    return []
+  }
+}
+
+function saveArchivedPosts(posts: QualityPost[]) {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(ARCHIVED_POSTS_KEY, JSON.stringify(posts))
+  } catch {
+    console.error("[LocalStorage] Error saving archived posts")
+  }
+}
+
+function isPostExpired(createdAt: Date): boolean {
+  const now = new Date()
+  const postDate = new Date(createdAt)
+  const hoursDiff = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60)
+  return hoursDiff >= 24
+}
+
 // Quality Posts hook with realtime
-export function useQualityPosts() {
+export function useQualityPosts(includeArchived: boolean = false) {
   const [posts, setPosts] = useState<QualityPost[]>([])
+  const [archivedPosts, setArchivedPosts] = useState<QualityPost[]>([])
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
   const subscribedRef = useRef(false)
+
+  // Load archived posts from localStorage on mount
+  useEffect(() => {
+    const archived = getArchivedPosts()
+    setArchivedPosts(archived)
+  }, [])
 
   const fetchPosts = useCallback(async () => {
     const supabase = createClient()
@@ -131,8 +176,36 @@ export function useQualityPosts() {
       comments: commentsMap.get(p.id) || [],
     }))
 
+    // Separar posts ativos (menos de 24h) e expirados (mais de 24h)
+    const activePosts: QualityPost[] = []
+    const expiredPosts: QualityPost[] = []
+
+    for (const post of mappedPosts) {
+      if (isPostExpired(post.createdAt)) {
+        expiredPosts.push({ ...post, isArchived: true } as QualityPost)
+      } else {
+        activePosts.push(post)
+      }
+    }
+
+    // Salvar posts expirados no localStorage (merge com existentes, evitar duplicatas)
+    if (expiredPosts.length > 0) {
+      const existingArchived = getArchivedPosts()
+      const existingIds = new Set(existingArchived.map(p => p.id))
+      const newArchivedPosts = expiredPosts.filter(p => !existingIds.has(p.id))
+      if (newArchivedPosts.length > 0) {
+        const allArchived = [...existingArchived, ...newArchivedPosts]
+        // Limitar a 100 posts arquivados mais recentes
+        const sortedArchived = allArchived.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ).slice(0, 100)
+        saveArchivedPosts(sortedArchived)
+        setArchivedPosts(sortedArchived)
+      }
+    }
+
     if (mountedRef.current) {
-      setPosts(mappedPosts)
+      setPosts(activePosts)
       setLoading(false)
     }
   }, [])
@@ -180,7 +253,18 @@ export function useQualityPosts() {
     }
   }, [fetchPosts])
 
-  return { posts, loading, refetch: fetchPosts }
+  // Combinar posts ativos com arquivados se solicitado
+  const allPosts = includeArchived 
+    ? [...posts, ...archivedPosts.filter(ap => !posts.some(p => p.id === ap.id))]
+    : posts
+
+  return { 
+    posts: allPosts, 
+    activePosts: posts,
+    archivedPosts, 
+    loading, 
+    refetch: fetchPosts 
+  }
 }
 
 // Admin Questions hook
