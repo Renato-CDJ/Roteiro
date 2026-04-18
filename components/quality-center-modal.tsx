@@ -489,24 +489,6 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 active={activeView === "inicio"}
                 onClick={() => setActiveView("inicio")}
               />
-              {/* Chat com Supervisao - esconder para supervisores, monitoria e operadores */}
-              {user?.role !== "operator" && user?.adminType !== "supervisao" && user?.adminType !== "monitoria" && (
-                <SidebarButton
-                  icon={<Users className="h-5 w-5" />}
-                  label="Chat com a Supervisão"
-                  active={activeView === "colegas"}
-                  onClick={() => setActiveView("colegas")}
-                />
-              )}
-              {/* Chat com Qualidade/Operacao - esconder para supervisores e operadores */}
-              {user?.role !== "operator" && user?.adminType !== "supervisao" && (
-                <SidebarButton
-                  icon={<MessageSquare className="h-5 w-5" />}
-                  label={user?.adminType === "monitoria" || user?.adminType === "qualidade" ? "Chat com a Operacao" : "Chat com a Qualidade"}
-                  active={activeView === "filter-perguntas"}
-                  onClick={() => setActiveView("filter-perguntas")}
-                />
-              )}
 
               <SidebarButton
                 icon={<BookOpen className="h-5 w-5" />}
