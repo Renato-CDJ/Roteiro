@@ -82,13 +82,13 @@ const DetailModal = memo(function DetailModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-border/50">
-        {/* Header compacto */}
+        {/* Header compacto - titulo centralizado */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
           <DialogHeader>
-            <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
+            <DialogTitle className="text-white text-lg font-semibold flex items-center justify-center gap-2 text-center">
               {color && (
                 <div 
-                  className="w-3 h-3 rounded-full ring-2 ring-white/30" 
+                  className="w-3 h-3 rounded-full ring-2 ring-white/30 flex-shrink-0" 
                   style={{ backgroundColor: color }} 
                 />
               )}
@@ -109,17 +109,6 @@ const DetailModal = memo(function DetailModal({
               Sem descricao disponivel
             </p>
           )}
-        </div>
-        
-        {/* Footer */}
-        <div className="p-4 pt-0">
-          <Button 
-            onClick={onClose} 
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-            size="sm"
-          >
-            Fechar
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
