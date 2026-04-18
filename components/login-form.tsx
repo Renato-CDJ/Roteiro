@@ -187,12 +187,7 @@ export const LoginForm = memo(function LoginForm() {
           </Button>
         </form>
 
-        {/* Info para operadores */}
-        {!showPasswordField && (
-          <p className="mt-4 text-xs text-center text-zinc-400 dark:text-zinc-500">
-            Operadores: use seu email @gruporoveri.com para entrar
-          </p>
-        )}
+
       </CardContent>
     </Card>
   )

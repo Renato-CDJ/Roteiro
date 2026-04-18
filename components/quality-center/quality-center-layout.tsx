@@ -7,8 +7,14 @@ import { QualityCenterSidebar } from "./quality-center-sidebar"
 import { QualityCenterFeed } from "./quality-center-feed"
 import { QualityCenterOnlineUsers } from "./quality-center-online-users"
 import { QualityCenterAdminPanel } from "./quality-center-admin-panel"
-import { QualityChatView } from "./quality-chat-view"
 import { useAllUsers, useAdminQuestions } from "@/hooks/use-supabase-realtime"
+
+// Verifica se o usuario pode acessar o painel admin
+// Apenas admin principal (sem adminType ou adminType vazio) e monitoria podem acessar
+function canAccessAdminPanel(user: any): boolean {
+  if (!user || user.role !== "admin") return false
+  return !user.adminType || user.adminType === "" || user.adminType === "monitoria"
+}
 
 export function QualityCenterLayout() {
   const { user } = useAuth()
@@ -22,6 +28,7 @@ export function QualityCenterLayout() {
   const pendingQuestions = adminQuestions.length
 
   const isAdmin = user?.role === "admin"
+  const hasAdminAccess = canAccessAdminPanel(user)
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,26 +51,9 @@ export function QualityCenterLayout() {
           pendingQuestions={pendingQuestions}
         />
         
-        {showAdminPanel && isAdmin ? (
+        {showAdminPanel && hasAdminAccess ? (
           <main className="flex-1 overflow-auto">
             <QualityCenterAdminPanel pendingQuestions={pendingQuestions} />
-          </main>
-        ) : (activeView === "chat-qualidade" || activeView === "chat-supervisao") && !isAdmin ? (
-          // Block operators from accessing chat views - redirect to feed
-          <>
-            <main className="flex-1 max-w-2xl mx-auto px-4 py-6">
-              <QualityCenterFeed />
-            </main>
-            
-            <aside className="hidden lg:block w-80 shrink-0 p-4 pr-6">
-              <div className="sticky top-20">
-                <QualityCenterOnlineUsers users={onlineUsers} />
-              </div>
-            </aside>
-          </>
-        ) : activeView === "chat-qualidade" ? (
-          <main className="flex-1 overflow-auto max-w-4xl mx-auto">
-            <QualityChatView />
           </main>
         ) : (
           <>

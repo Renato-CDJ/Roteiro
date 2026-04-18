@@ -58,7 +58,7 @@ export default function HomePage() {
           {/* Titulo com animacao */}
           <div className="mb-10 text-center">
             <h1
-              className={`text-6xl md:text-7xl font-black tracking-tight mb-4 transition-all duration-700 ${
+              className={`text-7xl md:text-8xl font-black tracking-tight mb-4 transition-all duration-700 ${
                 showTitle ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
               }`}
             >

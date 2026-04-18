@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useAuth } from "@/lib/auth-context"
-import { createClient } from "@/lib/supabase/client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -11,11 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RichTextEditorWYSIWYG } from "@/components/rich-text-editor-wysiwyg"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -25,332 +22,70 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import {
   Search,
-  Bell,
   Moon,
   Sun,
   Home,
-  User,
   Users,
-  Image,
-  Video,
-  Settings,
   Shield,
   ThumbsUp,
   MessageCircle,
-  Share2,
   Send,
   HelpCircle,
-  BarChart3,
   MessageSquare,
   ClipboardList,
   Plus,
   Trash2,
   CalendarIcon,
   Award,
-  TrendingUp,
   CheckCircle2,
   AlertCircle,
   Megaphone,
-  GraduationCap,
-  Heart,
-  Cake,
-  Briefcase,
-  MapPin,
-  Mail,
-  Phone,
-  Edit3,
-  Save,
+  BookOpen,
   Check,
   X,
-  BookOpen,
-  FileText,
-  Eye,
-  AtSign,
-  MoreVertical,
-  Pencil,
   Paintbrush,
-  Reply,
-  Smile,
-  ImageIcon,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { 
   useQualityPosts, 
   useAdminQuestions, 
   useAllUsers,
-  useQualityStats,
-  useFeedbacks,
   createQualityPostSupabase,
   likePostSupabase,
   addCommentSupabase,
   voteOnQuizSupabase,
   createFeedbackSupabase,
-  getQualityStatsSupabase,
   answerAdminQuestion,
   answerAdminQuestionSecond,
-  markQuestionUnderstood,
-  createAdminQuestion,
   deleteQualityPostSupabase,
   editQualityPostSupabase,
-  deleteCommentSupabase,
-  editCommentSupabase,
-  markFeedbackAsRead,
 } from "@/hooks/use-supabase-realtime"
 import { containsProfanity, getProfanityWarning } from "@/lib/profanity-filter"
 import { useToast } from "@/hooks/use-toast"
-import type { QualityPost, User as UserType } from "@/lib/types"
-
-const EMOJI_LIST_CHAT = [
-  "😀", "😃", "😄", "😁", "😅", "😂", "🤣", "😊", "😇", "🙂",
-  "😉", "😌", "😍", "🥰", "😘", "👍", "👎", "👌", "✌️", "🤞",
-  "🤝", "👏", "🙌", "🙏", "💪", "❤️", "🧡", "💛", "💚", "💙",
-  "💜", "🖤", "🤍", "💯", "✨", "🔥", "⭐", "🎉", "✅", "❌",
-]
+import type { QualityPost } from "@/lib/types"
 
 interface QualityCenterModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
-// Post Details Modal Component
-function PostDetailsModal({
-  post,
-  isOpen,
-  onClose,
-  user,
-  getInitials,
-  formatTimeAgo,
-}: {
-  post: QualityPost | null
-  isOpen: boolean
-  onClose: () => void
-  user: any
-  getInitials: (name: string) => string
-  formatTimeAgo: (date: Date) => string
-}) {
-  const [commentText, setCommentText] = useState("")
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-  const { toast } = useToast()
-
-  if (!post) return null
-
-  const hasLiked = post.likes?.includes(user?.id || "")
-  const isQuiz = post.type === "quiz"
-  const userVote = post.quizOptions?.find(opt => opt.votes?.includes(user?.id || ""))
-
-  const handleLike = async () => {
-    if (!user) return
-    await likePostSupabase(post.id, user.id)
-  }
-
-  const handleComment = async () => {
-    if (!commentText.trim() || !user || isSubmittingComment) return
-    
-    setIsSubmittingComment(true)
-    await addCommentSupabase(post.id, {
-      content: commentText,
-      authorId: user.id,
-      authorName: user.fullName || user.username || "Usuario",
-    })
-    
-    setIsSubmittingComment(false)
-    setCommentText("")
-    toast({
-      title: "Comentario adicionado!",
-      description: "Seu comentario foi publicado com sucesso.",
-    })
-  }
-
-  const handleVote = async (optionId: string) => {
-    if (!user || userVote) return
-    await voteOnQuizSupabase(post.id, optionId, user.id)
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Badge variant="outline" className="capitalize">
-              {post.type}
-            </Badge>
-            <span className="text-muted-foreground text-sm font-normal">
-              {formatTimeAgo(new Date(post.createdAt))}
-            </span>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Autor */}
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-border">
-              <AvatarFallback className="text-sm bg-muted font-semibold">
-                {getInitials(post.authorName)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold text-base">{post.authorName}</p>
-              <p className="text-xs text-muted-foreground">
-                Publicado em {format(new Date(post.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-              </p>
-            </div>
-          </div>
-
-          {/* Conteúdo */}
-          <div 
-            className={cn(
-              "rounded-lg p-6 min-h-[100px]",
-              post.backgroundColor || "bg-muted/50",
-              (post.backgroundColor?.includes("gradient") || post.backgroundColor?.includes("500") || post.backgroundColor?.includes("600")) && "text-white"
-            )}
-          >
-            <div 
-              className={cn(
-                "prose prose-sm max-w-none",
-                (post.backgroundColor?.includes("gradient") || post.backgroundColor?.includes("500") || post.backgroundColor?.includes("600")) 
-                  ? "prose-invert" 
-                  : "dark:prose-invert"
-              )}
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-          </div>
-
-          {/* Quiz Options */}
-          {isQuiz && post.quizOptions && (
-            <div className="space-y-3">
-              <h4 className="font-semibold text-sm">Opcoes:</h4>
-              {post.quizOptions.map((option) => {
-                const voteCount = option.votes?.length || 0
-                const totalVotes = post.quizOptions?.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0) || 0
-                const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0
-                const hasVoted = option.votes?.includes(user?.id || "")
-
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleVote(option.id)}
-                    disabled={!!userVote}
-                    className={cn(
-                      "w-full p-4 rounded-lg border-2 transition-all text-left relative overflow-hidden",
-                      hasVoted && "border-orange-500 bg-orange-500/10",
-                      !userVote && "hover:border-orange-500/50 cursor-pointer",
-                      userVote && !hasVoted && "opacity-60 cursor-not-allowed"
-                    )}
-                  >
-                    {userVote && (
-                      <div 
-                        className="absolute inset-0 bg-orange-500/20 transition-all"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    )}
-                    <div className="relative flex items-center justify-between">
-                      <span className="font-medium">{option.text}</span>
-                      {userVote && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold">{percentage}%</span>
-                          <span className="text-xs text-muted-foreground">({voteCount} voto{voteCount !== 1 ? 's' : ''})</span>
-                          {hasVoted && <Check className="h-5 w-5 text-orange-500" />}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {/* Interacoes */}
-          <div className="flex items-center gap-4 py-3 border-y">
-            <Button
-              variant={hasLiked ? "default" : "ghost"}
-              size="sm"
-              onClick={handleLike}
-              className={cn(
-                "gap-2",
-                hasLiked && "bg-orange-500 hover:bg-orange-600"
-              )}
-            >
-              <ThumbsUp className={cn("h-4 w-4", hasLiked && "fill-current")} />
-              <span>{post.likes?.length || 0}</span>
-            </Button>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MessageCircle className="h-4 w-4" />
-              <span>{post.comments?.length || 0} comentarios</span>
-            </div>
-          </div>
-
-          {/* Comentarios */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-sm">Comentarios</h4>
-            
-            {/* Novo Comentario */}
-            <div className="flex gap-3">
-              <Avatar className="h-8 w-8 border border-border">
-                <AvatarFallback className="text-xs bg-muted">
-                  {getInitials(user?.fullName || user?.username)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-2">
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Escreva um comentario..."
-                  className="min-h-[60px] resize-none"
-                />
-                <Button
-                  onClick={handleComment}
-                  disabled={!commentText.trim() || isSubmittingComment}
-                  size="sm"
-                  className="ml-auto bg-orange-500 hover:bg-orange-600"
-                >
-                  {isSubmittingComment ? (
-                    <>
-                      <div className="h-3.5 w-3.5 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-3.5 w-3.5 mr-2" />
-                      Comentar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Lista de Comentarios */}
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
-              {post.comments?.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhum comentario ainda. Seja o primeiro a comentar!
-                </p>
-              ) : (
-                post.comments?.map((comment) => (
-                  <div key={comment.id} className="flex gap-3 p-3 rounded-lg bg-muted/30">
-                    <Avatar className="h-8 w-8 border border-border">
-                      <AvatarFallback className="text-xs bg-muted">
-                        {getInitials(comment.authorName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm">{comment.authorName}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimeAgo(new Date(comment.createdAt))}
-                        </span>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
+// Verifica se o usuario pode acessar o painel admin
+// Apenas admin principal (sem adminType ou adminType vazio) e monitoria podem acessar
+function canAccessAdminPanel(user: any): boolean {
+  if (!user || user.role !== "admin") return false
+  // Admin principal (sem adminType definido ou vazio) ou monitoria
+  return !user.adminType || user.adminType === "" || user.adminType === "monitoria"
 }
+
+// Paleta de cores para posts
+const colorPalette = [
+  { name: "Padrao", value: "", class: "bg-card" },
+  { name: "Laranja", value: "bg-gradient-to-br from-orange-500 to-orange-600", class: "bg-gradient-to-br from-orange-500 to-orange-600" },
+  { name: "Azul", value: "bg-gradient-to-br from-blue-500 to-blue-600", class: "bg-gradient-to-br from-blue-500 to-blue-600" },
+  { name: "Verde", value: "bg-gradient-to-br from-green-500 to-green-600", class: "bg-gradient-to-br from-green-500 to-green-600" },
+  { name: "Roxo", value: "bg-gradient-to-br from-purple-500 to-purple-600", class: "bg-gradient-to-br from-purple-500 to-purple-600" },
+  { name: "Rosa", value: "bg-gradient-to-br from-pink-500 to-pink-600", class: "bg-gradient-to-br from-pink-500 to-pink-600" },
+]
 
 export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps) {
   const { user } = useAuth()
@@ -359,21 +94,34 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined)
   
-  // Use local hooks with localStorage
-  const { posts, loading: postsLoading, refetch: refetchPosts } = useQualityPosts()
+  const { posts, loading: postsLoading } = useQualityPosts()
   const { users: allUsers } = useAllUsers()
 
-  const isAdmin = user?.role === "admin"
+  const hasAdminAccess = canAccessAdminPanel(user)
   
   // Filter posts by date if set
-  const filteredPostsByDate = filterDate 
-    ? posts.filter(post => {
+  const filteredPosts = useMemo(() => {
+    let filtered = posts
+    
+    if (filterDate) {
+      filtered = filtered.filter(post => {
         const postDate = new Date(post.createdAt)
         return postDate.toDateString() === filterDate.toDateString()
       })
-    : posts
+    }
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(post => 
+        post.content.toLowerCase().includes(query) ||
+        post.authorName.toLowerCase().includes(query)
+      )
+    }
+    
+    return filtered
+  }, [posts, filterDate, searchQuery])
 
-  const getInitials = (name: string | undefined | null) => {
+  const getInitials = useCallback((name: string | undefined | null) => {
     if (!name) return "U"
     return name
       .split(" ")
@@ -381,9 +129,9 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
       .slice(0, 2)
       .join("")
       .toUpperCase()
-  }
+  }, [])
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = useCallback((date: Date) => {
     const now = new Date()
     const diffMs = now.getTime() - new Date(date).getTime()
     const diffMins = Math.floor(diffMs / 60000)
@@ -395,7 +143,7 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
     if (diffHours < 24) return `${diffHours}h atras`
     if (diffDays < 7) return `${diffDays}d atras`
     return format(new Date(date), "dd 'de' MMM", { locale: ptBR })
-  }
+  }, [])
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -421,7 +169,6 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 />
               </div>
 
-              {/* Date Filter */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -469,11 +216,6 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
 
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-orange-500 rounded-full" />
-              </Button>
-
               <Avatar className="h-8 w-8 border border-border">
                 <AvatarFallback className="text-xs font-medium bg-muted">
                   {getInitials(user?.fullName || user?.username)}
@@ -501,7 +243,7 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 onClick={() => setActiveView("treinamentos")}
               />
 
-              {/* Filter shortcuts */}
+              {/* Filtros */}
               <div className="my-3 border-t border-border pt-3">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-2">Filtros</p>
                 <SidebarButton
@@ -517,12 +259,6 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                   onClick={() => setActiveView("filter-recado")}
                 />
                 <SidebarButton
-                  icon={<ClipboardList className="h-5 w-5" />}
-                  label="Feedback"
-                  active={activeView === "filter-feedback"}
-                  onClick={() => setActiveView("filter-feedback")}
-                />
-                <SidebarButton
                   icon={<HelpCircle className="h-5 w-5" />}
                   label="Quiz"
                   active={activeView === "filter-quiz"}
@@ -530,8 +266,8 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 />
               </div>
 
-              {/* Painel Admin - esconder para supervisores */}
-              {isAdmin && user?.adminType !== "supervisao" && (
+              {/* Painel Admin - apenas monitoria e admin principal */}
+              {hasAdminAccess && (
                 <>
                   <div className="my-3 border-t border-border" />
                   <SidebarButton
@@ -567,20 +303,20 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
               <div className="p-4">
                 {activeView === "inicio" && (
                   <FeedView
-                    posts={filteredPostsByDate}
+                    posts={filteredPosts}
                     user={user}
-                    searchQuery={searchQuery}
                     getInitials={getInitials}
                     formatTimeAgo={formatTimeAgo}
                     allUsers={allUsers}
+                    loading={postsLoading}
                   />
                 )}
-                {activeView === "admin" && isAdmin && (
+                {activeView === "admin" && hasAdminAccess && (
                   <AdminPanelView user={user} getInitials={getInitials} formatTimeAgo={formatTimeAgo} />
                 )}
                 {activeView === "filter-comunicado" && (
                   <FilteredFeedView
-                    posts={posts.filter(p => p.type === "comunicado")}
+                    posts={filteredPosts.filter(p => p.type === "comunicado")}
                     user={user}
                     title="Comunicados"
                     icon={<Megaphone className="h-5 w-5 text-orange-500" />}
@@ -590,7 +326,7 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                 )}
                 {activeView === "filter-recado" && (
                   <FilteredFeedView
-                    posts={posts.filter(p => p.type === "recado")}
+                    posts={filteredPosts.filter(p => p.type === "recado")}
                     user={user}
                     title="Recados"
                     icon={<MessageCircle className="h-5 w-5 text-blue-500" />}
@@ -598,19 +334,9 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                     formatTimeAgo={formatTimeAgo}
                   />
                 )}
-                {activeView === "filter-feedback" && (
-                  <FilteredFeedView
-                    posts={posts.filter(p => p.type === "feedback")}
-                    user={user}
-                    title="Feedbacks"
-                    icon={<ClipboardList className="h-5 w-5 text-green-500" />}
-                    getInitials={getInitials}
-                    formatTimeAgo={formatTimeAgo}
-                  />
-                )}
                 {activeView === "filter-quiz" && (
                   <FilteredFeedView
-                    posts={posts.filter(p => p.type === "quiz")}
+                    posts={filteredPosts.filter(p => p.type === "quiz")}
                     user={user}
                     title="Quizzes"
                     icon={<HelpCircle className="h-5 w-5 text-purple-500" />}
@@ -619,14 +345,11 @@ export function QualityCenterModal({ isOpen, onClose }: QualityCenterModalProps)
                   />
                 )}
                 {activeView === "treinamentos" && (
-                  <TreinamentosView user={user} getInitials={getInitials} />
-                )}
-                {!["inicio", "admin", "perfil", "treinamentos", "filter-comunicado", "filter-recado", "filter-feedback", "filter-quiz"].includes(activeView) && (
                   <div className="flex flex-col items-center justify-center h-[50vh] text-muted-foreground">
                     <div className="p-6 bg-muted rounded-full mb-4">
-                      <Settings className="h-12 w-12" />
+                      <BookOpen className="h-12 w-12" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Em Desenvolvimento</h3>
+                    <h3 className="text-xl font-semibold mb-2">Treinamentos</h3>
                     <p className="text-sm">Esta funcionalidade estara disponivel em breve</p>
                   </div>
                 )}
@@ -670,7 +393,6 @@ function SidebarButton({
   )
 }
 
-// Profile View Component
 // Filtered Feed View Component
 function FilteredFeedView({
   posts,
@@ -687,10 +409,8 @@ function FilteredFeedView({
   getInitials: (name: string) => string
   formatTimeAgo: (date: Date) => string
 }) {
-  const [selectedPost, setSelectedPost] = useState<QualityPost | null>(null)
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-2xl mx-auto">
       <div className="flex items-center gap-2 mb-4">
         {icon}
         <h2 className="text-xl font-bold">{title}</h2>
@@ -707,63 +427,237 @@ function FilteredFeedView({
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <Card 
+            <PostCard 
               key={post.id} 
-              className="border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => setSelectedPost(post)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10 border border-border">
-                    <AvatarFallback className="text-sm bg-muted">
-                      {getInitials(post.authorName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm">{post.authorName}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatTimeAgo(new Date(post.createdAt))}
-                      </span>
-                      <Badge variant="outline" className="text-xs capitalize ml-auto">
-                        {post.type}
-                      </Badge>
-                    </div>
-                    <div 
-                      className="text-sm prose prose-sm dark:prose-invert max-w-none line-clamp-3"
-                      dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
-                    <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <ThumbsUp className="h-3.5 w-3.5" />
-                        <span>{post.likes?.length || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        <span>{post.comments?.length || 0}</span>
-                      </div>
-                      <span className="ml-auto text-orange-500 hover:text-orange-600">
-                        Clique para ver detalhes →
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              post={post} 
+              user={user} 
+              getInitials={getInitials} 
+              formatTimeAgo={formatTimeAgo} 
+            />
           ))}
         </div>
       )}
-
-      {/* Modal de Detalhes */}
-      <PostDetailsModal
-        post={selectedPost}
-        isOpen={!!selectedPost}
-        onClose={() => setSelectedPost(null)}
-        user={user}
-        getInitials={getInitials}
-        formatTimeAgo={formatTimeAgo}
-      />
     </div>
+  )
+}
+
+// Post Card Component
+function PostCard({
+  post,
+  user,
+  getInitials,
+  formatTimeAgo,
+}: {
+  post: QualityPost
+  user: any
+  getInitials: (name: string) => string
+  formatTimeAgo: (date: Date) => string
+}) {
+  const [showComments, setShowComments] = useState(false)
+  const [commentText, setCommentText] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+
+  const hasLiked = post.likes?.includes(user?.id || "")
+  const isQuiz = post.type === "quiz"
+  const userVote = post.quizOptions?.find(opt => opt.votes?.includes(user?.id || ""))
+
+  const handleLike = async () => {
+    if (!user) return
+    await likePostSupabase(post.id, user.id)
+  }
+
+  const handleVote = async (optionId: string) => {
+    if (!user || userVote) return
+    await voteOnQuizSupabase(post.id, optionId, user.id)
+  }
+
+  const handleComment = async () => {
+    if (!commentText.trim() || !user || isSubmitting) return
+    
+    if (containsProfanity(commentText)) {
+      toast({ title: "Erro", description: getProfanityWarning(), variant: "destructive" })
+      return
+    }
+
+    setIsSubmitting(true)
+    await addCommentSupabase(post.id, {
+      content: commentText,
+      authorId: user.id,
+      authorName: user.fullName || user.username || "Usuario",
+    })
+    setCommentText("")
+    setIsSubmitting(false)
+  }
+
+  const getTypeBadge = () => {
+    const badges: Record<string, { label: string; className: string }> = {
+      comunicado: { label: "Comunicado", className: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
+      quiz: { label: "Quiz", className: "bg-purple-500/10 text-purple-600 border-purple-500/30" },
+      recado: { label: "Recado", className: "bg-green-500/10 text-green-600 border-green-500/30" },
+    }
+    return badges[post.type] || badges.comunicado
+  }
+
+  const badge = getTypeBadge()
+
+  return (
+    <Card className="border shadow-sm">
+      <CardContent className="p-4">
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-3">
+          <Avatar className="h-10 w-10 border border-border">
+            <AvatarFallback className="text-sm bg-muted">
+              {getInitials(post.authorName)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-sm">{post.authorName}</span>
+              <Badge variant="outline" className={cn("text-xs", badge.className)}>
+                {badge.label}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formatTimeAgo(new Date(post.createdAt))}
+            </p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div 
+          className={cn(
+            "rounded-lg p-4 mb-3",
+            post.backgroundColor || "bg-muted/30",
+            post.backgroundColor?.includes("gradient") && "text-white"
+          )}
+        >
+          <div 
+            className={cn(
+              "prose prose-sm max-w-none",
+              post.backgroundColor?.includes("gradient") ? "prose-invert" : "dark:prose-invert"
+            )}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </div>
+
+        {/* Quiz Options */}
+        {isQuiz && post.quizOptions && (
+          <div className="space-y-2 mb-3">
+            {post.quizOptions.map((option) => {
+              const voteCount = option.votes?.length || 0
+              const totalVotes = post.quizOptions?.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0) || 0
+              const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0
+              const hasVoted = option.votes?.includes(user?.id || "")
+
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => handleVote(option.id)}
+                  disabled={!!userVote}
+                  className={cn(
+                    "w-full p-3 rounded-lg border transition-all text-left relative overflow-hidden",
+                    hasVoted && "border-orange-500 bg-orange-500/10",
+                    !userVote && "hover:border-orange-500/50 cursor-pointer",
+                    userVote && !hasVoted && "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  {userVote && (
+                    <div 
+                      className="absolute inset-0 bg-orange-500/20 transition-all"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  )}
+                  <div className="relative flex items-center justify-between">
+                    <span className="font-medium text-sm">{option.text}</span>
+                    {userVote && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">{percentage}%</span>
+                        {hasVoted && <Check className="h-4 w-4 text-orange-500" />}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pt-2 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            className={cn("gap-2", hasLiked && "text-orange-500")}
+          >
+            <ThumbsUp className={cn("h-4 w-4", hasLiked && "fill-current")} />
+            <span>{post.likes?.length || 0}</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowComments(!showComments)}
+            className="gap-2"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>{post.comments?.length || 0}</span>
+          </Button>
+        </div>
+
+        {/* Comments Section */}
+        {showComments && (
+          <div className="mt-3 pt-3 border-t space-y-3">
+            {/* Comment Input */}
+            <div className="flex gap-2">
+              <Input
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Escreva um comentario..."
+                className="flex-1 h-9 text-sm"
+                onKeyDown={(e) => e.key === "Enter" && handleComment()}
+              />
+              <Button
+                onClick={handleComment}
+                disabled={!commentText.trim() || isSubmitting}
+                size="sm"
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Comments List */}
+            {post.comments?.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                Nenhum comentario ainda
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {post.comments?.map((comment) => (
+                  <div key={comment.id} className="flex gap-2 p-2 rounded bg-muted/30">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback className="text-xs">
+                        {getInitials(comment.authorName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-xs">{comment.authorName}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(new Date(comment.createdAt))}
+                        </span>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -771,750 +665,63 @@ function FilteredFeedView({
 function FeedView({
   posts,
   user,
-  searchQuery,
   getInitials,
   formatTimeAgo,
   allUsers = [],
+  loading,
 }: {
   posts: QualityPost[]
   user: any
-  searchQuery: string
   getInitials: (name: string) => string
   formatTimeAgo: (date: Date) => string
   allUsers?: any[]
+  loading?: boolean
 }) {
-  const [newPostContent, setNewPostContent] = useState("")
-  const [newPostBgColor, setNewPostBgColor] = useState("") // "" means use system default
-  const [expandedComments, setExpandedComments] = useState<string[]>([])
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
-  const [mentionType, setMentionType] = useState<"all" | "qualidade" | "supervisao">("qualidade") // "all" = Todos podem ver, "qualidade" = Monitoria, "supervisao" = Supervisores
+  // Filter out question type posts for non-admins
+  const visiblePosts = useMemo(() => {
+    return posts.filter(p => {
+      if (user?.role === "admin") return true
+      if (p.type === "pergunta") return false
+      return true
+    })
+  }, [posts, user])
 
-  const filteredPosts = posts.filter((post) => {
-    if (!searchQuery) return true
+  if (loading) {
     return (
-      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+      </div>
     )
-  })
-
-  const handleCreatePost = async () => {
-    if (!newPostContent.trim() || !user) return
-
-    // Check for profanity
-    if (containsProfanity(newPostContent)) {
-      alert(getProfanityWarning())
-      return
-    }
-
-    // Operadores sempre publicam como "pergunta", admins publicam comunicados
-    const isOperator = user.role === "operator"
-    const postType = isOperator ? "pergunta" : "comunicado"
-
-    // Determine recipients based on mention type
-    const sendToAll = mentionType === "all"
-    let recipients: string[] = []
-    let recipientNames: string[] = []
-    
-    if (mentionType === "qualidade") {
-      recipients = ["qualidade"]
-      recipientNames = ["Qualidade"]
-    } else if (mentionType === "supervisao") {
-      recipients = ["supervisao"]
-      recipientNames = ["Supervisão"]
-    }
-
-    await createQualityPostSupabase({
-      type: postType,
-      content: newPostContent.trim(),
-      authorId: user.id,
-      authorName: user.fullName || user.username || "Usuario",
-      sendToAll: sendToAll,
-      recipients: recipients,
-      recipientNames: recipientNames,
-      backgroundColor: newPostBgColor || undefined,
-    })
-
-    setNewPostContent("")
-    setNewPostBgColor("")
-    setMentionType("all")
-  }
-
-  const handleLike = async (postId: string) => {
-    if (!user) return
-    await likePostSupabase(postId, user.id)
-  }
-
-  const handleVote = async (postId: string, optionId: string) => {
-    if (!user) return
-    await voteOnQuizSupabase(postId, optionId, user.id)
-  }
-
-  const handleComment = async (postId: string) => {
-    if (!user || !commentInputs[postId]?.trim()) return
-
-    // Check for profanity
-    if (containsProfanity(commentInputs[postId])) {
-      alert(getProfanityWarning())
-      return
-    }
-
-    await addCommentSupabase(postId, {
-      authorId: user.id,
-      authorName: user.fullName || user.username || "Usuario",
-      content: commentInputs[postId],
-    })
-
-    setCommentInputs((prev) => ({ ...prev, [postId]: "" }))
-  }
-
-  const toggleComments = (postId: string) => {
-    setExpandedComments((prev) =>
-      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
-    )
-  }
-
-  // Edit/Delete post states
-  const [editingPost, setEditingPost] = useState<QualityPost | null>(null)
-  const [editPostContent, setEditPostContent] = useState("")
-  const [editPostBgColor, setEditPostBgColor] = useState("")
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
-
-  const handleEditPost = (post: QualityPost) => {
-    setEditingPost(post)
-    setEditPostContent(post.content)
-    setEditPostBgColor(post.backgroundColor || "")
-  }
-
-  const handleSaveEditPost = async () => {
-    if (!editingPost || !editPostContent.trim()) return
-    
-    // Check for profanity
-    if (containsProfanity(editPostContent)) {
-      alert(getProfanityWarning())
-      return
-    }
-    
-    await editQualityPostSupabase(editingPost.id, editPostContent, editPostBgColor || undefined)
-    setEditingPost(null)
-    setEditPostContent("")
-    setEditPostBgColor("")
-  }
-
-  const handleDeletePost = async (postId: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta publicacao?")) {
-      await deleteQualityPostSupabase(postId)
-    }
-  }
-
-  const handleDeleteComment = async (commentId: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este comentario?")) {
-      await deleteCommentSupabase(commentId)
-    }
-  }
-
-  const getPostTypeBadge = (type: QualityPost["type"]) => {
-    const badges: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-      comunicado: {
-        label: "Comunicado",
-        className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
-        icon: <MessageSquare className="h-3 w-3" />,
-      },
-      quiz: {
-        label: "Quiz",
-        className: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
-        icon: <HelpCircle className="h-3 w-3" />,
-      },
-      recado: {
-        label: "Recado",
-        className: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30",
-        icon: <MessageCircle className="h-3 w-3" />,
-      },
-      pergunta: {
-        label: "Publicação",
-        className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30",
-        icon: <HelpCircle className="h-3 w-3" />,
-      },
-      feedback: {
-        label: "Feedback",
-        className: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/30",
-        icon: <MessageCircle className="h-3 w-3" />,
-      },
-      aviso: {
-        label: "Aviso",
-        className: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
-        icon: <MessageSquare className="h-3 w-3" />,
-      },
-      procedimento: {
-        label: "Procedimento",
-        className: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
-        icon: <MessageSquare className="h-3 w-3" />,
-      },
-      dica: {
-        label: "Dica",
-        className: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/30",
-        icon: <MessageSquare className="h-3 w-3" />,
-      },
-    }
-    return badges[type] || badges.comunicado
   }
 
   return (
-  <div className="max-w-2xl mx-auto space-y-3">
-  {/* New Post Card - Only for operators */}
-      {user?.role === "operator" && (
-        <Card className="border-border/50 shadow-sm">
-          <CardContent className="p-3">
-            <div className="flex gap-2.5">
-              <Avatar className="h-9 w-9 bg-orange-100 dark:bg-orange-900/50 border border-orange-500/30">
-                <AvatarFallback className="text-orange-600 dark:text-orange-300 font-medium text-sm">
-                  {getInitials(user?.fullName || user?.username)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-2">
-                <Textarea
-                  placeholder="Compartilhe algo com a equipe..."
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  className="min-h-[60px] text-sm bg-muted/30 border-0 resize-none focus:ring-1 focus:ring-orange-500/30 placeholder:text-muted-foreground/60"
-                />
-                
-                {/* Color Palette Picker */}
-                <div className="flex items-center gap-2 py-1">
-                  <span className="text-xs text-muted-foreground font-medium">Cor de fundo:</span>
-                  <button
-                    onClick={() => setNewPostBgColor("")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor === "" ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Sistema padrão"
-                  >
-                    <div className="h-full w-full rounded-full bg-muted" />
-                  </button>
-                  <button
-                    onClick={() => setNewPostBgColor("bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor?.includes("pink-500") ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Rosa-Roxo-Azul"
-                  >
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600" />
-                  </button>
-                  <button
-                    onClick={() => setNewPostBgColor("bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor?.includes("orange-500 via-pink") ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Laranja-Rosa-Roxo"
-                  >
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600" />
-                  </button>
-                  <button
-                    onClick={() => setNewPostBgColor("bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor?.includes("blue-500 via-purple") ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Azul-Roxo-Rosa"
-                  >
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
-                  </button>
-                  <button
-                    onClick={() => setNewPostBgColor("bg-gradient-to-br from-green-500 via-teal-500 to-blue-500")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor?.includes("green-500") ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Verde-Teal-Azul"
-                  >
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-green-500 via-teal-500 to-blue-500" />
-                  </button>
-                  <button
-                    onClick={() => setNewPostBgColor("bg-gradient-to-br from-yellow-500 via-orange-500 to-red-500")}
-                    className={cn(
-                      "h-6 w-6 rounded-full border-2 transition-all",
-                      newPostBgColor?.includes("yellow-500") ? "border-orange-500 ring-1 ring-orange-500" : "border-border"
-                    )}
-                    title="Amarelo-Laranja-Vermelho"
-                  >
-                    <div className="h-full w-full rounded-full bg-gradient-to-br from-yellow-500 via-orange-500 to-red-500" />
-                  </button>
-                </div>
-                
-                {/* Mention/Visibility and Publish in same row */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={cn(
-                            "h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground",
-                            mentionType !== "all" && "text-orange-600 dark:text-orange-400"
-                          )}
-                        >
-                          <AtSign className="h-3.5 w-3.5" />
-                          Mencionar
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-48 bg-popover">
-                        <DropdownMenuItem 
-                          onClick={() => setMentionType("qualidade")}
-                          className={cn(
-                            "text-sm text-foreground cursor-pointer", 
-                            mentionType === "qualidade" && "bg-orange-100 dark:bg-orange-900/30"
-                          )}
-                        >
-                          <Shield className="h-3.5 w-3.5 mr-2 text-orange-500" />
-                          <span className="text-foreground">Qualidade</span>
-                          {mentionType === "qualidade" && <Check className="ml-auto h-3.5 w-3.5 text-orange-500" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => setMentionType("supervisao")}
-                          className={cn(
-                            "text-sm text-foreground cursor-pointer", 
-                            mentionType === "supervisao" && "bg-blue-100 dark:bg-blue-900/30"
-                          )}
-                        >
-                          <Users className="h-3.5 w-3.5 mr-2 text-blue-500" />
-                          <span className="text-foreground">Supervisão</span>
-                          {mentionType === "supervisao" && <Check className="ml-auto h-3.5 w-3.5 text-blue-500" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => setMentionType("all")}
-                          className={cn(
-                            "text-sm text-foreground cursor-pointer", 
-                            mentionType === "all" && "bg-green-100 dark:bg-green-900/30"
-                          )}
-                        >
-                          <Users className="h-3.5 w-3.5 mr-2 text-green-500" />
-                          <span className="text-foreground">Todos podem ver</span>
-                          {mentionType === "all" && <Check className="ml-auto h-3.5 w-3.5 text-green-500" />}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    
-                    {/* Show current visibility as small badge */}
-                    <Badge variant="outline" className={cn(
-                      "text-[10px] h-5 px-1.5",
-                      mentionType === "all" 
-                        ? "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30" 
-                        : mentionType === "qualidade"
-                          ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30"
-                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
-                    )}>
-                      {mentionType === "all" ? "@Todos" : mentionType === "qualidade" ? "@Qualidade" : "@Supervisão"}
-                    </Badge>
-                  </div>
-
-                  <Button
-                    onClick={handleCreatePost}
-                    disabled={!newPostContent.trim()}
-                    size="sm"
-                    className="h-7 bg-orange-500 hover:bg-orange-600 text-white gap-1 text-xs px-3"
-                  >
-                    <Send className="h-3 w-3" />
-                    Publicar
-                  </Button>
-                </div>
-              </div>
+    <div className="max-w-2xl mx-auto space-y-4">
+      {visiblePosts.length === 0 ? (
+        <Card className="bg-card border-border/50">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <Megaphone className="h-8 w-8 text-muted-foreground" />
             </div>
+            <p className="text-foreground font-medium">Nenhuma publicacao ainda</p>
+            <p className="text-sm text-muted-foreground">Aguarde novos comunicados</p>
           </CardContent>
         </Card>
+      ) : (
+        visiblePosts.map((post) => (
+          <PostCard 
+            key={post.id} 
+            post={post} 
+            user={user} 
+            getInitials={getInitials} 
+            formatTimeAgo={formatTimeAgo} 
+          />
+        ))
       )}
-
-      {/* Posts Feed */}
-      {filteredPosts.map((post) => {
-        const badge = getPostTypeBadge(post.type)
-        const isLiked = post.likes?.includes(user?.id || "")
-        const totalVotes = post.quizOptions?.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0) || 0
-
-        // Usar a cor de fundo customizada ou padrão do sistema
-        const contentBgClass = post.backgroundColor || "bg-muted"
-
-        return (
-          <Card key={post.id} className="border-border/50 shadow-sm hover:shadow-md transition-all overflow-hidden bg-card">
-            {/* Post Header - Estilo Facebook */}
-            <div className="flex items-center justify-between px-4 pt-2 pb-1">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-muted text-foreground font-semibold text-sm">
-                    {getInitials(post.authorName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-foreground">{post.authorName}</span>
-                    <Badge variant="outline" className={cn("text-[10px] h-4 gap-0.5 px-1.5", badge.className)}>
-                      {badge.icon}
-                      {badge.label}
-                    </Badge>
-                    {/* Mentions Icon */}
-                    {!post.sendToAll && post.recipientNames && post.recipientNames.length > 0 && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-5 px-1.5 gap-0.5 text-orange-500 hover:text-orange-600 hover:bg-orange-500/10">
-                            <AtSign className="h-3 w-3" />
-                            <span className="text-[10px]">{post.recipientNames.length}</span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-48 p-2" align="start">
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-medium text-muted-foreground">Mencionados:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {post.recipientNames.map((name, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-[10px] h-4 px-1">
-                                  @{name}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span>{formatTimeAgo(post.createdAt)}</span>
-                    <span>·</span>
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM5.5 4.002h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1zm2.5 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              {/* Post Actions Menu */}
-              {(post.authorId === user?.id || user?.role === "admin" || user?.role === "master") && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-muted">
-                      <MoreVertical className="h-5 w-5 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEditPost(post)} className="text-sm">
-                      <Pencil className="h-3.5 w-3.5 mr-2" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleDeletePost(post.id)}
-                      className="text-red-600 focus:text-red-600 text-sm"
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-2" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-
-            {/* Post Content - Estilo Facebook */}
-            <div className={cn(
-              "min-h-[200px] flex items-center justify-center px-8 py-4 text-center",
-              contentBgClass,
-              // Se usar cores de gradiente, adicionar texto branco com sombra
-              post.backgroundColor && (
-                post.backgroundColor.includes("gradient") || 
-                post.backgroundColor.includes("500") || 
-                post.backgroundColor.includes("600")
-              ) && "text-white"
-            )}>
-              <p className={cn(
-                "text-xl font-bold leading-relaxed max-w-md",
-                (post.backgroundColor && (
-                  post.backgroundColor.includes("gradient") || 
-                  post.backgroundColor.includes("500") || 
-                  post.backgroundColor.includes("600")
-                )) ? "text-white drop-shadow-lg" : "text-foreground"
-              )}
-                dangerouslySetInnerHTML={{ __html: (post.content || "").replace(/<span class="text-orange-500[^"]*">@[^<]+<\/span>\s*/g, '').replace(/<[^>]*>/g, '') }}
-              />
-            </div>
-
-            {/* Quiz Options */}
-            {post.type === "quiz" && post.quizOptions && (
-              <div className="px-4 py-3 space-y-3">
-                {post.quizOptions.map((option, index) => {
-                  const voteCount = option.votes?.length || 0
-                  const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0
-                  const hasVoted = option.votes?.includes(user?.id || "")
-                  const isCorrectAnswer = option.isCorrect
-                  const userHasVoted = post.quizOptions?.some((opt) => opt.votes?.includes(user?.id || ""))
-
-                  return (
-                    <button
-                      key={option.id}
-                      onClick={() => handleVote(post.id, option.id)}
-                      disabled={userHasVoted}
-                      className={cn(
-                        "w-full rounded-xl text-left relative overflow-hidden transition-all",
-                        userHasVoted && isCorrectAnswer && "ring-2 ring-green-500/60",
-                        userHasVoted && hasVoted && !isCorrectAnswer && "ring-2 ring-red-500/60",
-                        !userHasVoted && "hover:scale-[1.01] hover:shadow-md"
-                      )}
-                    >
-                      {/* Background progress bar */}
-                      <div className="absolute inset-0 bg-muted/30" />
-                      <div
-                        className={cn(
-                          "absolute inset-y-0 left-0 transition-all duration-500",
-                          isCorrectAnswer && userHasVoted
-                            ? "bg-gradient-to-r from-green-500/40 to-green-500/20"
-                            : !isCorrectAnswer && hasVoted && userHasVoted
-                              ? "bg-gradient-to-r from-red-500/40 to-red-500/20"
-                              : "bg-gradient-to-r from-orange-500/30 to-orange-500/10"
-                        )}
-                        style={{ width: `${percentage}%` }}
-                      />
-                      
-                      {/* Content */}
-                      <div className="relative flex items-center p-3 gap-3">
-                        {/* Option number badge */}
-                        <div className={cn(
-                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm",
-                          isCorrectAnswer && userHasVoted
-                            ? "bg-green-500 text-white"
-                            : !isCorrectAnswer && hasVoted && userHasVoted
-                              ? "bg-red-500 text-white"
-                              : hasVoted
-                                ? "bg-orange-500 text-white"
-                                : "bg-muted text-foreground"
-                        )}>
-                          {index + 1}
-                        </div>
-                        
-                        {/* Option text and status */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={cn(
-                              "font-medium text-sm",
-                              hasVoted && "text-foreground"
-                            )}>
-                              {option.text}
-                            </span>
-                            {isCorrectAnswer && userHasVoted && (
-                              <span className="inline-flex items-center gap-1 bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-                                <Check className="h-3 w-3" />
-                                Correto
-                              </span>
-                            )}
-                            {!isCorrectAnswer && hasVoted && userHasVoted && (
-                              <span className="inline-flex items-center gap-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-                                <X className="h-3 w-3" />
-                                Incorreto
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Percentage */}
-                        <div className={cn(
-                          "flex-shrink-0 text-sm font-bold",
-                          isCorrectAnswer && userHasVoted
-                            ? "text-green-500"
-                            : !isCorrectAnswer && hasVoted && userHasVoted
-                              ? "text-red-500"
-                              : "text-muted-foreground"
-                        )}>
-                          {percentage}%
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
-                <p className="text-sm text-muted-foreground text-center pt-1">{totalVotes} votos no total</p>
-              </div>
-            )}
-
-            {/* Likes and Comments Count - Estilo Facebook */}
-            <div className="px-4 py-1 flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                {(post.likes?.length || 0) > 0 && (
-                  <>
-                    <div className="flex -space-x-1">
-                      <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center">
-                        <ThumbsUp className="h-3 w-3 text-white fill-white" />
-                      </div>
-                    </div>
-                    <span className="ml-1">{post.likes?.length}</span>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                {(post.comments?.length || 0) > 0 && (
-                  <button 
-                    onClick={() => toggleComments(post.id)}
-                    className="hover:underline"
-                  >
-                    {post.comments?.length} comentario{(post.comments?.length || 0) !== 1 ? "s" : ""}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Actions - Estilo Facebook */}
-            <div className="px-2 py-0.5 border-t border-border">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleLike(post.id)}
-                  className={cn(
-                    "flex-1 h-10 gap-2 rounded-md font-semibold",
-                    isLiked ? "text-blue-500 hover:bg-blue-500/10" : "text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  <ThumbsUp className={cn("h-5 w-5", isLiked && "fill-current")} />
-                  Curtir
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleComments(post.id)}
-                  className="flex-1 h-10 gap-2 rounded-md text-muted-foreground hover:bg-muted font-semibold"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  Comentar
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1 h-10 gap-2 rounded-md text-muted-foreground hover:bg-muted font-semibold"
-                >
-                  <Share2 className="h-5 w-5" />
-                  Compartilhar
-                </Button>
-              </div>
-            </div>
-
-            {/* Comments Section - Estilo Facebook */}
-            {expandedComments.includes(post.id) && (
-              <div className="px-4 pb-2 pt-1 border-t border-border space-y-2">
-                {/* Ver mais comentarios */}
-                {(post.comments?.length || 0) > 2 && (
-                  <button className="text-sm text-muted-foreground hover:underline font-medium">
-                    Ver mais comentarios
-                  </button>
-                )}
-                
-                {/* Comments List */}
-                {post.comments?.slice(-3).map((comment) => (
-                  <div key={comment.id} className="flex gap-2 group">
-                    <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarFallback className="text-xs bg-muted text-foreground font-medium">
-                        {getInitials(comment.authorName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="bg-muted rounded-2xl px-3 py-2 inline-block">
-                        <span className="font-semibold text-sm text-foreground block">{comment.authorName}</span>
-                        <p className="text-sm text-foreground">{comment.content}</p>
-                      </div>
-                      {/* Comment Actions */}
-                      <div className="flex items-center gap-3 mt-1 ml-3 text-xs text-muted-foreground">
-                        <span>{formatTimeAgo(new Date(comment.createdAt))}</span>
-                        <button className="font-semibold hover:underline">Curtir</button>
-                        <button className="font-semibold hover:underline">Responder</button>
-                        {(comment.authorId === user?.id || user?.role === "admin" || user?.role === "master") && (
-                          <button 
-                            onClick={() => handleDeleteComment(comment.id)}
-                            className="font-semibold hover:underline text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            Excluir
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Add Comment Input */}
-                <div className="flex gap-2 pt-2">
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback className="text-xs bg-muted text-foreground font-medium">
-                      {getInitials(user?.fullName || user?.username)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 relative">
-                    <Input
-                      placeholder="Escreva um comentario..."
-                      value={commentInputs[post.id] || ""}
-                      onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                      onKeyDown={(e) => e.key === "Enter" && handleComment(post.id)}
-                      className="w-full bg-muted border-0 rounded-full pr-10 focus-visible:ring-1 focus-visible:ring-blue-500"
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleComment(post.id)}
-                      disabled={!commentInputs[post.id]?.trim()}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full text-blue-500 hover:bg-blue-500/10 disabled:opacity-30"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-        )
-      })}
-
-      {filteredPosts.length === 0 && (
-        <div className="text-center py-16">
-          <div className="p-6 bg-muted rounded-full inline-block mb-4">
-            <MessageSquare className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Nenhuma publicacao</h3>
-          <p className="text-muted-foreground">Seja o primeiro a compartilhar algo!</p>
-        </div>
-        )}
-
-        {/* Edit Post Modal */}
-        <Dialog open={!!editingPost} onOpenChange={(open) => !open && setEditingPost(null)}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-orange-500" />
-              Editar Publicacao
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Textarea
-              value={editPostContent}
-              onChange={(e) => setEditPostContent(e.target.value)}
-              className="min-h-[150px]"
-              placeholder="Edite o conteudo da publicacao..."
-            />
-            {containsProfanity(editPostContent) && (
-              <p className="text-sm text-red-500 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Conteudo contem palavras inadequadas
-              </p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingPost(null)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSaveEditPost}
-              disabled={!editPostContent.trim() || containsProfanity(editPostContent)}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
 
-// Admin Panel View
+// Admin Panel View Component
 function AdminPanelView({
   user,
   getInitials,
@@ -1524,147 +731,81 @@ function AdminPanelView({
   getInitials: (name: string) => string
   formatTimeAgo: (date: Date) => string
 }) {
-  const [activeTab, setActiveTab] = useState("publicar")
+  const [activeTab, setActiveTab] = useState<"publicar" | "quiz">("publicar")
+  const { toast } = useToast()
+  const { users: allUsers } = useAllUsers()
+  const operators = useMemo(() => allUsers.filter(u => u.role === "operator"), [allUsers])
 
   return (
-    <div className="flex gap-6">
-      {/* Left Side - Admin Panel with Forms */}
-      <div className="flex-1">
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Shield className="h-5 w-5 text-orange-500" />
-            <h2 className="text-xl font-bold">Painel Administrativo</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Gerencie publicacoes, quizzes, feedbacks e estatisticas.
-          </p>
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-orange-500/20 rounded-lg">
+          <Shield className="h-5 w-5 text-orange-500" />
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-muted/30 border border-border p-1 mb-4 h-auto flex-wrap">
-            <TabsTrigger
-              value="publicar"
-              className="gap-1.5 text-sm data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Publicar
-            </TabsTrigger>
-            <TabsTrigger
-              value="quiz"
-              className="gap-1.5 text-sm data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <HelpCircle className="h-3.5 w-3.5" />
-              Quiz
-            </TabsTrigger>
-            <TabsTrigger
-              value="feedback"
-              className="gap-1.5 text-sm data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <ClipboardList className="h-3.5 w-3.5" />
-              Feedback
-            </TabsTrigger>
-            <TabsTrigger
-              value="estatisticas"
-              className="gap-1.5 text-sm data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-            >
-              <BarChart3 className="h-3.5 w-3.5" />
-              Estatisticas
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="publicar" className="mt-0">
-            <PublishTab user={user} />
-          </TabsContent>
-
-          <TabsContent value="quiz">
-            <QuizTab user={user} />
-          </TabsContent>
-
-          <TabsContent value="feedback">
-            <FeedbackTab user={user} />
-          </TabsContent>
-
-          <TabsContent value="estatisticas">
-            <StatsTab />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Right Side - Stats on top, Questions on bottom */}
-      <div className="w-80 shrink-0 flex flex-col gap-4">
-        {/* Stats Cards */}
         <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-            <BarChart3 className="h-4 w-4" />
-            <span>Estatisticas</span>
-          </div>
-          <AdminStatsCards />
-        </div>
-
-        {/* Questions Panel */}
-        <div className="flex-1">
-          <QuestionsTab getInitials={getInitials} formatTimeAgo={formatTimeAgo} compact />
+          <h1 className="text-xl font-bold">Painel Administrativo</h1>
+          <p className="text-sm text-muted-foreground">Publique comunicados, recados e quizzes</p>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2">
+        <Button
+          variant={activeTab === "publicar" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setActiveTab("publicar")}
+          className={activeTab === "publicar" ? "bg-orange-500 hover:bg-orange-600" : ""}
+        >
+          <Send className="h-4 w-4 mr-2" />
+          Publicar
+        </Button>
+        <Button
+          variant={activeTab === "quiz" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setActiveTab("quiz")}
+          className={activeTab === "quiz" ? "bg-purple-500 hover:bg-purple-600" : ""}
+        >
+          <HelpCircle className="h-4 w-4 mr-2" />
+          Quiz
+        </Button>
+      </div>
+
+      {/* Content */}
+      {activeTab === "publicar" && (
+        <PublicarTab user={user} operators={operators} />
+      )}
+      {activeTab === "quiz" && (
+        <QuizTab user={user} />
+      )}
     </div>
   )
 }
 
-// Publish Tab
-function PublishTab({ user }: { user: any }) {
-  const [content, setContent] = useState("")
+// Publicar Tab Component
+function PublicarTab({ user, operators }: { user: any; operators: any[] }) {
   const [type, setType] = useState<"comunicado" | "recado">("comunicado")
+  const [content, setContent] = useState("")
+  const [backgroundColor, setBackgroundColor] = useState("")
   const [sendToAll, setSendToAll] = useState(true)
-  const [selectedOperators, setSelectedOperators] = useState<string[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
-  const [backgroundColor, setBackgroundColor] = useState<string>("")
-  const { users: allUsers } = useAllUsers()
   const { toast } = useToast()
-  
-  const operators = allUsers.filter(u => u.role === "operator" && u.isActive)
-  
-  // Paleta de cores predefinidas
-  const colorPalette = [
-    { name: "Padrão", value: "", class: "bg-muted" },
-    { name: "Branco", value: "bg-white", class: "bg-white border-2" },
-    { name: "Laranja", value: "bg-orange-500", class: "bg-orange-500" },
-    { name: "Azul", value: "bg-blue-500", class: "bg-blue-500" },
-    { name: "Verde", value: "bg-green-500", class: "bg-green-500" },
-    { name: "Vermelho", value: "bg-red-500", class: "bg-red-500" },
-    { name: "Roxo", value: "bg-purple-500", class: "bg-purple-500" },
-    { name: "Rosa", value: "bg-pink-500", class: "bg-pink-500" },
-    { name: "Amarelo", value: "bg-yellow-500", class: "bg-yellow-500" },
-    { name: "Ciano", value: "bg-cyan-500", class: "bg-cyan-500" },
-    { name: "Grad. Laranja", value: "bg-gradient-to-r from-orange-500 to-red-500", class: "bg-gradient-to-r from-orange-500 to-red-500" },
-    { name: "Grad. Azul", value: "bg-gradient-to-r from-blue-500 to-cyan-500", class: "bg-gradient-to-r from-blue-500 to-cyan-500" },
-    { name: "Grad. Verde", value: "bg-gradient-to-r from-green-500 to-emerald-500", class: "bg-gradient-to-r from-green-500 to-emerald-500" },
-    { name: "Grad. Roxo", value: "bg-gradient-to-r from-purple-500 to-pink-500", class: "bg-gradient-to-r from-purple-500 to-pink-500" },
-    { name: "Grad. Pôr do Sol", value: "bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600", class: "bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600" },
-    { name: "Grad. Oceano", value: "bg-gradient-to-r from-blue-400 via-teal-500 to-green-500", class: "bg-gradient-to-r from-blue-400 via-teal-500 to-green-500" },
-    { name: "Grad. Aurora", value: "bg-gradient-to-r from-green-400 via-blue-500 to-purple-600", class: "bg-gradient-to-r from-green-400 via-blue-500 to-purple-600" },
-    { name: "Grad. Fogo", value: "bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600", class: "bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600" },
-  ]
 
   const handlePublish = async () => {
     if (!content.trim() || !user) return
-    if (!sendToAll && selectedOperators.length === 0) return
+
+    if (containsProfanity(content)) {
+      toast({ title: "Erro", description: getProfanityWarning(), variant: "destructive" })
+      return
+    }
 
     setIsPublishing(true)
-
-    const recipientNames = sendToAll 
-      ? [] 
-      : selectedOperators.map(id => {
-          const op = operators.find(o => o.id === id)
-          return op?.fullName || op?.username || "Operador"
-        })
-
+    
     const result = await createQualityPostSupabase({
       type,
       content,
       authorId: user.id,
       authorName: user.fullName || user.username || "Admin",
-      recipients: sendToAll ? [] : selectedOperators,
-      recipientNames,
       sendToAll,
       backgroundColor: backgroundColor || undefined,
     })
@@ -1672,34 +813,18 @@ function PublishTab({ user }: { user: any }) {
     setIsPublishing(false)
 
     if (result) {
-      toast({
-        title: type === "comunicado" ? "Comunicado publicado!" : "Recado publicado!",
-        description: "Sua publicacao foi enviada com sucesso para " + (sendToAll ? "todos os operadores" : `${selectedOperators.length} operador(es)`),
-      })
+      toast({ title: "Sucesso", description: `${type === "comunicado" ? "Comunicado" : "Recado"} publicado!` })
       setContent("")
-      setSelectedOperators([])
       setBackgroundColor("")
     } else {
-      toast({
-        title: "Erro ao publicar",
-        description: "Ocorreu um erro ao enviar sua publicacao. Tente novamente.",
-        variant: "destructive",
-      })
+      toast({ title: "Erro", description: "Falha ao publicar", variant: "destructive" })
     }
-  }
-
-  const toggleOperator = (operatorId: string) => {
-    setSelectedOperators(prev => 
-      prev.includes(operatorId) 
-        ? prev.filter(id => id !== operatorId)
-        : [...prev, operatorId]
-    )
   }
 
   return (
     <Card className="border shadow-sm">
-      <CardHeader className="py-4 px-5">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base flex items-center gap-2">
           {type === "comunicado" ? (
             <Megaphone className="h-4 w-4 text-orange-500" />
           ) : (
@@ -1707,199 +832,73 @@ function PublishTab({ user }: { user: any }) {
           )}
           {type === "comunicado" ? "Novo Comunicado" : "Novo Recado"}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {type === "comunicado" 
-            ? "Crie um comunicado oficial para ser exibido aos operadores"
-            : "Crie um recado formatado para ser exibido aos operadores"
-          }
-        </p>
       </CardHeader>
-      <CardContent className="px-5 pb-5 space-y-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium">Tipo de Publicacao</Label>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm">Tipo de Publicacao</Label>
           <Select value={type} onValueChange={(v) => setType(v as "comunicado" | "recado")}>
-            <SelectTrigger className="h-9 bg-background">
+            <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="comunicado">
-                <span className="flex items-center gap-2">
-                  <Megaphone className="h-3.5 w-3.5 text-orange-500" />
-                  Comunicado
-                </span>
-              </SelectItem>
-              <SelectItem value="recado">
-                <span className="flex items-center gap-2">
-                  <MessageCircle className="h-3.5 w-3.5 text-blue-500" />
-                  Recado
-                </span>
-              </SelectItem>
+              <SelectItem value="comunicado">Comunicado</SelectItem>
+              <SelectItem value="recado">Recado</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <RichTextEditorWYSIWYG
-          value={content}
-          onChange={setContent}
-          placeholder={type === "comunicado" 
-            ? "Digite o conteudo do comunicado e use as ferramentas de formatacao..." 
-            : "Digite o conteudo do recado e use as ferramentas de formatacao..."
-          }
-        />
-
-        {/* Paleta de Cores de Fundo */}
         <div className="space-y-2">
-          <Label className="text-xs font-medium flex items-center gap-2">
-            <Paintbrush className="h-3.5 w-3.5" />
-            Cor de Fundo da Publicacao
+          <Label className="text-sm">Conteudo</Label>
+          <RichTextEditorWYSIWYG
+            value={content}
+            onChange={setContent}
+            placeholder="Digite o conteudo..."
+          />
+        </div>
+
+        {/* Cor de Fundo */}
+        <div className="space-y-2">
+          <Label className="text-sm flex items-center gap-2">
+            <Paintbrush className="h-4 w-4" />
+            Cor de Fundo
           </Label>
-          <div className="grid grid-cols-6 gap-2">
+          <div className="flex gap-2 flex-wrap">
             {colorPalette.map((color) => (
               <button
                 key={color.value}
                 type="button"
                 onClick={() => setBackgroundColor(color.value)}
                 className={cn(
-                  "h-10 rounded-md border-2 transition-all relative group overflow-hidden",
+                  "h-8 w-8 rounded-md border-2 transition-all",
                   backgroundColor === color.value 
-                    ? "border-primary ring-2 ring-primary/30 scale-105" 
-                    : "border-border hover:border-primary/50 hover:scale-105",
+                    ? "border-orange-500 ring-2 ring-orange-500/30" 
+                    : "border-border hover:border-orange-500/50",
                   color.class
                 )}
                 title={color.name}
-              >
-                {backgroundColor === color.value && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                    <div className="h-4 w-4 rounded-full bg-white flex items-center justify-center">
-                      <div className="h-2 w-2 rounded-full bg-primary" />
-                    </div>
-                  </div>
-                )}
-                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity truncate">
-                  {color.name}
-                </span>
-              </button>
+              />
             ))}
           </div>
-          {backgroundColor && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
-                <p className="text-xs text-muted-foreground">
-                  Cor selecionada: <span className="font-medium text-foreground">{colorPalette.find(c => c.value === backgroundColor)?.name || "Personalizada"}</span>
-                </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setBackgroundColor("")}
-                  className="h-6 text-xs"
-                >
-                  Remover
-                </Button>
-              </div>
-              {/* Preview da publicação com a cor */}
-              <div className="border rounded-md overflow-hidden">
-                <div className="px-2 py-1 bg-muted/50 border-b">
-                  <p className="text-[10px] text-muted-foreground">Preview da Publicacao</p>
-                </div>
-                <div className={cn(
-                  "min-h-[120px] flex items-center justify-center px-4 py-3",
-                  backgroundColor,
-                  (backgroundColor.includes("gradient") || backgroundColor.includes("500") || backgroundColor.includes("600")) && "text-white"
-                )}>
-                  <p className={cn(
-                    "text-base font-semibold text-center leading-relaxed",
-                    (backgroundColor.includes("gradient") || backgroundColor.includes("500") || backgroundColor.includes("600")) 
-                      ? "text-white drop-shadow-lg" 
-                      : "text-foreground"
-                  )}>
-                    {content.replace(/<[^>]*>/g, '').substring(0, 100) || "Seu texto aparecera aqui..."}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="space-y-3 pt-3 border-t">
-          <Label className="text-xs font-medium">Destinatarios</Label>
-          <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-md">
-            <Checkbox 
-              id="sendToAll" 
-              checked={sendToAll} 
-              onCheckedChange={(checked) => {
-                setSendToAll(checked as boolean)
-                if (checked) setSelectedOperators([])
-              }}
-              className="h-4 w-4 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-            />
-            <label 
-              htmlFor="sendToAll" 
-              className="text-sm cursor-pointer flex items-center gap-2"
-            >
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              Enviar para todos os operadores
-            </label>
-          </div>
-          
-          {/* Operator Selection when not sending to all */}
-          {!sendToAll && (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Selecione os operadores:</p>
-              <ScrollArea className="h-32 border rounded-md p-2">
-                <div className="space-y-1">
-                  {operators.map(op => (
-                    <div 
-                      key={op.id} 
-                      className={cn(
-                        "flex items-center gap-2 p-2 rounded cursor-pointer transition-colors",
-                        selectedOperators.includes(op.id) 
-                          ? "bg-orange-500/20 border border-orange-500/30" 
-                          : "hover:bg-muted/50"
-                      )}
-                      onClick={() => toggleOperator(op.id)}
-                    >
-                      <Checkbox 
-                        checked={selectedOperators.includes(op.id)}
-                        className="h-3.5 w-3.5 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                      />
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-[10px]">
-                          {(op.fullName || op.username || "O").slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm">{op.fullName || op.username}</span>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-              {selectedOperators.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedOperators.map(id => {
-                    const op = operators.find(o => o.id === id)
-                    return (
-                      <Badge key={id} variant="secondary" className="text-xs gap-1">
-                        <AtSign className="h-3 w-3" />
-                        {op?.fullName || op?.username}
-                        <button 
-                          onClick={() => toggleOperator(id)}
-                          className="ml-1 hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+        {/* Destinatarios */}
+        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
+          <Checkbox 
+            id="sendToAll" 
+            checked={sendToAll} 
+            onCheckedChange={(checked) => setSendToAll(checked as boolean)}
+            className="data-[state=checked]:bg-orange-500"
+          />
+          <label htmlFor="sendToAll" className="text-sm cursor-pointer flex items-center gap-2">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            Enviar para todos os operadores
+          </label>
         </div>
 
         <Button
           onClick={handlePublish}
-          disabled={!content.trim() || (!sendToAll && selectedOperators.length === 0) || isPublishing}
-          className="w-full h-10 bg-orange-500 hover:bg-orange-600 text-white font-medium"
+          disabled={!content.trim() || isPublishing}
+          className="w-full bg-orange-500 hover:bg-orange-600"
         >
           {isPublishing ? (
             <>
@@ -1909,7 +908,7 @@ function PublishTab({ user }: { user: any }) {
           ) : (
             <>
               <Send className="h-4 w-4 mr-2" />
-              Publicar {type === "comunicado" ? "Comunicado" : "Recado"}
+              Publicar
             </>
           )}
         </Button>
@@ -1918,85 +917,85 @@ function PublishTab({ user }: { user: any }) {
   )
 }
 
-// Quiz Tab
+// Quiz Tab Component
 function QuizTab({ user }: { user: any }) {
   const [question, setQuestion] = useState("")
   const [options, setOptions] = useState(["", ""])
   const [correctOptionIndex, setCorrectOptionIndex] = useState<number | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const { toast } = useToast()
-  
+
   const addOption = () => setOptions([...options, ""])
   const removeOption = (index: number) => {
-  setOptions(options.filter((_, i) => i !== index))
-  if (correctOptionIndex === index) {
-  setCorrectOptionIndex(null)
-  } else if (correctOptionIndex !== null && correctOptionIndex > index) {
-  setCorrectOptionIndex(correctOptionIndex - 1)
-  }
+    setOptions(options.filter((_, i) => i !== index))
+    if (correctOptionIndex === index) {
+      setCorrectOptionIndex(null)
+    } else if (correctOptionIndex !== null && correctOptionIndex > index) {
+      setCorrectOptionIndex(correctOptionIndex - 1)
+    }
   }
   const updateOption = (index: number, value: string) => {
-  const newOptions = [...options]
-  newOptions[index] = value
-  setOptions(newOptions)
+    const newOptions = [...options]
+    newOptions[index] = value
+    setOptions(newOptions)
   }
-  
+
   const handlePublish = async () => {
-  if (!question.trim() || options.filter((o) => o.trim()).length < 2 || !user || correctOptionIndex === null) return
-  
-  setIsPublishing(true)
-  
-  const timestamp = Date.now()
-  const quizOptions = options
-  .filter((o) => o.trim())
-  .map((text, i) => ({
-  id: `opt-${timestamp}-${i}`,
-  text,
-  votes: [],
-  isCorrect: i === correctOptionIndex
-  }))
-  
-  const result = await createQualityPostSupabase({
-  type: "quiz",
-  content: question,
-  authorId: user.id,
-  authorName: user.fullName || user.username || "Admin",
-  quizOptions,
-  })
-  
-  setIsPublishing(false)
-  
-  if (result) {
-    toast({
-      title: "Quiz publicado!",
-      description: "Seu quiz foi enviado com sucesso para todos os operadores.",
+    if (!question.trim() || options.filter((o) => o.trim()).length < 2 || !user || correctOptionIndex === null) return
+
+    setIsPublishing(true)
+
+    const timestamp = Date.now()
+    const quizOptions = options
+      .filter((o) => o.trim())
+      .map((text, i) => ({
+        id: `opt-${timestamp}-${i}`,
+        text,
+        votes: [],
+        isCorrect: i === correctOptionIndex
+      }))
+
+    const result = await createQualityPostSupabase({
+      type: "quiz",
+      content: question,
+      authorId: user.id,
+      authorName: user.fullName || user.username || "Admin",
+      quizOptions,
     })
-    setQuestion("")
-    setOptions(["", ""])
-    setCorrectOptionIndex(null)
-  } else {
-    toast({
-      title: "Erro ao publicar quiz",
-      description: "Ocorreu um erro ao enviar o quiz. Tente novamente.",
-      variant: "destructive",
-    })
-  }
+
+    setIsPublishing(false)
+
+    if (result) {
+      toast({ title: "Quiz publicado!", description: "Seu quiz foi enviado com sucesso." })
+      setQuestion("")
+      setOptions(["", ""])
+      setCorrectOptionIndex(null)
+    } else {
+      toast({ title: "Erro", description: "Falha ao publicar quiz", variant: "destructive" })
+    }
   }
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-4">
+    <Card className="border shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base flex items-center gap-2">
+          <HelpCircle className="h-4 w-4 text-purple-500" />
+          Novo Quiz
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Pergunta do Quiz</Label>
-          <Input
+          <Label className="text-sm">Pergunta do Quiz</Label>
+          <Textarea
             placeholder="Digite a pergunta..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
+            className="min-h-[80px]"
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Opcoes (clique no circulo para marcar a resposta correta)</Label>
+          <Label className="text-sm">Opcoes (clique no circulo para marcar a correta)</Label>
           {options.map((option, index) => (
             <div key={index} className="flex gap-2 items-center">
               <button
@@ -2008,7 +1007,6 @@ function QuizTab({ user }: { user: any }) {
                     ? "border-green-500 bg-green-500 text-white" 
                     : "border-muted-foreground/30 hover:border-green-500/50"
                 )}
-                title={correctOptionIndex === index ? "Resposta correta" : "Marcar como correta"}
               >
                 {correctOptionIndex === index && <Check className="h-4 w-4" />}
               </button>
@@ -2025,10 +1023,12 @@ function QuizTab({ user }: { user: any }) {
               )}
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={addOption} className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Opcao
-          </Button>
+          {options.length < 5 && (
+            <Button variant="outline" size="sm" onClick={addOption} className="w-full">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Opcao
+            </Button>
+          )}
           {correctOptionIndex === null && options.some(o => o.trim()) && (
             <p className="text-sm text-amber-500 flex items-center gap-1">
               <AlertCircle className="h-4 w-4" />
@@ -2040,7 +1040,7 @@ function QuizTab({ user }: { user: any }) {
         <Button
           onClick={handlePublish}
           disabled={!question.trim() || options.filter((o) => o.trim()).length < 2 || correctOptionIndex === null || isPublishing}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+          className="w-full bg-purple-500 hover:bg-purple-600"
         >
           {isPublishing ? (
             <>
@@ -2056,677 +1056,5 @@ function QuizTab({ user }: { user: any }) {
         </Button>
       </CardContent>
     </Card>
-  )
-}
-
-// Feedback Tab
-function FeedbackTab({ user }: { user: any }) {
-  const [selectedOperator, setSelectedOperator] = useState("")
-  const [feedbackType, setFeedbackType] = useState<"positive" | "negative">("positive")
-  const [details, setDetails] = useState("")
-  const { users: operators } = useAllUsers()
-
-  const filteredOperators = operators.filter((u) => u.role === "operator")
-
-  const handleSubmit = async () => {
-    if (!selectedOperator || !details.trim() || !user) return
-
-    const operator = filteredOperators.find((o) => o.id === selectedOperator)
-    await createFeedbackSupabase({
-      operatorId: selectedOperator,
-      operatorName: operator?.fullName || operator?.username || "Operador",
-      createdBy: user.id,
-      createdByName: user.fullName || user.username || "Admin",
-      feedbackType,
-      details,
-      score: feedbackType === "positive" ? 80 : 40,
-    })
-
-    setSelectedOperator("")
-    setDetails("")
-    setFeedbackType("positive")
-  }
-
-  return (
-    <Card>
-      <CardContent className="p-6 space-y-4">
-        <div className="space-y-2">
-          <Label>Operador</Label>
-          <Select value={selectedOperator} onValueChange={setSelectedOperator}>
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o operador" />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredOperators.map((op) => (
-                <SelectItem key={op.id} value={op.id}>
-                  {op.fullName || op.username}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Tipo de Feedback</Label>
-          <div className="flex gap-2">
-            <Button
-              variant={feedbackType === "positive" ? "default" : "outline"}
-              onClick={() => setFeedbackType("positive")}
-              className={cn(
-                "flex-1 gap-2",
-                feedbackType === "positive" && "bg-green-500 hover:bg-green-600 text-white"
-              )}
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Positivo
-            </Button>
-            <Button
-              variant={feedbackType === "negative" ? "default" : "outline"}
-              onClick={() => setFeedbackType("negative")}
-              className={cn(
-                "flex-1 gap-2",
-                feedbackType === "negative" && "bg-red-500 hover:bg-red-600 text-white"
-              )}
-            >
-              <AlertCircle className="h-4 w-4" />
-              Negativo
-            </Button>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Detalhes</Label>
-          <Textarea
-            placeholder="Descreva o feedback..."
-            value={details}
-            onChange={(e) => setDetails(e.target.value)}
-            className="min-h-[100px]"
-          />
-        </div>
-
-        <Button
-          onClick={handleSubmit}
-          disabled={!selectedOperator || !details.trim()}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-        >
-          <Send className="h-4 w-4 mr-2" />
-          Enviar Feedback
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-// Questions Tab with realtime answer functionality (ADMIN VIEW)
-function QuestionsTab({
-  getInitials,
-  formatTimeAgo,
-  compact = false,
-}: {
-  getInitials: (name: string) => string
-  formatTimeAgo: (date: Date) => string
-  compact?: boolean
-}) {
-  const { user } = useAuth()
-  const { questions, loading } = useAdminQuestions()
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyText, setReplyText] = useState("")
-  const [isSecondReply, setIsSecondReply] = useState(false)
-  const [viewMode, setViewMode] = useState<"pending" | "all">("pending")
-  
-  // Filter questions that need attention:
-  // 1. No reply yet
-  // 2. Has reply but operator marked as not understood and no second reply yet
-  const pendingQuestions = questions.filter((q) => 
-    !q.reply || 
-    (q.understood === false && !q.secondReply && !q.needsInPersonFeedback)
-  )
-  
-  const answeredQuestions = questions.filter((q) => 
-    q.reply && (q.understood === true || q.needsInPersonFeedback || q.secondReply)
-  )
-  
-  const displayQuestions = viewMode === "pending" ? pendingQuestions : questions
-
-  const handleReply = async (questionId: string, isSecond: boolean = false) => {
-    if (!replyText.trim() || !user) return
-    
-    // Check profanity in reply
-    if (containsProfanity(replyText)) {
-      alert(getProfanityWarning())
-      return
-    }
-    
-    if (isSecond) {
-      await answerAdminQuestionSecond(
-        questionId,
-        replyText,
-        user.id,
-        user.fullName || user.username || "Admin"
-      )
-    } else {
-      await answerAdminQuestion(
-        questionId,
-        replyText,
-        user.id,
-        user.fullName || user.username || "Admin"
-      )
-    }
-    
-    setReplyText("")
-    setReplyingTo(null)
-    setIsSecondReply(false)
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Statistics Cards */}
-      {!compact && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-border/50 bg-card/50">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="p-3 rounded-xl bg-orange-500/20 mb-2">
-                <HelpCircle className="h-5 w-5 text-orange-500" />
-              </div>
-              <span className="text-2xl font-bold">{pendingQuestions.length}</span>
-              <span className="text-xs text-muted-foreground">Pendentes</span>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 bg-card/50">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="p-3 rounded-xl bg-green-500/20 mb-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-              </div>
-              <span className="text-2xl font-bold">{answeredQuestions.length}</span>
-              <span className="text-xs text-muted-foreground">Respondidas</span>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 bg-card/50">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="p-3 rounded-xl bg-blue-500/20 mb-2">
-                <MessageSquare className="h-5 w-5 text-blue-500" />
-              </div>
-              <span className="text-2xl font-bold">{questions.length}</span>
-              <span className="text-xs text-muted-foreground">Total</span>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 bg-card/50">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="p-3 rounded-xl bg-yellow-500/20 mb-2">
-                <AlertCircle className="h-5 w-5 text-yellow-500" />
-              </div>
-              <span className="text-2xl font-bold">{questions.filter(q => q.needsInPersonFeedback).length}</span>
-              <span className="text-xs text-muted-foreground">Feedback Presencial</span>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <Card className={compact ? "border-orange-500/30 border-dashed border-2 bg-card/30" : ""}>
-        <CardHeader className={compact ? "py-3 px-4" : "pb-4"}>
-          <div className="flex items-center justify-between">
-            <CardTitle className={`flex items-center gap-2 ${compact ? "text-sm" : "text-lg"}`}>
-              <HelpCircle className={`text-orange-500 ${compact ? "h-4 w-4" : "h-5 w-5"}`} />
-              Perguntas dos Operadores
-              {pendingQuestions.length > 0 && (
-                <Badge className="bg-orange-500 text-white ml-1 text-xs">{pendingQuestions.length}</Badge>
-              )}
-            </CardTitle>
-            {!compact && (
-              <div className="flex gap-1">
-                <Button
-                  size="sm"
-                  variant={viewMode === "pending" ? "default" : "ghost"}
-                  onClick={() => setViewMode("pending")}
-                  className={cn("h-7 text-xs", viewMode === "pending" && "bg-orange-500 hover:bg-orange-600")}
-                >
-                  Pendentes ({pendingQuestions.length})
-                </Button>
-                <Button
-                  size="sm"
-                  variant={viewMode === "all" ? "default" : "ghost"}
-                  onClick={() => setViewMode("all")}
-                  className={cn("h-7 text-xs", viewMode === "all" && "bg-orange-500 hover:bg-orange-600")}
-                >
-                  Todas ({questions.length})
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-      <CardContent className={compact ? "px-4 pb-4 pt-0" : "p-6 pt-0"}>
-        {displayQuestions.length === 0 ? (
-          <div className={`text-center ${compact ? "py-6" : "py-12"}`}>
-            <div className={`bg-muted/50 rounded-full inline-block mb-3 ${compact ? "p-3" : "p-6"}`}>
-              <HelpCircle className={`text-muted-foreground ${compact ? "h-6 w-6" : "h-12 w-12"}`} />
-            </div>
-            <h3 className={`font-semibold mb-1 ${compact ? "text-sm" : "text-xl"}`}>Nenhuma pergunta</h3>
-            <p className={`text-muted-foreground ${compact ? "text-xs" : "text-sm"}`}>
-              {viewMode === "pending" ? "Nenhuma pergunta pendente" : "Nenhuma pergunta recebida"}
-            </p>
-          </div>
-        ) : (
-          <ScrollArea className={compact ? "h-[300px]" : "max-h-[500px]"}>
-            <div className="space-y-3">
-              {displayQuestions.map((question) => {
-                const isPending = !question.reply || (question.understood === false && !question.secondReply && !question.needsInPersonFeedback)
-                
-                return (
-                <div key={question.id} className={cn(
-                  "border rounded-lg",
-                  compact ? "p-3" : "p-4",
-                  isPending 
-                    ? "border-orange-500/30 bg-orange-500/5" 
-                    : "border-border bg-background/50"
-                )}>
-                  <div className="flex items-start gap-2">
-                    <Avatar className={`bg-orange-100 dark:bg-orange-900/50 ${compact ? "h-7 w-7" : "h-10 w-10"}`}>
-                      <AvatarFallback className={`text-orange-600 dark:text-orange-300 ${compact ? "text-[10px]" : "text-sm"}`}>
-                        {getInitials(question.authorName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`font-semibold ${compact ? "text-xs" : ""}`}>{question.authorName}</span>
-                        <span className={`text-muted-foreground ${compact ? "text-[10px]" : "text-sm"}`}>
-                          {formatTimeAgo(new Date(question.createdAt))}
-                        </span>
-                        {/* Status badges */}
-                        {question.understood === true && (
-                          <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-[10px]">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Resolvido
-                          </Badge>
-                        )}
-                        {question.needsInPersonFeedback && (
-                          <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 text-[10px]">
-                            Feedback Presencial
-                          </Badge>
-                        )}
-                      </div>
-                      <p className={`mt-1 text-foreground ${compact ? "text-xs" : ""}`}>
-                        {question.question}
-                      </p>
-
-                      {/* Show previous reply if operator didn't understand */}
-                      {question.understood === false && question.reply && !question.secondReply && (
-                        <div className={`mt-2 p-2 bg-yellow-500/10 rounded border border-yellow-500/30 ${compact ? "text-xs" : "text-sm"}`}>
-                          <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-                            <AlertCircle className="h-4 w-4" />
-                            <span className="font-medium">Operador nao entendeu a resposta</span>
-                          </div>
-                          <p className="text-muted-foreground mt-1">Sua resposta: {question.reply}</p>
-                        </div>
-                      )}
-                      
-                      {/* Show answered status for resolved questions */}
-                      {question.reply && question.understood !== false && (
-                        <div className={`mt-2 p-2 bg-green-500/10 rounded border border-green-500/30 ${compact ? "text-xs" : "text-sm"}`}>
-                          <p className="text-muted-foreground">
-                            <span className="font-medium text-green-600">Sua resposta:</span> {question.reply}
-                          </p>
-                          {question.secondReply && (
-                            <p className="text-muted-foreground mt-1">
-                              <span className="font-medium text-green-600">2a resposta:</span> {question.secondReply}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                      
-                      {isPending && (
-                        replyingTo === question.id ? (
-                          <div className="mt-2 space-y-2">
-                            <div className="relative">
-                              <Textarea
-                                placeholder={isSecondReply ? "Digite uma nova resposta mais detalhada..." : "Digite sua resposta..."}
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                className={compact ? "text-xs min-h-[60px] pr-10" : "min-h-[80px] pr-10"}
-                              />
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute right-2 top-2 h-7 w-7"
-                                  >
-                                    <Smile className="h-4 w-4 text-muted-foreground" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-72" align="end">
-                                  <div className="grid grid-cols-8 gap-1">
-                                    {EMOJI_LIST_CHAT.map((emoji, idx) => (
-                                      <button
-                                        key={idx}
-                                        onClick={() => setReplyText(prev => prev + emoji)}
-                                        className="text-xl hover:bg-accent rounded p-1 transition-colors"
-                                      >
-                                        {emoji}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleReply(question.id, isSecondReply)}
-                                disabled={!replyText.trim()}
-                                className="h-7 text-xs bg-orange-500 hover:bg-orange-600 text-white"
-                              >
-                                <Send className="h-3 w-3 mr-1" />
-                                {isSecondReply ? "Enviar Nova Resposta" : "Enviar"}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setReplyingTo(null)
-                                  setReplyText("")
-                                  setIsSecondReply(false)
-                                }}
-                                className="h-7 text-xs"
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="mt-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setReplyingTo(question.id)
-                                setIsSecondReply(question.understood === false && !!question.reply)
-                              }}
-                              className="h-7 text-xs border-orange-500/50 text-orange-600 hover:bg-orange-500/10"
-                            >
-                              {question.understood === false && question.reply ? "Responder Novamente" : "Responder"}
-                            </Button>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )})}
-            </div>
-          </ScrollArea>
-        )}
-      </CardContent>
-    </Card>
-    </div>
-  )
-}
-
-// Stats Tab with realtime
-function StatsTab() {
-  const { stats } = useQualityStats()
-  const { users: allUsers } = useAllUsers()
-  
-  const onlineCount = allUsers.filter((u) => u.role === "operator" && u.isOnline).length
-
-  const statCards = [
-    { label: "Publicacoes", value: stats.totalPosts, icon: <MessageSquare className="h-6 w-6" />, color: "blue" },
-    { label: "Curtidas", value: stats.totalLikes, icon: <ThumbsUp className="h-6 w-6" />, color: "orange" },
-    { label: "Comentarios", value: stats.totalComments, icon: <MessageCircle className="h-6 w-6" />, color: "green" },
-    { label: "Usuarios", value: stats.totalUsers, icon: <Users className="h-6 w-6" />, color: "purple" },
-    { label: "Online Agora", value: onlineCount, icon: <TrendingUp className="h-6 w-6" />, color: "emerald" },
-  ]
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {statCards.map((stat) => (
-        <Card key={stat.label}>
-          <CardContent className="p-4 text-center">
-            <div
-              className={cn(
-                "p-3 rounded-xl inline-block mb-3",
-                stat.color === "blue" && "bg-blue-500/10 text-blue-500",
-                stat.color === "orange" && "bg-orange-500/10 text-orange-500",
-                stat.color === "green" && "bg-green-500/10 text-green-500",
-                stat.color === "purple" && "bg-purple-500/10 text-purple-500",
-                stat.color === "emerald" && "bg-emerald-500/10 text-emerald-500"
-              )}
-            >
-              {stat.icon}
-            </div>
-            <p className="text-3xl font-bold">{stat.value}</p>
-            <p className="text-sm text-muted-foreground">{stat.label}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-// Admin Stats Cards - Compact version for sidebar with realtime
-function AdminStatsCards() {
-  const { stats, loading } = useQualityStats()
-  const { users: allUsers } = useAllUsers()
-  
-  const onlineCount = allUsers.filter((u) => u.role === "operator" && u.isOnline).length
-
-  const statCards = [
-    { label: "Publicacoes", value: stats.totalPosts, icon: MessageSquare, color: "bg-blue-500/20", iconColor: "text-blue-400" },
-    { label: "Curtidas", value: stats.totalLikes, icon: ThumbsUp, color: "bg-yellow-500/20", iconColor: "text-yellow-400" },
-    { label: "Comentarios", value: stats.totalComments, icon: MessageCircle, color: "bg-green-500/20", iconColor: "text-green-400" },
-    { label: "Usuarios", value: stats.totalUsers, icon: Users, color: "bg-purple-500/20", iconColor: "text-purple-400" },
-  ]
-
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        {statCards.map((stat) => (
-          <Card key={stat.label} className="border-border/50 bg-card/30 hover:bg-card/50 transition-colors">
-            <CardContent className="p-3 flex flex-col items-center justify-center text-center">
-              <div className={`p-2 rounded-lg ${stat.color} mb-1.5`}>
-                <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
-              </div>
-              <span className="text-lg font-bold">{stat.value}</span>
-              <span className="text-[10px] text-muted-foreground">{stat.label}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {/* Online Now Card */}
-      <Card className="border-border/50 bg-card/30">
-        <CardContent className="p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-orange-500/20">
-              <TrendingUp className="h-4 w-4 text-orange-400" />
-            </div>
-            <span className="text-xs text-muted-foreground">Online Agora</span>
-          </div>
-          <span className="text-2xl font-bold text-orange-500">{onlineCount}</span>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-// Treinamentos View Component
-function TreinamentosView({
-  user,
-  getInitials,
-}: {
-  user: any
-  getInitials: (name: string) => string
-}) {
-  const [trainings, setTrainings] = useState<any[]>([])
-  const [selectedTraining, setSelectedTraining] = useState<any | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const loadTrainings = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await fetch('/api/trainings')
-        if (!response.ok) throw new Error('Erro ao carregar treinamentos')
-        const data = await response.json()
-        setTrainings(data.trainings || [])
-      } catch (err) {
-        console.error("Error loading trainings:", err)
-        setError("Erro ao carregar treinamentos. Tente novamente.")
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadTrainings()
-  }, [])
-
-  // Abre um treinamento
-  const handleOpenTraining = (training: any) => {
-    setSelectedTraining(training)
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (!bytes || bytes === 0) return ""
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
-
-  if (selectedTraining) {
-    return (
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => setSelectedTraining(null)}
-            className="gap-2"
-          >
-            <X className="h-4 w-4" />
-            Voltar
-          </Button>
-          <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/30">
-            Treinamento PDF
-          </Badge>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{selectedTraining.title}</CardTitle>
-            <p className="text-muted-foreground text-sm">{selectedTraining.filename}</p>
-          </CardHeader>
-          <CardContent>
-            <iframe
-              src={selectedTraining.url}
-              title={selectedTraining.title}
-              className="w-full h-[70vh] rounded-lg border border-border"
-            />
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-center py-16">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <p className="text-muted-foreground">Carregando treinamentos...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="p-4 bg-destructive/10 rounded-full mb-4">
-              <X className="h-10 w-10 text-destructive" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Erro ao carregar</h3>
-            <p className="text-muted-foreground text-sm text-center">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Treinamentos</h2>
-          <p className="text-muted-foreground text-sm">Acesse os materiais de treinamento em PDF</p>
-        </div>
-        <Badge variant="outline" className="gap-1">
-          <BookOpen className="h-3.5 w-3.5" />
-          {trainings.length} disponível(is)
-        </Badge>
-      </div>
-
-      {trainings.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="p-4 bg-muted rounded-full mb-4">
-              <BookOpen className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Nenhum treinamento disponível</h3>
-            <p className="text-muted-foreground text-sm text-center">
-              Quando novos treinamentos forem publicados, eles aparecerão aqui.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {trainings.map((training) => (
-            <Card 
-              key={training.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-orange-500"
-              onClick={() => handleOpenTraining(training)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-orange-500/10 rounded-lg">
-                      <FileText className="h-6 w-6 text-orange-500" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{training.title}</h3>
-                      <div className="flex items-center gap-3 mt-2">
-                        <Badge variant="secondary" className="text-xs">
-                          PDF
-                        </Badge>
-                        {training.filename && (
-                          <span className="text-xs text-muted-foreground">
-                            {training.filename}
-                          </span>
-                        )}
-                        {training.size && (
-                          <span className="text-xs text-muted-foreground">
-                            {formatFileSize(training.size)}
-                          </span>
-                        )}
-                        {training.uploadedAt && (
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(training.uploadedAt), "dd/MM/yyyy", { locale: ptBR })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-orange-500">
-                    Visualizar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
   )
 }

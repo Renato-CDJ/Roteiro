@@ -16,6 +16,14 @@ interface QualityCenterSidebarProps {
   pendingQuestions?: number
 }
 
+// Verifica se o usuario pode acessar o painel admin
+// Apenas admin principal (sem adminType ou adminType vazio) e monitoria podem acessar
+function canAccessAdminPanel(user: any): boolean {
+  if (!user || user.role !== "admin") return false
+  // Admin principal (sem adminType definido ou vazio) ou monitoria
+  return !user.adminType || user.adminType === "" || user.adminType === "monitoria"
+}
+
 export function QualityCenterSidebar({ 
   isAdmin, 
   showAdminPanel, 
@@ -27,6 +35,7 @@ export function QualityCenterSidebar({
   const { user } = useAuth()
 
   const isOperator = user?.role === "operator"
+  const hasAdminAccess = canAccessAdminPanel(user)
 
   const mainMenuItems = [
     { id: "feed", icon: Home, label: "Inicio", adminOnly: false },
@@ -121,8 +130,8 @@ export function QualityCenterSidebar({
           )
         })}
 
-        {/* Admin Panel Button */}
-        {isAdmin && (
+        {/* Admin Panel Button - apenas monitoria e admin principal */}
+        {hasAdminAccess && (
           <>
             <div className="pt-4" />
             <Button
