@@ -40,15 +40,17 @@ export default function HomePage() {
           {/* Titulo */}
           <div className="mb-10 text-center">
             <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent animate-fade-in">
                 Roteiro
               </span>
             </h1>
             
-            {/* Linha */}
-            <div className="h-1 w-24 mx-auto mb-5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
+            {/* Linha animada */}
+            <div className="relative h-1 w-24 mx-auto mb-5 overflow-hidden rounded-full bg-orange-200/30 dark:bg-orange-900/30">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 animate-line-expand origin-center" />
+            </div>
             
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium animate-fade-in">
               Sistema de Atendimento
             </p>
           </div>

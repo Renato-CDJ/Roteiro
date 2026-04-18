@@ -41,21 +41,21 @@ const SimpleListItem = memo(function SimpleListItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 overflow-hidden ${
+      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 ${
         isSelected 
           ? "bg-orange-500/10 border-orange-500/50 text-orange-500" 
           : "bg-card border-border/50 hover:bg-muted/50 hover:border-border text-foreground"
       }`}
     >
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 w-full overflow-hidden">
         {item.color && (
           <div 
             className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
             style={{ backgroundColor: item.color }} 
           />
         )}
-        <span className="text-sm font-medium truncate flex-1 min-w-0">{item.name}</span>
-        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+        <span className="text-sm font-medium truncate block max-w-[calc(100%-40px)]">{item.name}</span>
+        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground ml-auto" />
       </div>
     </button>
   )
