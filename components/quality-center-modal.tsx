@@ -70,11 +70,11 @@ interface QualityCenterModalProps {
 }
 
 // Verifica se o usuario pode acessar o painel admin
-// Apenas admin principal (sem adminType ou adminType vazio) e monitoria podem acessar
+// Admins com role "admin" podem acessar - master, monitoria e supervisao
 function canAccessAdminPanel(user: any): boolean {
   if (!user || user.role !== "admin") return false
-  // Admin principal (sem adminType definido ou vazio) ou monitoria
-  return !user.adminType || user.adminType === "" || user.adminType === "monitoria"
+  // Todos os admins podem acessar o painel (master, monitoria, supervisao)
+  return true
 }
 
 // Paleta de cores para posts
