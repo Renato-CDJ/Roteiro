@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xyfagwyqkhsqhirzkunz.supabase.co'
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.argv[2]
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase credentials')
+  console.error('Missing Supabase credentials. Pass service role key as argument.')
   process.exit(1)
 }
 
