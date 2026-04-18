@@ -519,6 +519,7 @@ async function insertOperators() {
     // Inserir novo operador
     const { error } = await supabase.from("users").insert({
       name: op.name,
+      username: op.username,
       email: email,
       role: "operator",
       is_active: true,
