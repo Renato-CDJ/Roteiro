@@ -5,8 +5,8 @@ import { useState, useMemo, useCallback, memo, lazy, Suspense } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useCachedTabulations, useCachedSituations, useCachedChannels } from "@/hooks/use-cached-data"
-import { CheckCircle2, Tags, AlertCircle, Radio, Search, CalendarIcon, Maximize2, X, ChevronRight, Loader2 } from "lucide-react"
+import { useCachedSituations, useCachedChannels } from "@/hooks/use-cached-data"
+import { CheckCircle2, AlertCircle, Radio, Search, CalendarIcon, Maximize2, X, ChevronRight, Loader2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PromiseCalendarInline } from "@/components/promise-calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -41,21 +41,21 @@ const SimpleListItem = memo(function SimpleListItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 ${
+      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 overflow-hidden ${
         isSelected 
           ? "bg-orange-500/10 border-orange-500/50 text-orange-500" 
           : "bg-card border-border/50 hover:bg-muted/50 hover:border-border text-foreground"
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-0">
         {item.color && (
           <div 
             className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
             style={{ backgroundColor: item.color }} 
           />
         )}
-        <span className="text-sm font-medium truncate">{item.name}</span>
-        <ChevronRight className="h-3.5 w-3.5 ml-auto flex-shrink-0 text-muted-foreground" />
+        <span className="text-sm font-medium truncate flex-1 min-w-0">{item.name}</span>
+        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
       </div>
     </button>
   )
@@ -139,7 +139,7 @@ const FullListModal = memo(function FullListModal({
   onClose: () => void
   title: string
   items: ListItemData[]
-  type: "tabulation" | "situation" | "channel"
+  type: "situation" | "channel"
   onItemClick: (item: ListItemData) => void
 }) {
   const [search, setSearch] = useState("")
@@ -160,9 +160,9 @@ const FullListModal = memo(function FullListModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden border-border/50">
+      <DialogContent className="max-w-lg w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col border-border/50">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex-shrink-0">
           <DialogHeader>
             <DialogTitle className="text-white text-lg font-semibold">
               {title}
@@ -190,15 +190,15 @@ const FullListModal = memo(function FullListModal({
         </div>
         
         {/* Contador */}
-        <div className="px-4 py-2 bg-muted/30 border-b border-border/50 text-xs text-muted-foreground">
+        <div className="px-4 py-2 bg-muted/30 border-b border-border/50 text-xs text-muted-foreground flex-shrink-0">
           {filteredItems.length === items.length 
             ? `${items.length} itens`
             : `${filteredItems.length} de ${items.length} itens`
           }
         </div>
         
-        {/* Lista */}
-        <ScrollArea className="flex-1 max-h-[calc(85vh-180px)]">
+        {/* Lista com scroll */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           <div className="p-3 space-y-1.5">
             {visibleItems.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm">
@@ -218,8 +218,8 @@ const FullListModal = memo(function FullListModal({
                         style={{ backgroundColor: item.color }} 
                       />
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm text-foreground group-hover:text-orange-500 transition-colors">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h4 className="font-medium text-sm text-foreground group-hover:text-orange-500 transition-colors truncate">
                         {item.name}
                       </h4>
                       {(item.description || item.contact) && (
@@ -239,7 +239,7 @@ const FullListModal = memo(function FullListModal({
               </p>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
@@ -253,14 +253,13 @@ const TabContent = memo(function TabContent({
   onSelectItem,
   onViewAll,
 }: {
-  type: "tabulation" | "situation" | "channel"
+  type: "situation" | "channel"
   items: ListItemData[]
   selectedId: string
   onSelectItem: (item: ListItemData) => void
   onViewAll: () => void
 }) {
   const titles = {
-    tabulation: "Tabulacoes",
     situation: "Situacoes",
     channel: "Canais",
   }
@@ -361,12 +360,12 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   productCategory, 
   currentStep 
 }: OperatorSidebarProps) {
-  const [activeSection, setActiveSection] = useState<"calendar" | "checkTabulation" | "tabulation" | "situation" | "channel">("calendar")
+  const [activeSection, setActiveSection] = useState<"calendar" | "checkTabulation" | "situation" | "channel">("calendar")
   
   // Estado para modais - apenas um ativo por vez
   const [modalState, setModalState] = useState<{
     type: "detail" | "list" | null
-    listType?: "tabulation" | "situation" | "channel"
+    listType?: "situation" | "channel"
     item?: ListItemData | null
     title?: string
   }>({ type: null })
@@ -379,22 +378,10 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   })
 
   // Dados do cache - ja memoizados pelo hook
-  const { tabulations: tabulationsRaw } = useCachedTabulations()
   const { situations: situationsRaw } = useCachedSituations()
   const { channels: channelsRaw } = useCachedChannels()
 
   // Mapear dados uma vez
-  const tabulations = useMemo<ListItemData[]>(() => 
-    tabulationsRaw
-      .filter((t: any) => t.is_active !== false)
-      .map((t: any) => ({
-        id: t.id,
-        name: t.name,
-        description: t.description || "",
-        color: t.color || "#6b7280",
-      }))
-  , [tabulationsRaw])
-
   const situations = useMemo<ListItemData[]>(() => 
     situationsRaw
       .filter((s: any) => s.is_active !== false)
@@ -418,7 +405,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   , [channelsRaw])
 
   // Handlers memoizados
-  const handleSelectItem = useCallback((type: "tabulation" | "situation" | "channel", item: ListItemData) => {
+  const handleSelectItem = useCallback((type: "situation" | "channel", item: ListItemData) => {
     setSelectedIds(prev => ({ ...prev, [type]: item.id }))
     setModalState({ 
       type: "detail", 
@@ -427,9 +414,8 @@ export const OperatorSidebar = memo(function OperatorSidebar({
     })
   }, [])
 
-  const handleOpenList = useCallback((type: "tabulation" | "situation" | "channel") => {
+  const handleOpenList = useCallback((type: "situation" | "channel") => {
     const titles = {
-      tabulation: "Todas as Tabulacoes",
       situation: "Todas as Situacoes", 
       channel: "Todos os Canais",
     }
@@ -450,11 +436,10 @@ export const OperatorSidebar = memo(function OperatorSidebar({
 
   // Items para lista atual
   const currentListItems = useMemo(() => {
-    if (modalState.listType === "tabulation") return tabulations
     if (modalState.listType === "situation") return situations
     if (modalState.listType === "channel") return channels
     return []
-  }, [modalState.listType, tabulations, situations, channels])
+  }, [modalState.listType, situations, channels])
 
   if (!isOpen) return null
 
@@ -465,7 +450,6 @@ export const OperatorSidebar = memo(function OperatorSidebar({
         {[
           { id: "calendar" as const, icon: CalendarIcon, label: "Calen." },
           { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verif.", badge: currentStep?.tabulations?.length },
-          { id: "tabulation" as const, icon: Tags, label: "Tabu." },
           { id: "situation" as const, icon: AlertCircle, label: "Situ." },
           { id: "channel" as const, icon: Radio, label: "Canal" },
         ].map(({ id, icon: Icon, label, badge }) => (
@@ -527,16 +511,6 @@ export const OperatorSidebar = memo(function OperatorSidebar({
                 onExpand={handleExpandTabulation}
               />
             </div>
-          )}
-
-          {activeSection === "tabulation" && (
-            <TabContent
-              type="tabulation"
-              items={tabulations}
-              selectedId={selectedIds.tabulation}
-              onSelectItem={(item) => handleSelectItem("tabulation", item)}
-              onViewAll={() => handleOpenList("tabulation")}
-            />
           )}
 
           {activeSection === "situation" && (

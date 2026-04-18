@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useCachedResultCodes } from "@/hooks/use-cached-data"
@@ -60,7 +59,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-6xl w-[90vw] max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="!max-w-6xl w-[90vw] max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
         {/* Header com gradiente */}
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
           <DialogHeader>
@@ -128,7 +127,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
 
         {/* Content */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <div className="p-6">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
@@ -255,7 +254,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
