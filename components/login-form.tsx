@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
 import { AlertCircle, Mail, Lock, Sun, Moon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { useTheme } from "next-themes"
 import Image from "next/image"
 
@@ -73,7 +74,7 @@ export const LoginForm = memo(function LoginForm() {
   }, [theme, setTheme])
 
   return (
-    <Card className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl transition-all duration-300 hover:shadow-2xl">
+    <Card className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl">
       {/* Botao tema */}
       <div className="absolute top-4 right-4 z-20">
         <Button
@@ -81,7 +82,7 @@ export const LoginForm = memo(function LoginForm() {
           size="icon"
           onClick={toggleTheme}
           title="Alternar tema"
-          className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />
@@ -112,28 +113,34 @@ export const LoginForm = memo(function LoginForm() {
             <label htmlFor="email" className="sr-only">
               Email
             </label>
-            <div className="relative flex items-center">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
-              <Input
-                id="email"
-                type="text"
-                placeholder="digite o login do CRM"
-                value={email}
-                onChange={(e) => {
-                  // Remover @ e tudo depois se o usuario tentar digitar
-                  const value = e.target.value.split("@")[0]
-                  setEmail(value)
-                  setError("")
-                }}
-                required
-                autoComplete="username"
-                disabled={isLoading}
-                className="h-12 pl-10 pr-[140px] text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all rounded-r-none border-r-0"
-              />
-              <div className="h-12 px-3 flex items-center bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-200 dark:border-zinc-700 rounded-r-md">
-                <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
-              </div>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10 cursor-help" />
+                  <Input
+                    id="email"
+                    type="text"
+                    placeholder="Login"
+                    value={email}
+                    onChange={(e) => {
+                      const value = e.target.value.split("@")[0]
+                      setEmail(value)
+                      setError("")
+                    }}
+                    required
+                    autoComplete="username"
+                    disabled={isLoading}
+                    className="h-12 pl-10 pr-[140px] text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 rounded-r-none border-r-0"
+                  />
+                  <div className="h-12 px-3 flex items-center bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-200 dark:border-zinc-700 rounded-r-md">
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
+                Digite o login do CRM
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Senha - apenas para admins */}
