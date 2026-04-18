@@ -11,6 +11,7 @@ export function useSupabaseUsers() {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchUsers = useCallback(async () => {
     const supabase = createClient()
@@ -27,24 +28,36 @@ export function useSupabaseUsers() {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchUsers()
 
     const supabase = createClient()
     const channelId = `users-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "users" },
-        () => {
-          if (mountedRef.current) fetchUsers()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "users" },
+      () => {
+        if (mountedRef.current) fetchUsers()
+      }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
         }
-      )
-      .subscribe()
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -55,12 +68,58 @@ export function useSupabaseUsers() {
   return { users, loading, refetch: fetchUsers }
 }
 
+// Helper para localStorage de posts arquivados
+const ARCHIVED_POSTS_KEY = "quality_posts_archived"
+
+function getArchivedPosts(): QualityPost[] {
+  if (typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem(ARCHIVED_POSTS_KEY)
+    if (!stored) return []
+    const parsed = JSON.parse(stored)
+    return parsed.map((p: any) => ({
+      ...p,
+      createdAt: new Date(p.createdAt),
+      comments: (p.comments || []).map((c: any) => ({
+        ...c,
+        createdAt: new Date(c.createdAt),
+      })),
+    }))
+  } catch {
+    return []
+  }
+}
+
+function saveArchivedPosts(posts: QualityPost[]) {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(ARCHIVED_POSTS_KEY, JSON.stringify(posts))
+  } catch {
+    console.error("[LocalStorage] Error saving archived posts")
+  }
+}
+
+function isPostExpired(createdAt: Date): boolean {
+  const now = new Date()
+  const postDate = new Date(createdAt)
+  const hoursDiff = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60)
+  return hoursDiff >= 24
+}
+
 // Quality Posts hook with realtime
-export function useQualityPosts() {
+export function useQualityPosts(includeArchived: boolean = false) {
   const [posts, setPosts] = useState<QualityPost[]>([])
+  const [archivedPosts, setArchivedPosts] = useState<QualityPost[]>([])
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
+
+  // Load archived posts from localStorage on mount
+  useEffect(() => {
+    const archived = getArchivedPosts()
+    setArchivedPosts(archived)
+  }, [])
 
   const fetchPosts = useCallback(async () => {
     const supabase = createClient()
@@ -117,21 +176,52 @@ export function useQualityPosts() {
       comments: commentsMap.get(p.id) || [],
     }))
 
+    // Separar posts ativos (menos de 24h) e expirados (mais de 24h)
+    const activePosts: QualityPost[] = []
+    const expiredPosts: QualityPost[] = []
+
+    for (const post of mappedPosts) {
+      if (isPostExpired(post.createdAt)) {
+        expiredPosts.push({ ...post, isArchived: true } as QualityPost)
+      } else {
+        activePosts.push(post)
+      }
+    }
+
+    // Salvar posts expirados no localStorage (merge com existentes, evitar duplicatas)
+    if (expiredPosts.length > 0) {
+      const existingArchived = getArchivedPosts()
+      const existingIds = new Set(existingArchived.map(p => p.id))
+      const newArchivedPosts = expiredPosts.filter(p => !existingIds.has(p.id))
+      if (newArchivedPosts.length > 0) {
+        const allArchived = [...existingArchived, ...newArchivedPosts]
+        // Limitar a 100 posts arquivados mais recentes
+        const sortedArchived = allArchived.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ).slice(0, 100)
+        saveArchivedPosts(sortedArchived)
+        setArchivedPosts(sortedArchived)
+      }
+    }
+
     if (mountedRef.current) {
-      setPosts(mappedPosts)
+      setPosts(activePosts)
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchPosts()
 
     const supabase = createClient()
     const channelId = `quality-posts-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "quality_posts" },
@@ -142,10 +232,20 @@ export function useQualityPosts() {
         { event: "*", schema: "public", table: "quality_comments" },
         () => { if (mountedRef.current) fetchPosts() }
       )
-      .subscribe()
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -153,7 +253,18 @@ export function useQualityPosts() {
     }
   }, [fetchPosts])
 
-  return { posts, loading, refetch: fetchPosts }
+  // Combinar posts ativos com arquivados se solicitado
+  const allPosts = includeArchived 
+    ? [...posts, ...archivedPosts.filter(ap => !posts.some(p => p.id === ap.id))]
+    : posts
+
+  return { 
+    posts: allPosts, 
+    activePosts: posts,
+    archivedPosts, 
+    loading, 
+    refetch: fetchPosts 
+  }
 }
 
 // Admin Questions hook
@@ -162,6 +273,7 @@ export function useAdminQuestions(filterByUserId?: string) {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchQuestions = useCallback(async () => {
     const supabase = createClient()
@@ -200,22 +312,34 @@ export function useAdminQuestions(filterByUserId?: string) {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchQuestions()
 
     const supabase = createClient()
     const channelId = `admin-questions-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "admin_questions" },
-        () => { if (mountedRef.current) fetchQuestions() }
-      )
-      .subscribe()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "admin_questions" },
+      () => { if (mountedRef.current) fetchQuestions() }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
@@ -493,6 +617,7 @@ export function useFeedbacks() {
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
+  const subscribedRef = useRef(false)
 
   const fetchFeedbacks = useCallback(async () => {
     const supabase = createClient()
@@ -518,22 +643,34 @@ export function useFeedbacks() {
 
   useEffect(() => {
     mountedRef.current = true
+    subscribedRef.current = false
     fetchFeedbacks()
 
     const supabase = createClient()
     const channelId = `feedbacks-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
     
-    channelRef.current = supabase
-      .channel(channelId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "feedbacks" },
-        () => { if (mountedRef.current) fetchFeedbacks() }
-      )
-      .subscribe()
+    // Create channel and configure listeners before subscribing
+    const channel = supabase.channel(channelId)
+    
+    channel.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "feedbacks" },
+      () => { if (mountedRef.current) fetchFeedbacks() }
+    )
+    
+    // Only subscribe once
+    if (!subscribedRef.current) {
+      subscribedRef.current = true
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channelRef.current = channel
+        }
+      })
+    }
 
     return () => {
       mountedRef.current = false
+      subscribedRef.current = false
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null

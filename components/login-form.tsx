@@ -117,7 +117,7 @@ export const LoginForm = memo(function LoginForm() {
               <Input
                 id="email"
                 type="text"
-                placeholder="nome.sobrenome"
+                placeholder="digite o login do CRM"
                 value={email}
                 onChange={(e) => {
                   // Remover @ e tudo depois se o usuario tentar digitar
