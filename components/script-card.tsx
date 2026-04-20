@@ -324,10 +324,10 @@ export const ScriptCard = memo(function ScriptCard({
             key={button.id}
             size="lg"
             onClick={() => onButtonClick(button.nextStepId, button.label)}
-            className={`font-bold transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-xl hover:shadow-2xl border-0 rounded-xl ${
+            className={`font-bold transition-colors shadow-lg border-0 rounded-xl ${
               isPrimary
-                ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-500 dark:to-orange-600 dark:hover:from-orange-600 dark:hover:to-orange-700 dark:text-white"
-                : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 dark:from-orange-500 dark:to-orange-600 dark:hover:from-orange-600 dark:hover:to-orange-700 dark:text-white"
+                ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
+                : "bg-amber-500 hover:bg-amber-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
             }`}
             style={{
               fontSize: `${navButtonFontSize}px`,
@@ -397,7 +397,7 @@ export const ScriptCard = memo(function ScriptCard({
           variant="outline"
           size="sm"
           onClick={onGoBack}
-          className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-50 shadow-2xl hover:shadow-3xl bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-800 hover:to-zinc-900 text-white border-0 h-10 w-10 md:h-12 md:w-12 p-0 rounded-full transition-all duration-200 hover:scale-110"
+          className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-50 shadow-lg bg-zinc-700 hover:bg-zinc-800 text-white border-0 h-10 w-10 md:h-12 md:w-12 p-0 rounded-full transition-colors"
         >
           <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
@@ -438,15 +438,15 @@ export const ScriptCard = memo(function ScriptCard({
       <Card className="relative shadow-2xl border-2 border-orange-200/80 dark:border-orange-500/60 w-full overflow-hidden backdrop-blur-sm">
         <Popover open={showSearch} onOpenChange={setShowSearch}>
           <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSearchOpen}
-              className="absolute top-4 left-4 z-20 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-500/50 shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-110 animate-pulse-subtle"
-              title="Buscar tela do roteiro"
-            >
-              <Search className="h-5 w-5 text-blue-500 dark:text-cyan-400 animate-color-pulse" />
-            </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSearchOpen}
+                className="absolute top-4 left-4 z-20 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-500/50 shadow-lg transition-colors"
+                title="Buscar tela do roteiro"
+              >
+                <Search className="h-5 w-5 text-blue-500 dark:text-cyan-400" />
+              </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-4" align="start" side="bottom">
             <div className="space-y-3">
