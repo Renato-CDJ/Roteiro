@@ -5,34 +5,48 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
 
-// Componente animado para o titulo "Roteiro"
+// Componente animado para o titulo "Roteiro" com efeito de iluminacao
 function AnimatedTitle() {
   const [isHovered, setIsHovered] = useState(false)
-  const letters = "Roteiro".split("")
   
   return (
     <h1 
-      className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 cursor-default select-none"
+      className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 cursor-default select-none group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <span className="inline-flex overflow-hidden">
-        {letters.map((letter, index) => (
-          <span
-            key={index}
-            className="inline-block bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent transition-all duration-300 ease-out"
-            style={{
-              transform: isHovered 
-                ? `translateY(${Math.sin(index * 0.8) * -8}px) rotate(${Math.sin(index * 0.5) * 3}deg) scale(1.05)` 
-                : "translateY(0) rotate(0) scale(1)",
-              transitionDelay: isHovered ? `${index * 40}ms` : `${(letters.length - index) * 30}ms`,
-              filter: isHovered ? "brightness(1.2)" : "brightness(1)",
-              textShadow: isHovered ? "0 0 30px rgba(249, 115, 22, 0.4)" : "none",
-            }}
-          >
-            {letter}
-          </span>
-        ))}
+      {/* Camada de glow atras do texto */}
+      <span 
+        className="absolute inset-0 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent blur-2xl transition-all duration-500 ease-out pointer-events-none"
+        style={{
+          opacity: isHovered ? 0.8 : 0,
+          transform: isHovered ? "scale(1.05)" : "scale(1)",
+        }}
+        aria-hidden="true"
+      >
+        Roteiro
+      </span>
+      
+      {/* Segundo glow mais suave e difuso */}
+      <span 
+        className="absolute inset-0 bg-gradient-to-r from-amber-400 via-orange-400 to-orange-600 bg-clip-text text-transparent blur-3xl transition-all duration-700 ease-out pointer-events-none"
+        style={{
+          opacity: isHovered ? 0.5 : 0,
+          transform: isHovered ? "scale(1.1)" : "scale(1)",
+        }}
+        aria-hidden="true"
+      >
+        Roteiro
+      </span>
+      
+      {/* Texto principal */}
+      <span 
+        className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent transition-all duration-300 ease-out"
+        style={{
+          filter: isHovered ? "brightness(1.15)" : "brightness(1)",
+        }}
+      >
+        Roteiro
       </span>
     </h1>
   )
