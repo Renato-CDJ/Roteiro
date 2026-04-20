@@ -41,21 +41,21 @@ const SimpleListItem = memo(function SimpleListItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 ${
+      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 overflow-hidden ${
         isSelected 
           ? "bg-orange-500/10 border-orange-500/50 text-orange-500" 
           : "bg-card border-border/50 hover:bg-muted/50 hover:border-border text-foreground"
       }`}
     >
-      <div className="flex items-center gap-2 w-full overflow-hidden">
+      <div className="flex items-center gap-2 w-full min-w-0">
         {item.color && (
           <div 
             className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
             style={{ backgroundColor: item.color }} 
           />
         )}
-        <span className="text-sm font-medium truncate block max-w-[calc(100%-40px)]">{item.name}</span>
-        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground ml-auto" />
+        <span className="text-sm font-medium truncate flex-1 min-w-0">{item.name}</span>
+        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
       </div>
     </button>
   )
@@ -253,11 +253,11 @@ const TabContent = memo(function TabContent({
     channel: "Canais",
   }
 
-  // Limitar itens para renderizacao inicial rapida
-  const visibleItems = useMemo(() => items.slice(0, 20), [items])
+  // Limitar itens para renderizacao inicial rapida - reduzido para 15 para melhor fit na tela
+  const visibleItems = useMemo(() => items.slice(0, 15), [items])
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-hidden">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">{titles[type]}</h3>
         <Badge variant="secondary" className="text-xs">
@@ -275,7 +275,7 @@ const TabContent = memo(function TabContent({
         Ver todos e buscar
       </Button>
       
-      <div className="space-y-1">
+      <div className="space-y-1 overflow-hidden">
         {visibleItems.map((item) => (
           <SimpleListItem
             key={item.id}
@@ -284,12 +284,12 @@ const TabContent = memo(function TabContent({
             isSelected={selectedId === item.id}
           />
         ))}
-        {items.length > 20 && (
+        {items.length > 15 && (
           <button
             onClick={onViewAll}
             className="w-full text-center py-2 text-xs text-orange-500 hover:underline"
           >
-            +{items.length - 20} mais...
+            +{items.length - 15} mais...
           </button>
         )}
       </div>
@@ -474,7 +474,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
                   <div className="p-1 rounded bg-orange-500">
                     <CheckCircle2 className="h-3 w-3 text-white" />
                   </div>
-                  <span className="text-xs font-semibold">Tabulacao Recomendada</span>
+                  <span className="text-xs font-semibold">Tabulacao Recomendada de acordo com a sua tela atual</span>
                 </div>
                 <RecommendedTabulation 
                   currentStep={currentStep} 
@@ -492,7 +492,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold">Tabulacao Recomendada</h3>
-                  <p className="text-xs text-muted-foreground">Para a tela atual</p>
+                  <p className="text-xs text-muted-foreground">De acordo com a sua tela atual</p>
                 </div>
               </div>
               <RecommendedTabulation 
