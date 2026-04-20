@@ -5,46 +5,47 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
 
-// Componente animado para o titulo "Roteiro" com efeito de iluminacao
+// Componente animado para o titulo "Roteiro" com efeito de holofotes
 function AnimatedTitle() {
   const [isHovered, setIsHovered] = useState(false)
   
   return (
     <h1 
-      className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 cursor-default select-none group"
+      className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 cursor-default select-none overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Camada de glow atras do texto */}
+      {/* Texto base com gradiente */}
+      <span className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+        Roteiro
+      </span>
+      
+      {/* Holofote 1 - vindo da esquerda */}
       <span 
-        className="absolute inset-0 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent blur-2xl transition-all duration-500 ease-out pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent bg-clip-text text-transparent pointer-events-none"
         style={{
-          opacity: isHovered ? 0.8 : 0,
-          transform: isHovered ? "scale(1.05)" : "scale(1)",
+          backgroundSize: "200% 100%",
+          backgroundPosition: isHovered ? "200% 0" : "-100% 0",
+          transition: "background-position 0.8s ease-in-out",
+          mixBlendMode: "overlay",
+          opacity: 0.7,
         }}
         aria-hidden="true"
       >
         Roteiro
       </span>
       
-      {/* Segundo glow mais suave e difuso */}
+      {/* Holofote 2 - vindo da direita (com delay) */}
       <span 
-        className="absolute inset-0 bg-gradient-to-r from-amber-400 via-orange-400 to-orange-600 bg-clip-text text-transparent blur-3xl transition-all duration-700 ease-out pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200 to-transparent bg-clip-text text-transparent pointer-events-none"
         style={{
-          opacity: isHovered ? 0.5 : 0,
-          transform: isHovered ? "scale(1.1)" : "scale(1)",
+          backgroundSize: "200% 100%",
+          backgroundPosition: isHovered ? "-100% 0" : "200% 0",
+          transition: "background-position 0.8s ease-in-out 0.15s",
+          mixBlendMode: "overlay",
+          opacity: 0.6,
         }}
         aria-hidden="true"
-      >
-        Roteiro
-      </span>
-      
-      {/* Texto principal */}
-      <span 
-        className="relative bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent transition-all duration-300 ease-out"
-        style={{
-          filter: isHovered ? "brightness(1.15)" : "brightness(1)",
-        }}
       >
         Roteiro
       </span>
