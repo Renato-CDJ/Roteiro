@@ -433,7 +433,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   if (!isOpen) return null
 
   return (
-    <aside className="w-[380px] border-l border-border/50 bg-card flex flex-col h-full">
+    <aside className="w-full md:w-[320px] lg:w-[380px] max-w-full border-l border-border/50 bg-card flex flex-col h-full shrink-0">
       {/* Tabs */}
       <div className="border-b border-border/50 p-1.5 flex gap-1">
         {[

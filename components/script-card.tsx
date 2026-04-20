@@ -324,15 +324,15 @@ export const ScriptCard = memo(function ScriptCard({
             key={button.id}
             size="lg"
             onClick={() => onButtonClick(button.nextStepId, button.label)}
-            className={`font-bold transition-colors shadow-lg border-0 rounded-xl ${
+            className={`font-bold transition-colors shadow-lg border-0 rounded-xl max-w-full text-wrap ${
               isPrimary
                 ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
                 : "bg-amber-500 hover:bg-amber-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
             }`}
             style={{
-              fontSize: `${navButtonFontSize}px`,
-              padding: `${navButtonPadding}px ${navButtonPadding * 2}px`,
-              minHeight: `${navButtonPadding * 3}px`,
+              fontSize: `clamp(12px, ${navButtonFontSize}px, 18px)`,
+              padding: `${Math.min(navButtonPadding, 16)}px ${Math.min(navButtonPadding * 1.5, 24)}px`,
+              minHeight: `${Math.min(navButtonPadding * 2.5, 48)}px`,
             }}
           >
             {button.label}
@@ -508,8 +508,8 @@ export const ScriptCard = memo(function ScriptCard({
         </CardContent>
       </Card>
 
-      <div className="flex justify-center items-center pt-6 px-2">
-        <div className="flex flex-wrap justify-center gap-4 md:gap-5 w-full max-w-3xl">{renderedButtons}</div>
+      <div className="flex justify-center items-center pt-6 px-4">
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4 lg:gap-5 w-full max-w-full md:max-w-3xl">{renderedButtons}</div>
       </div>
 
       <Dialog open={showTabulation} onOpenChange={setShowTabulation}>

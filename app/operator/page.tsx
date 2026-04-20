@@ -307,7 +307,7 @@ const OperatorContent = memo(function OperatorContent() {
   const operatorFirstName = user.fullName.split(" ")[0]
 
   return (
-    <div className="flex flex-col h-screen h-dvh bg-background overflow-hidden">
+    <div className="flex flex-col h-screen h-dvh bg-background overflow-x-hidden overflow-y-auto">
       <OperatorHeader
         searchQuery={searchQuery}
         onSearchChange={handleSearch}
@@ -356,7 +356,11 @@ const OperatorContent = memo(function OperatorContent() {
           </div>
         </main>
 
-        {isSessionActive && <OperatorSidebar isOpen={isSidebarOpen} productCategory={currentProductCategory} currentStep={currentStep} />}
+        {isSessionActive && isSidebarOpen && (
+          <div className="hidden md:block">
+            <OperatorSidebar isOpen={isSidebarOpen} productCategory={currentProductCategory} currentStep={currentStep} />
+          </div>
+        )}
       </div>
 
       <OperatorChatModal isOpen={showChatModal} onClose={() => setShowChatModal(false)} />

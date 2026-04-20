@@ -87,9 +87,14 @@
   * {
     border-color: hsl(var(--border));
   }
-  body {
+  html, body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  body {
+    min-height: 100dvh;
   }
 }
 

@@ -178,12 +178,12 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
       </TooltipProvider>
 
       {/* Action Buttons */}
-      <div className="flex justify-center gap-6 mt-8">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-8 px-4">
         <Button
           size="lg"
           onClick={handleStart}
           disabled={!attendanceType || (!isReceptivo && !personType) || !product}
-          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 text-white font-bold px-16 py-7 text-xl shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 border-0 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 text-white font-bold px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105 border-0 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           Iniciar Atendimento
         </Button>
@@ -191,7 +191,7 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
           size="lg"
           variant="outline"
           onClick={handleReset}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 dark:from-amber-600 dark:to-orange-600 dark:hover:from-amber-700 dark:hover:to-orange-700 text-white font-bold px-16 py-7 text-xl shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110 border-0 rounded-2xl"
+          className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 dark:from-amber-600 dark:to-orange-600 dark:hover:from-amber-700 dark:hover:to-orange-700 text-white font-bold px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-105 border-0 rounded-2xl"
         >
           Limpar
         </Button>
