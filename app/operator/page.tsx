@@ -19,7 +19,7 @@ import {
 } from "@/hooks/use-cached-data"
 import type { ScriptStep, AttendanceConfig as AttendanceConfigType } from "@/lib/types"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+
 
 const mapScriptRowToStep = (step: any): ScriptStep => ({
   id: step.id,
@@ -41,7 +41,7 @@ const OperatorContent = memo(function OperatorContent() {
   const router = useRouter()
   
   // Inicializar e manter cache sincronizado
-  const { isInitialized, isSyncing } = useCacheSync()
+  const { isInitialized } = useCacheSync()
   
   // Maintain presence in Supabase for realtime dashboard
   usePresenceHeartbeat(user?.id)
@@ -87,6 +87,7 @@ const OperatorContent = memo(function OperatorContent() {
     setAllSteps([])
   }, [])
 
+  // Auto-logout check - intervalo aumentado para 60s para reduzir CPU
   useEffect(() => {
     const checkAutoLogout = () => {
       const now = new Date()
@@ -100,19 +101,18 @@ const OperatorContent = memo(function OperatorContent() {
     }
 
     checkAutoLogout()
-
-    const interval = setInterval(checkAutoLogout, 30000)
+    const interval = setInterval(checkAutoLogout, 60000) // 60s ao inves de 30s
 
     return () => clearInterval(interval)
   }, [logout, router])
 
-  // Heartbeat: send every 30s to prove operator is active
+  // Heartbeat: send every 60s para reduzir requests e CPU
   useEffect(() => {
     if (!user) return
     sendOperatorHeartbeat(user.id)
     const heartbeatInterval = setInterval(() => {
       sendOperatorHeartbeat(user.id)
-    }, 30000)
+    }, 60000) // 60s ao inves de 30s
     return () => clearInterval(heartbeatInterval)
   }, [user])
 
@@ -296,7 +296,7 @@ const OperatorContent = memo(function OperatorContent() {
   if (!isInitialized) {
     return (
       <div className="flex flex-col h-screen h-dvh bg-background items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="text-muted-foreground">Carregando dados...</p>
       </div>
     )
@@ -360,14 +360,6 @@ const OperatorContent = memo(function OperatorContent() {
       </div>
 
       <OperatorChatModal isOpen={showChatModal} onClose={() => setShowChatModal(false)} />
-      
-      {/* Indicator de sincronização */}
-      {isSyncing && (
-        <div className="fixed bottom-4 right-4 bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-full text-sm flex items-center gap-2 shadow-lg">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          Sincronizando...
-        </div>
-      )}
     </div>
   )
 })

@@ -318,7 +318,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                 variant="outline"
                 size="icon"
                 onClick={() => setShowInitialGuideModal(true)}
-                className="h-9 w-9 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 dark:from-teal-600 dark:to-cyan-600 dark:hover:from-teal-700 dark:hover:to-cyan-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                className="h-9 w-9 bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white border-0 shadow-md transition-colors"
                 title="Guia Inicial"
               >
                 <FileText className="h-4 w-4" />
@@ -328,7 +328,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                 variant="outline"
                 size="icon"
                 onClick={() => setShowResultCodesModal(true)}
-                className="h-9 w-9 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 dark:from-blue-600 dark:to-indigo-600 dark:hover:from-blue-700 dark:hover:to-indigo-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                className="h-9 w-9 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 shadow-md transition-colors"
                 title="Codigos de Resultado"
               >
                 <ListChecks className="h-4 w-4" />
@@ -338,7 +338,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                 variant="outline"
                 size="icon"
                 onClick={() => setShowMessagesModal(true)}
-                className="h-9 w-9 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 dark:from-purple-600 dark:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all relative"
+                className="h-9 w-9 bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 shadow-md transition-colors relative"
                 title="Central da Qualidade"
               >
                 <Bell className="h-4 w-4" />
@@ -356,7 +356,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                 variant="outline"
                 size="icon"
                 onClick={onBackToStart}
-                className="h-9 w-9 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 dark:from-green-600 dark:to-emerald-600 dark:hover:from-green-700 dark:hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                className="h-9 w-9 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 shadow-md transition-colors"
                 title="Voltar ao Início"
               >
                 <Home className="h-4 w-4" />
@@ -367,7 +367,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                   variant="outline"
                   size="icon"
                   onClick={onToggleControls}
-                  className="h-9 w-9 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 dark:from-orange-600 dark:to-amber-500 dark:hover:from-orange-700 dark:hover:to-amber-600 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                  className="h-9 w-9 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white border-0 shadow-md transition-colors"
                   title={showControls ? "Ocultar Controles" : "Exibir Controles"}
                 >
                   {showControls ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -379,7 +379,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                   variant="outline"
                   size="icon"
                   onClick={onToggleSidebar}
-                  className="h-9 w-9 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 dark:from-gray-600 dark:to-gray-700 dark:hover:from-gray-700 dark:hover:to-gray-800 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                  className="h-9 w-9 bg-blue-500 hover:bg-blue-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white border-0 shadow-md transition-colors"
                   title={isSidebarOpen ? "Ocultar Painel" : "Exibir Painel"}
                 >
                   {isSidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
@@ -391,7 +391,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                 size="icon"
                 onClick={toggleTheme}
                 title="Alternar tema"
-                className="h-9 w-9 border-2 hover:scale-110 transition-all shadow-md hover:shadow-lg bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-600/20 dark:hover:to-orange-700/20"
+                className="h-9 w-9 border-2 shadow-md bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
               >
                 {theme === "dark" ? (
                   <Sun className="h-5 w-5 text-orange-500" />

@@ -441,7 +441,7 @@ export async function updateOperatorPresence(userId: string, data?: {
   }
 }
 
-// Hook for operator to maintain presence
+// Hook for operator to maintain presence - intervalo aumentado para 60s
 export function usePresenceHeartbeat(userId?: string) {
   useEffect(() => {
     if (!userId) return
@@ -450,7 +450,7 @@ export function usePresenceHeartbeat(userId?: string) {
 
     const interval = setInterval(() => {
       updateOperatorPresence(userId)
-    }, 30000)
+    }, 60000) // 60s ao inves de 30s para reduzir requests
 
     return () => clearInterval(interval)
   }, [userId])

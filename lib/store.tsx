@@ -2788,17 +2788,12 @@ export function getFilePresentationProgressByFile(fileName: string): FilePresent
 export function markFilePresentationAsRead(fileName: string, operatorId: string, operatorName: string) {
   if (typeof window === "undefined") return
 
-  console.log("[v0] markFilePresentationAsRead called:", fileName, operatorId, operatorName)
-
   const progress = getFilePresentationProgress()
-  console.log("[v0] Current file presentation progress:", progress)
-
   const existing = progress.find((p) => p.fileName === fileName && p.operatorId === operatorId)
 
   if (existing) {
     existing.marked_as_seen = true
     existing.completion_date = new Date()
-    console.log("[v0] Updated existing progress:", existing)
   } else {
     const newProgress: FilePresentationProgress = {
       id: `file-prog-${Date.now()}`,
@@ -2810,13 +2805,10 @@ export function markFilePresentationAsRead(fileName: string, operatorId: string,
       completion_date: new Date(),
     }
     progress.push(newProgress)
-    console.log("[v0] Created new progress:", newProgress)
   }
 
-  console.log("[v0] Saving progress to localStorage:", progress)
   saveImmediately(STORAGE_KEYS.FILE_PRESENTATION_PROGRESS, progress)
   notifyUpdateImmediate()
-  console.log("[v0] Progress saved and notified")
 }
 
 export function saveFilePresentationProgress(progress: Omit<FilePresentationProgress, "id">) {
