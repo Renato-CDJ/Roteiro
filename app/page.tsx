@@ -1,9 +1,42 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
+
+// Componente animado para o titulo "Roteiro"
+function AnimatedTitle() {
+  const [isHovered, setIsHovered] = useState(false)
+  const letters = "Roteiro".split("")
+  
+  return (
+    <h1 
+      className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 cursor-default select-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span className="inline-flex overflow-hidden">
+        {letters.map((letter, index) => (
+          <span
+            key={index}
+            className="inline-block bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent transition-all duration-300 ease-out"
+            style={{
+              transform: isHovered 
+                ? `translateY(${Math.sin(index * 0.8) * -8}px) rotate(${Math.sin(index * 0.5) * 3}deg) scale(1.05)` 
+                : "translateY(0) rotate(0) scale(1)",
+              transitionDelay: isHovered ? `${index * 40}ms` : `${(letters.length - index) * 30}ms`,
+              filter: isHovered ? "brightness(1.2)" : "brightness(1)",
+              textShadow: isHovered ? "0 0 30px rgba(249, 115, 22, 0.4)" : "none",
+            }}
+          >
+            {letter}
+          </span>
+        ))}
+      </span>
+    </h1>
+  )
+}
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()
@@ -39,11 +72,7 @@ export default function HomePage() {
         <div className="w-full max-w-md px-2 sm:px-0">
           {/* Titulo */}
           <div className="mb-8 sm:mb-10 text-center">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
-                Roteiro
-              </span>
-            </h1>
+            <AnimatedTitle />
             
             {/* Linha estatica */}
             <div className="h-1 w-24 mx-auto mb-5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
