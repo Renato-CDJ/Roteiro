@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,19 +16,24 @@ export function NotesTab() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [currentNoteId, setCurrentNoteId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
+  const lastSavedContentRef = useRef("")
   const { toast } = useToast()
 
   useEffect(() => {
     if (notes && notes.length > 0) {
       const latestNote = notes[0]
-      setContent(latestNote.content || "")
+      const noteContent = latestNote.content || ""
+      setContent(noteContent)
       setCurrentNoteId(latestNote.id)
       setLastSaved(new Date(latestNote.updated_at || latestNote.created_at))
+      lastSavedContentRef.current = noteContent
+      setHasChanges(false)
     }
   }, [notes])
 
-  const handleSave = useCallback(async () => {
-    if (!user) return
+  const handleSave = useCallback(async (silent = false) => {
+    if (!user || !hasChanges) return
 
     setSaving(true)
     try {
@@ -39,30 +44,42 @@ export function NotesTab() {
         if (data) setCurrentNoteId(data.id)
       }
       setLastSaved(new Date())
-      toast({
-        title: "Nota salva",
-        description: "Suas anotacoes foram salvas com sucesso.",
-      })
+      lastSavedContentRef.current = content
+      setHasChanges(false)
+      if (!silent) {
+        toast({
+          title: "Nota salva",
+          description: "Suas anotacoes foram salvas com sucesso.",
+        })
+      }
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar nota",
-        variant: "destructive",
-      })
+      if (!silent) {
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar nota",
+          variant: "destructive",
+        })
+      }
     }
     setSaving(false)
-  }, [user, currentNoteId, content, create, update, toast])
+  }, [user, currentNoteId, content, hasChanges, create, update, toast])
+  
+  // Detectar mudanças no conteúdo
+  const handleContentChange = useCallback((newContent: string) => {
+    setContent(newContent)
+    setHasChanges(newContent !== lastSavedContentRef.current)
+  }, [])
 
-  // Auto-save every 30 seconds if there are changes
+  // Auto-save every 60 seconds only if there are actual changes
   useEffect(() => {
-    if (!content || !user) return
+    if (!user || !hasChanges) return
 
     const autoSaveInterval = setInterval(() => {
-      handleSave()
-    }, 30000)
+      handleSave(true) // silent save
+    }, 60000)
 
     return () => clearInterval(autoSaveInterval)
-  }, [content, user, handleSave])
+  }, [user, hasChanges, handleSave])
 
   if (loading) {
     return (
@@ -95,7 +112,7 @@ export function NotesTab() {
                 )}
               </CardDescription>
             </div>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={() => handleSave(false)} disabled={saving || !hasChanges}>
               {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
               Salvar
             </Button>
@@ -104,12 +121,12 @@ export function NotesTab() {
         <CardContent>
           <Textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => handleContentChange(e.target.value)}
             placeholder="Digite suas anotações aqui..."
             className="min-h-[400px] font-mono text-sm"
           />
           <p className="text-xs text-muted-foreground mt-2">
-            Salvamento automático a cada 30 segundos. {content.length} caracteres
+            {hasChanges ? "Alterações não salvas - " : ""}Salvamento automático a cada 60 segundos quando houver mudanças. {content.length} caracteres
           </p>
         </CardContent>
       </Card>

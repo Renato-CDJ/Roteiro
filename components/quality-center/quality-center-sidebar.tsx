@@ -147,7 +147,7 @@ export function QualityCenterSidebar({
               <Shield className={cn("h-5 w-5", showAdminPanel && "text-white")} />
               <span className="flex-1 text-left text-sm">Painel Admin</span>
               {pendingQuestions > 0 && (
-                <Badge className="bg-red-500 text-white hover:bg-red-500 text-xs h-5 min-w-[20px] flex items-center justify-center rounded-full animate-pulse">
+                <Badge className="bg-red-500 text-white hover:bg-red-500 text-xs h-5 min-w-[20px] flex items-center justify-center rounded-full">
                   {pendingQuestions}
                 </Badge>
               )}

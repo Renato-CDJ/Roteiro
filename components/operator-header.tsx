@@ -411,7 +411,7 @@ export const OperatorHeader = memo(function OperatorHeader({
               </Button>
 
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-md border border-green-500/20">
-                <Circle className="h-3 w-3 fill-current animate-pulse" />
+                <Circle className="h-3 w-3 fill-current" />
                 <span className="text-sm font-medium">Online</span>
               </div>
             </div>

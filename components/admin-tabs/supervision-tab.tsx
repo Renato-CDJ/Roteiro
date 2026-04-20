@@ -46,7 +46,8 @@ export function SupervisionTab() {
 
   useEffect(() => {
     loadData()
-    const interval = setInterval(loadData, 3000)
+    // Aumentado de 3s para 30s - dados de supervisão não precisam de atualização tão frequente
+    const interval = setInterval(loadData, 30000)
 
     const handleStoreUpdate = () => {
       loadData()
@@ -261,7 +262,7 @@ export function SupervisionTab() {
                         </Badge>
                         {onlineCount > 0 && (
                           <Badge variant="outline" className="gap-1.5 text-green-600 border-green-600 font-normal">
-                            <Circle className="h-2.5 w-2.5 fill-current animate-pulse" />
+                            <Circle className="h-2.5 w-2.5 fill-current" />
                             {onlineCount} online
                           </Badge>
                         )}
@@ -306,7 +307,7 @@ export function SupervisionTab() {
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <Circle
-                                className={`h-3 w-3 flex-shrink-0 ${online ? "fill-green-500 text-green-500 animate-pulse" : "fill-gray-400 text-gray-400"}`}
+                                className={`h-3 w-3 flex-shrink-0 ${online ? "fill-green-500 text-green-500" : "fill-gray-400 text-gray-400"}`}
                               />
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium truncate">{operator.fullName}</p>
@@ -473,7 +474,7 @@ export function SupervisionTab() {
                                     onCheckedChange={() => toggleOperatorSelection(op.id)}
                                   />
                                   <Circle
-                                    className={`h-2.5 w-2.5 flex-shrink-0 ${online ? "fill-green-500 text-green-500 animate-pulse" : "fill-gray-400 text-gray-400"}`}
+                                    className={`h-2.5 w-2.5 flex-shrink-0 ${online ? "fill-green-500 text-green-500" : "fill-gray-400 text-gray-400"}`}
                                   />
                                   <label htmlFor={`op-${op.id}`} className="flex-1 cursor-pointer">
                                     <p className="text-sm font-medium">{op.fullName}</p>
