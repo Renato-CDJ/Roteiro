@@ -171,7 +171,7 @@ export const OperatorHeader = memo(function OperatorHeader({
                       />
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[650px] p-0 border-border shadow-lg" align="start">
+                  <PopoverContent className="w-[90vw] max-w-[650px] p-0 border-border shadow-lg" align="start">
                     <Command className="bg-popover">
                       <CommandList className="max-h-[500px]">
                         <div className="p-4 border-b bg-muted/30 space-y-4">

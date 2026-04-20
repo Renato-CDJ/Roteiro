@@ -181,13 +181,13 @@ const AdminContent = memo(function AdminContent() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen h-dvh bg-background overflow-hidden">
-      <aside className="w-full md:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border overflow-auto md:overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen h-dvh bg-background overflow-x-hidden overflow-y-auto">
+      <aside className="w-full md:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border max-h-[40vh] md:max-h-none overflow-auto">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
       </aside>
 
-      <main className="flex-1 overflow-auto min-h-0">
-        <div className="container mx-auto p-4 md:p-6 lg:p-8">{renderContent()}</div>
+      <main className="flex-1 overflow-auto min-h-0 w-full">
+        <div className="w-full max-w-full px-3 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">{renderContent()}</div>
       </main>
 
       <Toaster />

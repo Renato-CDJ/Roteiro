@@ -35,11 +35,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6">
-        <div className="w-full max-w-md">
+    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
+        <div className="w-full max-w-md px-2 sm:px-0">
           {/* Titulo */}
-          <div className="mb-10 text-center">
-            <h1 className="text-7xl md:text-8xl lg:text-9xl font-black tracking-tight mb-4">
+          <div className="mb-8 sm:mb-10 text-center">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4">
               <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
                 Roteiro
               </span>
