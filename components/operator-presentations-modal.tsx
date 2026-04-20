@@ -70,8 +70,6 @@ export function OperatorPresentationsModal({ isOpen, onClose }: OperatorPresenta
   }, [isOpen, loadData, loadPPTFiles])
 
   const openFile = (file: PPTFile) => {
-    console.log("[v0] Opening file:", file.displayName, "Type:", file.extension)
-
     setSelectedPPTFile(file)
     setShowSlideshowViewer(true)
   }

@@ -25,12 +25,9 @@ export default function PresentationPage() {
     const loadSlides = async () => {
       try {
         const decodedFilename = decodeURIComponent(filename)
-        console.log("[v0] Loading slides for:", decodedFilename)
 
         const response = await fetch(`/api/presentations/slides?filename=${encodeURIComponent(decodedFilename)}`)
         const data = await response.json()
-
-        console.log("[v0] Slides API response:", data)
 
         if (data.slides && data.slides.length > 0) {
           setSlides(data.slides)
@@ -110,10 +107,8 @@ export default function PresentationPage() {
       const decodedFilename = decodeURIComponent(filename)
         .replace(/\.(pptx?|PPTX?)$/, "")
         .replace(/\.+$/, "")
-      console.log("[v0] Marking presentation as read:", decodedFilename, user.id, user.fullName || user.username)
       markFilePresentationAsRead(decodedFilename, user.id, user.fullName || user.username)
       setHasMarkedAsRead(true)
-      console.log("[v0] Marked as read successfully")
     }
   }
 

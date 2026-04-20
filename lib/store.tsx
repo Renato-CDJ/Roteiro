@@ -1113,7 +1113,7 @@ if (typeof window !== "undefined") {
         productCache.delete(key)
       }
     })
-  }, 120000) // Clean every 2 minutes
+  }, 300000) // Clean every 5 minutes - aumentado para reduzir overhead
 }
 
 export function getScriptStepsByProduct(productId: string): ScriptStep[] {
@@ -2319,7 +2319,6 @@ export function cleanupOldSessions() {
     })
 
     if (cleanedCount > 0) {
-      console.log(`[v0] Cleaned up ${cleanedCount} old sessions`)
       debouncedSave(STORAGE_KEYS.USERS, users)
     }
   } catch (error) {

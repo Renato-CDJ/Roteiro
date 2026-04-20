@@ -700,8 +700,8 @@ export function useQualityStats() {
   useEffect(() => {
     fetchStats()
 
-    // Refresh stats every 30 seconds
-    const interval = setInterval(fetchStats, 30000)
+    // Refresh stats every 60 seconds - estatísticas não precisam de atualização tão frequente
+    const interval = setInterval(fetchStats, 60000)
     return () => clearInterval(interval)
   }, [fetchStats])
 
