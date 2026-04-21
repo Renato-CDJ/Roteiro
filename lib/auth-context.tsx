@@ -165,6 +165,8 @@ async function validateUserCredentials(
     const supabase = createClient()
     const normalizedEmail = normalizeEmail(email)
     
+    console.log("[v0] Tentando login com email:", normalizedEmail)
+    
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
       .from("users")
@@ -172,9 +174,11 @@ async function validateUserCredentials(
       .ilike("email", normalizedEmail)
       .limit(1)
 
+    console.log("[v0] Resultado da query:", { users, error })
+
     if (error) {
       console.error("[Supabase] Query error:", error)
-      return { success: false, error: "Erro ao buscar usuario" }
+      return { success: false, error: `Erro ao buscar usuario: ${error.message}` }
     }
 
     // Se nao encontrou usuario
@@ -216,7 +220,7 @@ async function validateUserCredentials(
     return { success: true, user }
   } catch (error: any) {
     console.error("[Supabase] Validation error:", error)
-    return { success: false, error: "Erro ao validar credenciais" }
+    return { success: false, error: `Erro ao validar credenciais: ${error.message || error}` }
   }
 }
 
