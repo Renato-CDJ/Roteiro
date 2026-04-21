@@ -1,8 +1,11 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { updateDataVersion } from "@/lib/cache-service"
+
+// Polling interval - 60 seconds para reduzir requisições
+const POLLING_INTERVAL = 60000
 
 // Collection/table names
 const TABLES = {
@@ -17,10 +20,7 @@ const TABLES = {
   QUIZ_ATTEMPTS: "quiz_attempts",
   PRESENTATIONS: "presentations",
   PRESENTATION_PROGRESS: "presentation_progress",
-  CHAT_MESSAGES: "chat_messages",
-  CHAT_SETTINGS: "chat_settings",
   QUALITY_POSTS: "quality_posts",
-  QUALITY_COMMENTS: "quality_comments",
   FEEDBACKS: "feedbacks",
   RESULT_CODES: "result_codes",
   ADMIN_QUESTIONS: "admin_questions",
@@ -46,7 +46,7 @@ const TABLE_TO_VERSION_KEY: Record<string, string> = {
   [TABLES.PHRASEOLOGY]: "phraseology",
 }
 
-// Generic hook for CRUD operations with realtime
+// Generic hook for CRUD operations with polling (sem realtime)
 export function useSupabaseTable<T extends { id: string }>(
   tableName: string,
   orderByField: string = "created_at",
@@ -79,18 +79,11 @@ export function useSupabaseTable<T extends { id: string }>(
   useEffect(() => {
     fetchData()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`${tableName}-changes`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: tableName },
-        () => fetchData()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [tableName, fetchData])
 
@@ -110,6 +103,9 @@ export function useSupabaseTable<T extends { id: string }>(
       if (versionKey) {
         updateDataVersion(versionKey as any).catch(console.error)
       }
+
+      // Refetch para atualizar lista
+      fetchData()
 
       return { data: result as T, error: null }
     } catch (e: any) {
@@ -135,6 +131,9 @@ export function useSupabaseTable<T extends { id: string }>(
         updateDataVersion(versionKey as any).catch(console.error)
       }
 
+      // Refetch para atualizar lista
+      fetchData()
+
       return { data: result as T, error: null }
     } catch (e: any) {
       return { data: null, error: e.message || "Erro ao atualizar" }
@@ -156,6 +155,9 @@ export function useSupabaseTable<T extends { id: string }>(
       if (versionKey) {
         updateDataVersion(versionKey as any).catch(console.error)
       }
+
+      // Refetch para atualizar lista
+      fetchData()
 
       return { error: null }
     } catch (e: any) {
@@ -230,7 +232,7 @@ export async function getScriptStepByIdFromSupabase(stepId: string) {
   return data
 }
 
-// Hook for operator to use scripts with realtime updates
+// Hook for operator to use scripts with polling
 export function useProductScripts(productId: string | null) {
   const [scripts, setScripts] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -269,23 +271,11 @@ export function useProductScripts(productId: string | null) {
 
     fetchScripts()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`scripts-${productId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: TABLES.SCRIPTS,
-          filter: `product_id=eq.${productId}`,
-        },
-        () => fetchScripts()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchScripts, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [productId, fetchScripts])
 
@@ -416,23 +406,11 @@ export function useNotes(userId?: string) {
 
     fetchData()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`notes-${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: TABLES.NOTES,
-          filter: `user_id=eq.${userId}`,
-        },
-        () => fetchData()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [userId, fetchData])
 
@@ -445,6 +423,7 @@ export function useNotes(userId?: string) {
       .single()
 
     if (error) return { data: null, error: error.message }
+    fetchData()
     return { data: result, error: null }
   }
 
@@ -458,6 +437,7 @@ export function useNotes(userId?: string) {
       .single()
 
     if (error) return { data: null, error: error.message }
+    fetchData()
     return { data: result, error: null }
   }
 
@@ -465,6 +445,7 @@ export function useNotes(userId?: string) {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.NOTES).delete().eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -493,18 +474,11 @@ export function useAppSettings() {
   useEffect(() => {
     fetchSettings()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel("app-settings-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TABLES.APP_SETTINGS },
-        () => fetchSettings()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchSettings, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [fetchSettings])
 
@@ -515,6 +489,7 @@ export function useAppSettings() {
       .upsert({ key, value, updated_at: new Date().toISOString() })
 
     if (error) return { error: error.message }
+    fetchSettings()
     return { error: null }
   }
 
@@ -731,7 +706,7 @@ export async function deleteScriptsForProductByName(productName: string): Promis
   }
 }
 
-// Messages hook for operator messages
+// Messages hook for operator messages with polling
 export function useMessages(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -753,18 +728,11 @@ export function useMessages(userId?: string) {
   useEffect(() => {
     fetchData()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel("messages-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TABLES.MESSAGES },
-        () => fetchData()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [fetchData])
 
@@ -780,6 +748,7 @@ export function useMessages(userId?: string) {
         .from(TABLES.MESSAGES)
         .update({ seen_by: [...seenBy, userId] })
         .eq("id", messageId)
+      fetchData()
     }
   }
 
@@ -787,6 +756,7 @@ export function useMessages(userId?: string) {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.MESSAGES).insert(messageData)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -797,6 +767,7 @@ export function useMessages(userId?: string) {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -804,13 +775,14 @@ export function useMessages(userId?: string) {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.MESSAGES).delete().eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
   return { data, loading, refetch: fetchData, markAsSeen, create, update, remove }
 }
 
-// Quizzes hook
+// Quizzes hook with polling
 export function useQuizzes(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -832,18 +804,11 @@ export function useQuizzes(userId?: string) {
   useEffect(() => {
     fetchData()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel("quizzes-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TABLES.QUIZZES },
-        () => fetchData()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [fetchData])
 
@@ -851,6 +816,7 @@ export function useQuizzes(userId?: string) {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.QUIZZES).insert(quizData)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -861,6 +827,7 @@ export function useQuizzes(userId?: string) {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -868,13 +835,39 @@ export function useQuizzes(userId?: string) {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.QUIZZES).delete().eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
-  return { data, loading, refetch: fetchData, create, update, remove }
+  const submitAttempt = async (quizId: string, answer: string, isCorrect: boolean) => {
+    if (!userId) return { error: "User not logged in" }
+    const supabase = createClient()
+    const { error } = await supabase.from("quiz_attempts").insert({
+      quiz_id: quizId,
+      user_id: userId,
+      answer,
+      is_correct: isCorrect,
+      created_at: new Date().toISOString()
+    })
+    if (error) return { error: error.message }
+    return { error: null }
+  }
+
+  const getAttempts = async (quizId: string) => {
+    if (!userId) return []
+    const supabase = createClient()
+    const { data: attempts } = await supabase
+      .from("quiz_attempts")
+      .select("*")
+      .eq("quiz_id", quizId)
+      .eq("user_id", userId)
+    return attempts || []
+  }
+
+  return { data, loading, refetch: fetchData, create, update, remove, submitAttempt, getAttempts }
 }
 
-// Presentations hook
+// Presentations hook with polling
 export function usePresentations() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -896,18 +889,11 @@ export function usePresentations() {
   useEffect(() => {
     fetchData()
 
-    const supabase = createClient()
-    const channel = supabase
-      .channel("presentations-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TABLES.PRESENTATIONS },
-        () => fetchData()
-      )
-      .subscribe()
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [fetchData])
 
@@ -920,6 +906,7 @@ export function usePresentations() {
       .single()
 
     if (error) return { data: null, error: error.message }
+    fetchData()
     return { data: result, error: null }
   }
 
@@ -930,6 +917,7 @@ export function usePresentations() {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
     if (error) return { error: error.message }
+    fetchData()
     return { error: null }
   }
 
@@ -937,75 +925,7 @@ export function usePresentations() {
     const supabase = createClient()
     const { error } = await supabase.from(TABLES.PRESENTATIONS).delete().eq("id", id)
     if (error) return { error: error.message }
-    return { error: null }
-  }
-
-  return { data, loading, refetch: fetchData, create, update, remove }
-}
-
-// Chat messages hook
-export function useChatMessages() {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const supabase = createClient()
-    const { data: messages, error } = await supabase
-      .from(TABLES.CHAT_MESSAGES)
-      .select("*")
-      .order("created_at", { ascending: true })
-
-    if (!error && messages) {
-      setData(messages)
-    }
-    setLoading(false)
-  }, [])
-
-  useEffect(() => {
     fetchData()
-
-    const supabase = createClient()
-    const channel = supabase
-      .channel("chat-messages-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: TABLES.CHAT_MESSAGES },
-        () => fetchData()
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [fetchData])
-
-  const create = async (messageData: any) => {
-    const supabase = createClient()
-    const { data: result, error } = await supabase
-      .from(TABLES.CHAT_MESSAGES)
-      .insert(messageData)
-      .select()
-      .single()
-
-    if (error) return { data: null, error: error.message }
-    return { data: result, error: null }
-  }
-
-  const update = async (id: string, updates: any) => {
-    const supabase = createClient()
-    const { error } = await supabase
-      .from(TABLES.CHAT_MESSAGES)
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id)
-    if (error) return { error: error.message }
-    return { error: null }
-  }
-
-  const remove = async (id: string) => {
-    const supabase = createClient()
-    const { error } = await supabase.from(TABLES.CHAT_MESSAGES).delete().eq("id", id)
-    if (error) return { error: error.message }
     return { error: null }
   }
 
@@ -1021,4 +941,54 @@ export function useSupervisorTeams() {
     created_at: string
     updated_at: string
   }>(TABLES.SUPERVISOR_TEAMS)
+}
+
+// Feedbacks hook for operators with polling
+export function useFeedbacksForOperator(userId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchData = useCallback(async () => {
+    if (!userId) {
+      setData([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    const supabase = createClient()
+    const { data: feedbacks, error } = await supabase
+      .from(TABLES.FEEDBACKS)
+      .select("*")
+      .eq("operator_id", userId)
+      .order("created_at", { ascending: false })
+
+    if (!error && feedbacks) {
+      setData(feedbacks)
+    }
+    setLoading(false)
+  }, [userId])
+
+  useEffect(() => {
+    fetchData()
+
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [fetchData])
+
+  const markAsRead = async (feedbackId: string) => {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from(TABLES.FEEDBACKS)
+      .update({ is_read: true })
+      .eq("id", feedbackId)
+    if (error) return { error: error.message }
+    fetchData()
+    return { error: null }
+  }
+
+  return { data, loading, refetch: fetchData, markAsRead }
 }

@@ -13,12 +13,11 @@ import {
   createQualityPostSupabase,
   likePostSupabase,
   voteOnQuizSupabase,
-  addCommentSupabase,
   deleteQualityPostSupabase,
   editQualityPostSupabase,
 } from "@/hooks/use-supabase-realtime"
 import type { QualityPost } from "@/lib/types"
-import { Send, HelpCircle, Heart, MessageCircle, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield, Archive, Clock, Pencil, Trash2 } from "lucide-react"
+import { Send, HelpCircle, Heart, Share2, Megaphone, MoreHorizontal, Bookmark, AtSign, Users, Shield, Archive, Clock, Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -52,12 +51,10 @@ export function QualityCenterFeed() {
   const { user } = useAuth()
   const { toast } = useToast()
   const [showArchived, setShowArchived] = useState(false)
-  const { posts: allPosts, activePosts, archivedPosts } = useQualityPosts(showArchived)
+  const { posts: allPosts, activePosts, archivedPosts, refetch } = useQualityPosts(showArchived)
   const [newPostContent, setNewPostContent] = useState("")
   const [isQuestionToAdmin, setIsQuestionToAdmin] = useState(false)
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
-  const [showComments, setShowComments] = useState<Record<string, boolean>>({})
-  const [mentionType, setMentionType] = useState<"all" | "qualidade" | "supervisao">("qualidade") // "all" = Todos podem ver, "qualidade" = Monitoria, "supervisao" = Supervisores
+  const [mentionType, setMentionType] = useState<"all" | "qualidade" | "supervisao">("qualidade")
   
   // Edit/Delete states
   const [editingPost, setEditingPost] = useState<QualityPost | null>(null)
@@ -125,7 +122,7 @@ export function QualityCenterFeed() {
       recipientNames = ["Qualidade"]
     } else if (mentionType === "supervisao") {
       recipients = ["supervisao"]
-      recipientNames = ["Supervisão"]
+      recipientNames = ["Supervisao"]
     }
 
     await createQualityPostSupabase({
@@ -141,6 +138,7 @@ export function QualityCenterFeed() {
     setNewPostContent("")
     setIsQuestionToAdmin(false)
     setMentionType("all")
+    refetch() // Atualizar lista apos criar
     toast({
       title: isQuestionToAdmin || isOperator ? "Pergunta enviada" : "Publicacao criada",
       description: !sendToAll 
@@ -152,24 +150,13 @@ export function QualityCenterFeed() {
   const handleLike = async (postId: string) => {
     if (!user) return
     await likePostSupabase(postId, user.id)
+    refetch() // Atualizar lista apos like
   }
 
   const handleVote = async (postId: string, optionId: string) => {
     if (!user) return
     await voteOnQuizSupabase(postId, optionId, user.id)
-  }
-
-  const handleComment = async (postId: string) => {
-    const content = commentInputs[postId]?.trim()
-    if (!content || !user) return
-
-    await addCommentSupabase(postId, {
-      authorId: user.id,
-      authorName: user.fullName || user.username,
-      content,
-    })
-
-    setCommentInputs((prev) => ({ ...prev, [postId]: "" }))
+    refetch() // Atualizar lista apos voto
   }
 
   const handleEditPost = (post: QualityPost) => {
@@ -189,6 +176,7 @@ export function QualityCenterFeed() {
       })
       setEditingPost(null)
       setEditContent("")
+      refetch() // Atualizar lista apos editar
     } catch (error) {
       toast({
         title: "Erro",
@@ -211,6 +199,7 @@ export function QualityCenterFeed() {
         description: "Sua publicacao foi removida com sucesso.",
       })
       setDeletingPostId(null)
+      refetch() // Atualizar lista apos excluir
     } catch (error) {
       toast({
         title: "Erro",
@@ -268,18 +257,6 @@ export function QualityCenterFeed() {
     }
   }
 
-  const getDepartmentName = (authorName: string) => {
-    const departments: Record<string, string> = {
-      "Admin": "Setor Administrativo",
-      "RH": "Setor de Pessoas",
-      "Diretoria": "Gestao Executiva",
-    }
-    const firstWord = authorName.split(" ")[0]
-    return departments[firstWord] || "Central da Qualidade"
-  }
-
-  const userInitials = getInitials(user?.fullName || "")
-
   return (
     <div className="space-y-4">
       {/* Create Post - Only for operators */}
@@ -299,7 +276,7 @@ export function QualityCenterFeed() {
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarFallback className={cn(getAvatarColor(user?.fullName || ""), "text-white font-medium")}>
-                  {userInitials}
+                  {getInitials(user?.fullName || "")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -326,7 +303,7 @@ export function QualityCenterFeed() {
                           <AtSign className="h-4 w-4 mr-2" />
                           Mencionar
                           {mentionType === "qualidade" && <span className="ml-1 text-xs">(Qualidade)</span>}
-                          {mentionType === "supervisao" && <span className="ml-1 text-xs">(Supervisão)</span>}
+                          {mentionType === "supervisao" && <span className="ml-1 text-xs">(Supervisao)</span>}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="w-52">
@@ -343,7 +320,7 @@ export function QualityCenterFeed() {
                           className={cn(mentionType === "supervisao" && "bg-blue-100 dark:bg-blue-900/30")}
                         >
                           <Users className="h-4 w-4 mr-2 text-blue-500" />
-                          <span>Supervisão</span>
+                          <span>Supervisao</span>
                           {mentionType === "supervisao" && <span className="ml-auto text-blue-500">&#10003;</span>}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
@@ -550,19 +527,14 @@ export function QualityCenterFeed() {
                     </div>
                   )}
 
-                  {/* Likes and Comments Count */}
-                  {(post.likes.length > 0 || post.comments.length > 0) && (
+                  {/* Likes Count */}
+                  {post.likes.length > 0 && (
                     <div className="px-4 pb-2">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {post.likes.length > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Heart className="h-4 w-4 fill-orange-500 text-orange-500" />
-                            {post.likes.length} curtida{post.likes.length !== 1 ? "s" : ""}
-                          </span>
-                        )}
-                        {post.comments.length > 0 && (
-                          <span>{post.comments.length} comentario{post.comments.length !== 1 ? "s" : ""}</span>
-                        )}
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-4 w-4 fill-orange-500 text-orange-500" />
+                          {post.likes.length} curtida{post.likes.length !== 1 ? "s" : ""}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -577,15 +549,6 @@ export function QualityCenterFeed() {
                     >
                       <Heart className={`h-5 w-5 ${isLiked ? "fill-orange-500" : ""}`} />
                       <span className="font-medium">Curtir</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))}
-                      className="flex-1 h-11 gap-2 rounded-none text-muted-foreground hover:text-foreground"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      <span className="font-medium">Comentar{post.comments.length > 0 ? ` (${post.comments.length})` : ""}</span>
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -603,58 +566,6 @@ export function QualityCenterFeed() {
                       <Bookmark className="h-5 w-5" />
                     </Button>
                   </div>
-
-                  {/* Comments Section */}
-                  {showComments[post.id] && (
-                    <div className="p-4 pt-3 border-t border-border/50 space-y-4 bg-muted/5">
-                      {/* Existing Comments */}
-                      {post.comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className={`${getAvatarColor(comment.authorName)} text-white text-xs font-medium`}>
-                              {getInitials(comment.authorName)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 bg-muted/50 rounded-2xl px-4 py-2.5">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-sm font-semibold text-foreground">{comment.authorName}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: false, locale: ptBR })}
-                              </span>
-                            </div>
-                            <p className="text-sm text-foreground/90">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Add Comment */}
-                      <div className="flex gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className={`${getAvatarColor(user?.fullName || "")} text-white text-xs font-medium`}>
-                            {userInitials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Escreva um comentario..."
-                            value={commentInputs[post.id] || ""}
-                            onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                            onKeyDown={(e) => e.key === "Enter" && handleComment(post.id)}
-                            className="flex-1 px-4 py-2 text-sm bg-muted/50 border border-border/50 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent text-foreground placeholder:text-muted-foreground"
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => handleComment(post.id)}
-                            disabled={!commentInputs[post.id]?.trim()}
-                            className="rounded-full bg-orange-500 hover:bg-orange-600 h-9 w-9 p-0"
-                          >
-                            <Send className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )

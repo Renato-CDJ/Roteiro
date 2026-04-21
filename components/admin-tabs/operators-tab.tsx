@@ -80,19 +80,11 @@ export function OperatorsTab() {
   useEffect(() => {
     loadOperators()
 
-    // Subscribe to realtime changes
-    const supabase = createClient()
-    const channel = supabase
-      .channel("operators-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "users", filter: "role=eq.operator" },
-        () => loadOperators()
-      )
-      .subscribe()
+    // Polling ao invés de realtime - a cada 60 segundos
+    const interval = setInterval(loadOperators, 60000)
 
     return () => {
-      supabase.removeChannel(channel)
+      clearInterval(interval)
     }
   }, [])
 

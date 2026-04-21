@@ -8,8 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Send, Reply, X } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-import { sendChatMessage, markChatMessageAsRead, getChatSettings } from "@/lib/store"
-import { useChatMessages } from "@/hooks/use-supabase-chat-realtime"
+import { sendChatMessage, markChatMessageAsRead, getChatSettings, getAllChatMessages } from "@/lib/store"
 import type { ChatMessage } from "@/lib/types"
 
 interface OperatorChatModalProps {
@@ -19,19 +18,32 @@ interface OperatorChatModalProps {
 
 export const OperatorChatModal = memo(function OperatorChatModal({ isOpen, onClose }: OperatorChatModalProps) {
   const { user } = useAuth()
-  const { messages: realtimeMessages } = useChatMessages()
+  const [allMessages, setAllMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [chatEnabled, setChatEnabled] = useState(true)
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Load messages with polling
+  const loadAllMessages = () => {
+    const msgs = getAllChatMessages()
+    setAllMessages(msgs)
+  }
+
+  useEffect(() => {
+    loadAllMessages()
+    // Polling a cada 30 segundos para mensagens de chat
+    const interval = setInterval(loadAllMessages, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   // Filter messages for this operator
   const messages = useMemo(() => {
     if (!user) return []
-    return realtimeMessages.filter(
+    return allMessages.filter(
       (m) => m.senderId === user.id || (m.recipientId === user.id || !m.recipientId)
     )
-  }, [realtimeMessages, user])
+  }, [allMessages, user])
 
   const unreadCount = useMemo(() => {
     if (!user) return 0
@@ -49,7 +61,7 @@ export const OperatorChatModal = memo(function OperatorChatModal({ isOpen, onClo
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const loadMessages = () => {
+  const markMessagesAsRead = () => {
     if (!user || !messages) return
     messages.forEach((msg) => {
       if (!msg.isRead && msg.senderId !== user.id) {
@@ -72,7 +84,8 @@ export const OperatorChatModal = memo(function OperatorChatModal({ isOpen, onClo
     await sendChatMessage(user.id, user.fullName, user.role, newMessage.trim(), undefined, undefined, replyToData)
     setNewMessage("")
     setReplyingTo(null)
-    loadMessages()
+    loadAllMessages()
+    markMessagesAsRead()
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
