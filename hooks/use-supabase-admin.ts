@@ -839,7 +839,32 @@ export function useQuizzes(userId?: string) {
     return { error: null }
   }
 
-  return { data, loading, refetch: fetchData, create, update, remove }
+  const submitAttempt = async (quizId: string, answer: string, isCorrect: boolean) => {
+    if (!userId) return { error: "User not logged in" }
+    const supabase = createClient()
+    const { error } = await supabase.from("quiz_attempts").insert({
+      quiz_id: quizId,
+      user_id: userId,
+      answer,
+      is_correct: isCorrect,
+      created_at: new Date().toISOString()
+    })
+    if (error) return { error: error.message }
+    return { error: null }
+  }
+
+  const getAttempts = async (quizId: string) => {
+    if (!userId) return []
+    const supabase = createClient()
+    const { data: attempts } = await supabase
+      .from("quiz_attempts")
+      .select("*")
+      .eq("quiz_id", quizId)
+      .eq("user_id", userId)
+    return attempts || []
+  }
+
+  return { data, loading, refetch: fetchData, create, update, remove, submitAttempt, getAttempts }
 }
 
 // Presentations hook with polling
@@ -916,4 +941,54 @@ export function useSupervisorTeams() {
     created_at: string
     updated_at: string
   }>(TABLES.SUPERVISOR_TEAMS)
+}
+
+// Feedbacks hook for operators with polling
+export function useFeedbacksForOperator(userId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchData = useCallback(async () => {
+    if (!userId) {
+      setData([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    const supabase = createClient()
+    const { data: feedbacks, error } = await supabase
+      .from(TABLES.FEEDBACKS)
+      .select("*")
+      .eq("operator_id", userId)
+      .order("created_at", { ascending: false })
+
+    if (!error && feedbacks) {
+      setData(feedbacks)
+    }
+    setLoading(false)
+  }, [userId])
+
+  useEffect(() => {
+    fetchData()
+
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchData, POLLING_INTERVAL)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [fetchData])
+
+  const markAsRead = async (feedbackId: string) => {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from(TABLES.FEEDBACKS)
+      .update({ is_read: true })
+      .eq("id", feedbackId)
+    if (error) return { error: error.message }
+    fetchData()
+    return { error: null }
+  }
+
+  return { data, loading, refetch: fetchData, markAsRead }
 }

@@ -52,7 +52,6 @@ import {
   useAllUsers,
   createQualityPostSupabase,
   likePostSupabase,
-  addCommentSupabase,
   voteOnQuizSupabase,
   createFeedbackSupabase,
   answerAdminQuestion,
@@ -453,11 +452,6 @@ function PostCard({
   getInitials: (name: string) => string
   formatTimeAgo: (date: Date) => string
 }) {
-  const [showComments, setShowComments] = useState(false)
-  const [commentText, setCommentText] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
-
   const hasLiked = post.likes?.includes(user?.id || "")
   const isQuiz = post.type === "quiz"
   const userVote = post.quizOptions?.find(opt => opt.votes?.includes(user?.id || ""))
@@ -470,24 +464,6 @@ function PostCard({
   const handleVote = async (optionId: string) => {
     if (!user || userVote) return
     await voteOnQuizSupabase(post.id, optionId, user.id)
-  }
-
-  const handleComment = async () => {
-    if (!commentText.trim() || !user || isSubmitting) return
-    
-    if (containsProfanity(commentText)) {
-      toast({ title: "Erro", description: getProfanityWarning(), variant: "destructive" })
-      return
-    }
-
-    setIsSubmitting(true)
-    await addCommentSupabase(post.id, {
-      content: commentText,
-      authorId: user.id,
-      authorName: user.fullName || user.username || "Usuario",
-    })
-    setCommentText("")
-    setIsSubmitting(false)
   }
 
   const getTypeBadge = () => {
@@ -594,68 +570,7 @@ function PostCard({
             <ThumbsUp className={cn("h-4 w-4", hasLiked && "fill-current")} />
             <span>{post.likes?.length || 0}</span>
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowComments(!showComments)}
-            className="gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span>{post.comments?.length || 0}</span>
-          </Button>
         </div>
-
-        {/* Comments Section */}
-        {showComments && (
-          <div className="mt-3 pt-3 border-t space-y-3">
-            {/* Comment Input */}
-            <div className="flex gap-2">
-              <Input
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Escreva um comentario..."
-                className="flex-1 h-9 text-sm"
-                onKeyDown={(e) => e.key === "Enter" && handleComment()}
-              />
-              <Button
-                onClick={handleComment}
-                disabled={!commentText.trim() || isSubmitting}
-                size="sm"
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Comments List */}
-            {post.comments?.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-2">
-                Nenhum comentario ainda
-              </p>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {post.comments?.map((comment) => (
-                  <div key={comment.id} className="flex gap-2 p-2 rounded bg-muted/30">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(comment.authorName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-xs">{comment.authorName}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimeAgo(new Date(comment.createdAt))}
-                        </span>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   )

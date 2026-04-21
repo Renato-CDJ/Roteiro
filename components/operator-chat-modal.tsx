@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Send, Reply, X } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-import { sendChatMessage, markChatMessageAsRead, getChatSettings, getChatMessages } from "@/lib/store"
+import { sendChatMessage, markChatMessageAsRead, getChatSettings, getAllChatMessages } from "@/lib/store"
 import type { ChatMessage } from "@/lib/types"
 
 interface OperatorChatModalProps {
@@ -26,7 +26,7 @@ export const OperatorChatModal = memo(function OperatorChatModal({ isOpen, onClo
 
   // Load messages with polling
   const loadAllMessages = () => {
-    const msgs = getChatMessages()
+    const msgs = getAllChatMessages()
     setAllMessages(msgs)
   }
 
