@@ -5,13 +5,14 @@ import { createClient } from "@/lib/supabase/client"
 import { mapSupabaseUser } from "@/lib/auth-context"
 import type { User, QualityPost, QualityComment } from "@/lib/types"
 
-// Users hook with realtime
+// Polling interval - 60 seconds para reduzir requisições
+const POLLING_INTERVAL = 60000
+
+// Users hook with polling (sem realtime)
 export function useSupabaseUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
-  const subscribedRef = useRef(false)
 
   const fetchUsers = useCallback(async () => {
     const supabase = createClient()
@@ -28,40 +29,14 @@ export function useSupabaseUsers() {
 
   useEffect(() => {
     mountedRef.current = true
-    subscribedRef.current = false
     fetchUsers()
 
-    const supabase = createClient()
-    const channelId = `users-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    
-    // Create channel and configure listeners before subscribing
-    const channel = supabase.channel(channelId)
-    
-    channel.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "users" },
-      () => {
-        if (mountedRef.current) fetchUsers()
-      }
-    )
-    
-    // Only subscribe once
-    if (!subscribedRef.current) {
-      subscribedRef.current = true
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          channelRef.current = channel
-        }
-      })
-    }
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchUsers, POLLING_INTERVAL)
 
     return () => {
       mountedRef.current = false
-      subscribedRef.current = false
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
+      clearInterval(interval)
     }
   }, [fetchUsers])
 
@@ -106,14 +81,12 @@ function isPostExpired(createdAt: Date): boolean {
   return hoursDiff >= 24
 }
 
-// Quality Posts hook with realtime
+// Quality Posts hook with polling (sem realtime)
 export function useQualityPosts(includeArchived: boolean = false) {
   const [posts, setPosts] = useState<QualityPost[]>([])
   const [archivedPosts, setArchivedPosts] = useState<QualityPost[]>([])
   const [loading, setLoading] = useState(true)
-  const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
-  const subscribedRef = useRef(false)
 
   // Load archived posts from localStorage on mount
   useEffect(() => {
@@ -137,27 +110,6 @@ export function useQualityPosts(includeArchived: boolean = false) {
       return
     }
 
-    // Fetch all comments
-    const { data: commentsData } = await supabase
-      .from("quality_comments")
-      .select("*")
-      .order("created_at", { ascending: true })
-
-    const commentsMap = new Map<string, QualityComment[]>()
-    if (commentsData) {
-      for (const c of commentsData) {
-        const postComments = commentsMap.get(c.post_id) || []
-        postComments.push({
-          id: c.id,
-          authorId: c.author_id,
-          authorName: c.author_name,
-          content: c.content,
-          createdAt: new Date(c.created_at),
-        })
-        commentsMap.set(c.post_id, postComments)
-      }
-    }
-
     const mappedPosts: QualityPost[] = (postsData || []).map((p) => ({
       id: p.id,
       type: p.type,
@@ -173,7 +125,7 @@ export function useQualityPosts(includeArchived: boolean = false) {
       recipientNames: p.recipient_names || [],
       sendToAll: p.send_to_all ?? true,
       backgroundColor: p.background_color || undefined,
-      comments: commentsMap.get(p.id) || [],
+      comments: [], // Comentários removidos
     }))
 
     // Separar posts ativos (menos de 24h) e expirados (mais de 24h)
@@ -212,44 +164,14 @@ export function useQualityPosts(includeArchived: boolean = false) {
 
   useEffect(() => {
     mountedRef.current = true
-    subscribedRef.current = false
     fetchPosts()
 
-    const supabase = createClient()
-    const channelId = `quality-posts-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    
-    // Create channel and configure listeners before subscribing
-    const channel = supabase.channel(channelId)
-    
-    channel
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "quality_posts" },
-        () => { if (mountedRef.current) fetchPosts() }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "quality_comments" },
-        () => { if (mountedRef.current) fetchPosts() }
-      )
-    
-    // Only subscribe once
-    if (!subscribedRef.current) {
-      subscribedRef.current = true
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          channelRef.current = channel
-        }
-      })
-    }
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchPosts, POLLING_INTERVAL)
 
     return () => {
       mountedRef.current = false
-      subscribedRef.current = false
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
+      clearInterval(interval)
     }
   }, [fetchPosts])
 
@@ -267,13 +189,11 @@ export function useQualityPosts(includeArchived: boolean = false) {
   }
 }
 
-// Admin Questions hook
+// Admin Questions hook with polling
 export function useAdminQuestions(filterByUserId?: string) {
   const [questions, setQuestions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
-  const subscribedRef = useRef(false)
 
   const fetchQuestions = useCallback(async () => {
     const supabase = createClient()
@@ -312,38 +232,14 @@ export function useAdminQuestions(filterByUserId?: string) {
 
   useEffect(() => {
     mountedRef.current = true
-    subscribedRef.current = false
     fetchQuestions()
 
-    const supabase = createClient()
-    const channelId = `admin-questions-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    
-    // Create channel and configure listeners before subscribing
-    const channel = supabase.channel(channelId)
-    
-    channel.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "admin_questions" },
-      () => { if (mountedRef.current) fetchQuestions() }
-    )
-    
-    // Only subscribe once
-    if (!subscribedRef.current) {
-      subscribedRef.current = true
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          channelRef.current = channel
-        }
-      })
-    }
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchQuestions, POLLING_INTERVAL)
 
     return () => {
       mountedRef.current = false
-      subscribedRef.current = false
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
+      clearInterval(interval)
     }
   }, [fetchQuestions])
 
@@ -441,7 +337,7 @@ export async function updateOperatorPresence(userId: string, data?: {
   }
 }
 
-// Hook for operator to maintain presence - intervalo aumentado para 60s
+// Hook for operator to maintain presence - intervalo de 60s
 export function usePresenceHeartbeat(userId?: string) {
   useEffect(() => {
     if (!userId) return
@@ -450,7 +346,7 @@ export function usePresenceHeartbeat(userId?: string) {
 
     const interval = setInterval(() => {
       updateOperatorPresence(userId)
-    }, 60000) // 60s ao inves de 30s para reduzir requests
+    }, 60000) // 60s para reduzir requests
 
     return () => clearInterval(interval)
   }, [userId])
@@ -536,20 +432,6 @@ export async function likePostSupabase(postId: string, userId: string): Promise<
   await supabase.from("quality_posts").update({ likes: newLikes }).eq("id", postId)
 }
 
-export async function addCommentSupabase(
-  postId: string,
-  comment: { authorId: string; authorName: string; content: string }
-): Promise<void> {
-  const supabase = createClient()
-  
-  await supabase.from("quality_comments").insert({
-    post_id: postId,
-    author_id: comment.authorId,
-    author_name: comment.authorName,
-    content: comment.content,
-  })
-}
-
 export async function voteOnQuizSupabase(
   postId: string,
   optionId: string,
@@ -590,10 +472,6 @@ export async function getQualityStatsSupabase(): Promise<{
 
   const totalLikes = (posts || []).reduce((acc, p) => acc + (p.likes?.length || 0), 0)
 
-  const { count: commentsCount } = await supabase
-    .from("quality_comments")
-    .select("*", { count: "exact", head: true })
-
   const { data: users } = await supabase
     .from("users")
     .select("role, is_online")
@@ -605,19 +483,17 @@ export async function getQualityStatsSupabase(): Promise<{
   return {
     totalPosts: postsCount || 0,
     totalLikes,
-    totalComments: commentsCount || 0,
+    totalComments: 0, // Comentários removidos
     totalUsers,
     onlineCount,
   }
 }
 
-// Feedbacks hook with realtime
+// Feedbacks hook with polling
 export function useFeedbacks() {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const channelRef = useRef<any>(null)
   const mountedRef = useRef(true)
-  const subscribedRef = useRef(false)
 
   const fetchFeedbacks = useCallback(async () => {
     const supabase = createClient()
@@ -643,45 +519,21 @@ export function useFeedbacks() {
 
   useEffect(() => {
     mountedRef.current = true
-    subscribedRef.current = false
     fetchFeedbacks()
 
-    const supabase = createClient()
-    const channelId = `feedbacks-changes-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    
-    // Create channel and configure listeners before subscribing
-    const channel = supabase.channel(channelId)
-    
-    channel.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "feedbacks" },
-      () => { if (mountedRef.current) fetchFeedbacks() }
-    )
-    
-    // Only subscribe once
-    if (!subscribedRef.current) {
-      subscribedRef.current = true
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          channelRef.current = channel
-        }
-      })
-    }
+    // Polling ao invés de realtime
+    const interval = setInterval(fetchFeedbacks, POLLING_INTERVAL)
 
     return () => {
       mountedRef.current = false
-      subscribedRef.current = false
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
+      clearInterval(interval)
     }
   }, [fetchFeedbacks])
 
   return { feedbacks, loading, refetch: fetchFeedbacks }
 }
 
-// Quality Stats hook with realtime
+// Quality Stats hook with polling
 export function useQualityStats() {
   const [stats, setStats] = useState({
     totalPosts: 0,
@@ -700,8 +552,8 @@ export function useQualityStats() {
   useEffect(() => {
     fetchStats()
 
-    // Refresh stats every 60 seconds - estatísticas não precisam de atualização tão frequente
-    const interval = setInterval(fetchStats, 60000)
+    // Polling a cada 60 segundos
+    const interval = setInterval(fetchStats, POLLING_INTERVAL)
     return () => clearInterval(interval)
   }, [fetchStats])
 
@@ -784,9 +636,6 @@ export async function createAdminQuestion(data: {
 export async function deleteQualityPostSupabase(postId: string): Promise<void> {
   const supabase = createClient()
   
-  // Delete comments first
-  await supabase.from("quality_comments").delete().eq("post_id", postId)
-  
   // Delete post
   await supabase.from("quality_posts").delete().eq("id", postId)
 }
@@ -801,21 +650,6 @@ export async function editQualityPostSupabase(postId: string, content: string, b
   }
 
   await supabase.from("quality_posts").update(updates).eq("id", postId)
-}
-
-// Delete comment
-export async function deleteCommentSupabase(commentId: string): Promise<void> {
-  const supabase = createClient()
-  await supabase.from("quality_comments").delete().eq("id", commentId)
-}
-
-// Edit comment
-export async function editCommentSupabase(commentId: string, content: string): Promise<void> {
-  const supabase = createClient()
-  await supabase.from("quality_comments").update({
-    content,
-    updated_at: new Date().toISOString(),
-  }).eq("id", commentId)
 }
 
 // Mark feedback as read

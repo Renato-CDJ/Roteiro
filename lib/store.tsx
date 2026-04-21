@@ -1026,49 +1026,31 @@ async function syncProductsFromSupabase() {
   }
 }
 
-// Initialize Supabase sync on load
-let realtimeInitialized = false
+// Initialize Supabase sync on load with polling (sem realtime)
+let syncInitialized = false
 
-function initializeSupabaseRealtime() {
-  if (realtimeInitialized || typeof window === "undefined") return
-  realtimeInitialized = true
+// Polling interval - 60 seconds para reduzir requisições
+const SYNC_POLLING_INTERVAL = 60000
+
+function initializeSupabaseSync() {
+  if (syncInitialized || typeof window === "undefined") return
+  syncInitialized = true
   
   // Initial sync
   syncScriptsFromSupabase()
   syncProductsFromSupabase()
   
-  // Get a single client instance for realtime
-  const supabase = getSupabaseClient()
-  
-  // Subscribe to realtime changes for scripts
-  supabase
-    .channel("scripts-realtime")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "scripts" },
-      () => {
-        syncScriptsFromSupabase()
-      }
-    )
-    .subscribe()
-  
-  // Subscribe to realtime changes for products
-  supabase
-    .channel("products-realtime")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "products" },
-      () => {
-        syncProductsFromSupabase()
-      }
-    )
-    .subscribe()
+  // Polling ao invés de realtime
+  setInterval(() => {
+    syncScriptsFromSupabase()
+    syncProductsFromSupabase()
+  }, SYNC_POLLING_INTERVAL)
 }
 
 // Initialize on first access
 if (typeof window !== "undefined") {
   // Delay initialization to ensure client is ready
-  setTimeout(initializeSupabaseRealtime, 100)
+  setTimeout(initializeSupabaseSync, 100)
 }
 
 // Script steps
@@ -1271,27 +1253,18 @@ async function syncChannelsFromSupabase() {
   }
 }
 
-// Initialize sync for tabulations, situations, channels
+// Initialize sync for tabulations, situations, channels with polling (sem realtime)
 if (typeof window !== "undefined") {
   syncTabulationsFromSupabase()
   syncSituationsFromSupabase()
   syncChannelsFromSupabase()
   
-  // Realtime subscriptions
-  getSupabaseClient()
-    .channel("tabulations-realtime")
-    .on("postgres_changes", { event: "*", schema: "public", table: "tabulations" }, () => syncTabulationsFromSupabase())
-    .subscribe()
-  
-  getSupabaseClient()
-    .channel("situations-realtime")
-    .on("postgres_changes", { event: "*", schema: "public", table: "situations" }, () => syncSituationsFromSupabase())
-    .subscribe()
-  
-  getSupabaseClient()
-    .channel("channels-realtime")
-    .on("postgres_changes", { event: "*", schema: "public", table: "channels" }, () => syncChannelsFromSupabase())
-    .subscribe()
+  // Polling ao invés de realtime
+  setInterval(() => {
+    syncTabulationsFromSupabase()
+    syncSituationsFromSupabase()
+    syncChannelsFromSupabase()
+  }, SYNC_POLLING_INTERVAL)
 }
 
 // Tabulations
