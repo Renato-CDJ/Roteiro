@@ -165,12 +165,17 @@ async function validateUserCredentials(
     const supabase = createClient()
     const normalizedEmail = normalizeEmail(email)
     
+    console.log("[v0] Tentando login com email:", normalizedEmail)
+    console.log("[v0] Senha fornecida:", password)
+    
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
       .from("users")
       .select("*")
       .ilike("email", normalizedEmail)
       .limit(1)
+
+    console.log("[v0] Resultado da busca:", { users, error })
 
     if (error) {
       console.error("[Supabase] Query error:", error)
@@ -179,6 +184,7 @@ async function validateUserCredentials(
 
     // Se nao encontrou usuario
     if (!users || users.length === 0) {
+      console.log("[v0] Usuario nao encontrado para email:", normalizedEmail)
       // Se for admin, nao permitir auto-registro
       if (isAdminEmail(normalizedEmail)) {
         return { success: false, error: "Usuario administrador nao encontrado" }
@@ -189,19 +195,25 @@ async function validateUserCredentials(
     }
 
     const userData = users[0]
+    console.log("[v0] Usuario encontrado:", { id: userData.id, email: userData.email, role: userData.role, password: userData.password })
 
     // Verificar se usuario esta ativo
     if (userData.is_active === false) {
+      console.log("[v0] Usuario desativado")
       return { success: false, error: "Usuario desativado" }
     }
 
     // Verificar senha para admins/supervisores
     const requiresPassword = userData.role === "admin" || userData.role === "supervisor"
+    console.log("[v0] Requer senha:", requiresPassword, "| Senha no DB:", userData.password, "| Senha digitada:", password)
+    
     if (requiresPassword && userData.password && userData.password !== password) {
+      console.log("[v0] Senha incorreta! DB:", userData.password, "vs Input:", password)
       return { success: false, error: "Senha incorreta" }
     }
 
     const user = mapSupabaseUser(userData)
+    console.log("[v0] Login bem sucedido para:", user.email)
 
     // Atualizar status online
     await supabase
@@ -215,7 +227,7 @@ async function validateUserCredentials(
 
     return { success: true, user }
   } catch (error: any) {
-    console.error("[Supabase] Validation error:", error)
+    console.error("[v0] Validation error:", error)
     return { success: false, error: "Erro ao validar credenciais" }
   }
 }
