@@ -151,7 +151,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-start pt-12 sm:pt-16 md:pt-20 bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-start pt-32 sm:pt-40 md:pt-48 bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
         <div className="w-full max-w-md px-2 sm:px-0">
           {/* Titulo */}
           <div className="mb-10 sm:mb-14 text-center">
