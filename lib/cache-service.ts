@@ -115,12 +115,19 @@ async function getRemoteDataVersion(): Promise<DataVersion | null> {
       .from("app_settings")
       .select("value")
       .eq("key", "data_version")
-      .single()
+      .maybeSingle()
     
-    if (error || !data) return null
+    if (error) {
+      // Silenciar erro se a tabela nao existir ou registro nao encontrado
+      if (error.code === "PGRST116" || error.code === "42P01") {
+        return null
+      }
+      return null
+    }
+    
+    if (!data) return null
     return data.value as DataVersion
-  } catch (e) {
-    console.error("[Cache] Erro ao buscar versão remota:", e)
+  } catch {
     return null
   }
 }
@@ -143,7 +150,7 @@ export async function updateDataVersion(dataType: keyof DataVersion): Promise<vo
       .from("app_settings")
       .select("value")
       .eq("key", "data_version")
-      .single()
+      .maybeSingle()
     
     const currentVersion = currentData?.value || {}
     
@@ -157,8 +164,8 @@ export async function updateDataVersion(dataType: keyof DataVersion): Promise<vo
         },
         updated_at: new Date().toISOString(),
       })
-  } catch (e) {
-    console.error("[Cache] Erro ao atualizar versão:", e)
+  } catch {
+    // Silenciar erro se a tabela nao existir
   }
 }
 
