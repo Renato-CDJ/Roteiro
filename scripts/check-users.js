@@ -38,7 +38,12 @@ async function checkUsers() {
   if (adminError) {
     console.log('[v0] Erro ao buscar admin@gruporoveri.com:', adminError.message)
   } else {
-    console.log('[v0] Admin encontrado:', admin)
+    console.log('[v0] Admin encontrado:')
+    console.log('  - ID:', admin.id)
+    console.log('  - Email:', admin.email)
+    console.log('  - Password:', admin.password)
+    console.log('  - Role:', admin.role)
+    console.log('  - is_active:', admin.is_active)
   }
 }
 
