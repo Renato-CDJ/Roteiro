@@ -19,32 +19,16 @@ function AnimatedTitle() {
       <div 
         className="absolute pointer-events-none transition-all duration-700 ease-out"
         style={{
-          top: "-180px",
-          left: "-150px",
-          width: "320px",
-          height: "380px",
-          background: "linear-gradient(145deg, rgba(251, 146, 60, 0.6) 0%, rgba(251, 146, 60, 0.25) 25%, rgba(251, 146, 60, 0.08) 50%, transparent 70%)",
-          clipPath: "polygon(40% 0%, 100% 100%, 0% 100%)",
+          top: "-100px",
+          left: "-80px",
+          width: "180px",
+          height: "220px",
+          background: "linear-gradient(135deg, rgba(251, 146, 60, 0.4) 0%, rgba(251, 146, 60, 0.15) 30%, transparent 60%)",
+          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
           opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(-12deg)" : "scale(0.7) rotate(-12deg)",
+          transform: isHovered ? "scale(1) rotate(-5deg)" : "scale(0.8) rotate(-5deg)",
           transformOrigin: "top center",
-          filter: "blur(8px)",
-        }}
-      />
-      {/* Núcleo brilhante do holofote esquerdo */}
-      <div 
-        className="absolute pointer-events-none transition-all duration-700 ease-out"
-        style={{
-          top: "-160px",
-          left: "-100px",
-          width: "200px",
-          height: "280px",
-          background: "linear-gradient(145deg, rgba(251, 191, 36, 0.5) 0%, rgba(251, 146, 60, 0.2) 30%, transparent 60%)",
-          clipPath: "polygon(45% 0%, 90% 100%, 10% 100%)",
-          opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(-12deg)" : "scale(0.7) rotate(-12deg)",
-          transformOrigin: "top center",
-          filter: "blur(4px)",
+          filter: "blur(12px)",
         }}
       />
       
@@ -52,34 +36,17 @@ function AnimatedTitle() {
       <div 
         className="absolute pointer-events-none transition-all duration-700 ease-out"
         style={{
-          top: "-180px",
-          right: "-150px",
-          width: "320px",
-          height: "380px",
-          background: "linear-gradient(-145deg, rgba(251, 146, 60, 0.6) 0%, rgba(251, 146, 60, 0.25) 25%, rgba(251, 146, 60, 0.08) 50%, transparent 70%)",
-          clipPath: "polygon(60% 0%, 100% 100%, 0% 100%)",
+          top: "-100px",
+          right: "-80px",
+          width: "180px",
+          height: "220px",
+          background: "linear-gradient(-135deg, rgba(251, 146, 60, 0.4) 0%, rgba(251, 146, 60, 0.15) 30%, transparent 60%)",
+          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
           opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(12deg)" : "scale(0.7) rotate(12deg)",
+          transform: isHovered ? "scale(1) rotate(5deg)" : "scale(0.8) rotate(5deg)",
           transformOrigin: "top center",
           transitionDelay: "80ms",
-          filter: "blur(8px)",
-        }}
-      />
-      {/* Núcleo brilhante do holofote direito */}
-      <div 
-        className="absolute pointer-events-none transition-all duration-700 ease-out"
-        style={{
-          top: "-160px",
-          right: "-100px",
-          width: "200px",
-          height: "280px",
-          background: "linear-gradient(-145deg, rgba(251, 191, 36, 0.5) 0%, rgba(251, 146, 60, 0.2) 30%, transparent 60%)",
-          clipPath: "polygon(55% 0%, 90% 100%, 10% 100%)",
-          opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(12deg)" : "scale(0.7) rotate(12deg)",
-          transformOrigin: "top center",
-          transitionDelay: "80ms",
-          filter: "blur(4px)",
+          filter: "blur(12px)",
         }}
       />
       
@@ -87,22 +54,10 @@ function AnimatedTitle() {
       <div 
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-500 ease-out"
         style={{
-          width: "160%",
-          height: "140%",
-          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(251, 146, 60, 0.2) 0%, rgba(251, 146, 60, 0.08) 40%, transparent 70%)",
+          width: "120%",
+          height: "100%",
+          background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(251, 146, 60, 0.15) 0%, transparent 70%)",
           opacity: isHovered ? 1 : 0,
-        }}
-      />
-      {/* Reflexo no chão */}
-      <div 
-        className="absolute left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-600 ease-out"
-        style={{
-          bottom: "-20px",
-          width: "80%",
-          height: "40px",
-          background: "radial-gradient(ellipse 100% 100% at 50% 0%, rgba(251, 146, 60, 0.15) 0%, transparent 80%)",
-          opacity: isHovered ? 1 : 0,
-          filter: "blur(8px)",
         }}
       />
       
