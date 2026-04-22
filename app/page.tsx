@@ -23,7 +23,7 @@ function AnimatedTitle() {
           left: "-150px",
           width: "320px",
           height: "380px",
-          background: "linear-gradient(145deg, rgba(251, 146, 60, 0.6) 0%, rgba(251, 146, 60, 0.25) 25%, rgba(251, 146, 60, 0.08) 50%, transparent 70%)",
+          background: "linear-gradient(145deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)",
           clipPath: "polygon(40% 0%, 100% 100%, 0% 100%)",
           opacity: isHovered ? 1 : 0,
           transform: isHovered ? "scale(1) rotate(-12deg)" : "scale(0.7) rotate(-12deg)",
@@ -39,7 +39,7 @@ function AnimatedTitle() {
           left: "-100px",
           width: "200px",
           height: "280px",
-          background: "linear-gradient(145deg, rgba(251, 191, 36, 0.5) 0%, rgba(251, 146, 60, 0.2) 30%, transparent 60%)",
+          background: "linear-gradient(145deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.3) 30%, transparent 60%)",
           clipPath: "polygon(45% 0%, 90% 100%, 10% 100%)",
           opacity: isHovered ? 1 : 0,
           transform: isHovered ? "scale(1) rotate(-12deg)" : "scale(0.7) rotate(-12deg)",
@@ -56,7 +56,7 @@ function AnimatedTitle() {
           right: "-150px",
           width: "320px",
           height: "380px",
-          background: "linear-gradient(-145deg, rgba(251, 146, 60, 0.6) 0%, rgba(251, 146, 60, 0.25) 25%, rgba(251, 146, 60, 0.08) 50%, transparent 70%)",
+          background: "linear-gradient(-145deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 25%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)",
           clipPath: "polygon(60% 0%, 100% 100%, 0% 100%)",
           opacity: isHovered ? 1 : 0,
           transform: isHovered ? "scale(1) rotate(12deg)" : "scale(0.7) rotate(12deg)",
@@ -73,7 +73,7 @@ function AnimatedTitle() {
           right: "-100px",
           width: "200px",
           height: "280px",
-          background: "linear-gradient(-145deg, rgba(251, 191, 36, 0.5) 0%, rgba(251, 146, 60, 0.2) 30%, transparent 60%)",
+          background: "linear-gradient(-145deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.3) 30%, transparent 60%)",
           clipPath: "polygon(55% 0%, 90% 100%, 10% 100%)",
           opacity: isHovered ? 1 : 0,
           transform: isHovered ? "scale(1) rotate(12deg)" : "scale(0.7) rotate(12deg)",
@@ -89,7 +89,7 @@ function AnimatedTitle() {
         style={{
           width: "160%",
           height: "140%",
-          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(251, 146, 60, 0.2) 0%, rgba(251, 146, 60, 0.08) 40%, transparent 70%)",
+          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%)",
           opacity: isHovered ? 1 : 0,
         }}
       />
@@ -100,7 +100,7 @@ function AnimatedTitle() {
           bottom: "-20px",
           width: "80%",
           height: "40px",
-          background: "radial-gradient(ellipse 100% 100% at 50% 0%, rgba(251, 146, 60, 0.15) 0%, transparent 80%)",
+          background: "radial-gradient(ellipse 100% 100% at 50% 0%, rgba(255, 255, 255, 0.2) 0%, transparent 80%)",
           opacity: isHovered ? 1 : 0,
           filter: "blur(8px)",
         }}
