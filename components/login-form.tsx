@@ -50,9 +50,7 @@ export const LoginForm = memo(function LoginForm() {
           return
         }
         
-        console.log("[v0] Tentando login com:", { email: email.trim(), password: showPasswordField ? password : "" })
         const result = await login(email.trim(), showPasswordField ? password : "")
-        console.log("[v0] Resultado do login:", result)
         
         if (!result.success) {
           setError(result.error || "Erro ao fazer login")
