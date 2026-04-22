@@ -5,7 +5,7 @@ const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXB
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-// Lista de operadores atualizada
+// Lista de operadores atualizada - apenas usuários com login definido
 const operators = [
   { username: 'sabmedeiros', name: 'SABRINA NUNES DE MEDEIROS' },
   { username: 'fbugada', name: 'FABIOLLA BUGADA' },
@@ -486,37 +486,46 @@ const operators = [
   { username: 'lafraga', name: 'LARISSA DA SILVA FRAGA' },
   { username: 'nanovaes', name: 'NATHALIA REGINA SILVA NOVAES' },
   { username: 'nialbuquerque', name: 'NICOLE CAVALCANTE DE ALBUQUERQUE' },
-  { username: 'vtrbatista', name: 'VITORIA SILVA BATISTA' }
+  { username: 'vtrbatista', name: 'VITORIA SILVA BATISTA' },
 ]
 
 async function insertOperators() {
   console.log('Iniciando inserção de operadores...')
   console.log(`Total de operadores a inserir: ${operators.length}`)
-  
-  let inserted = 0
-  let skipped = 0
-  let errors = 0
 
-  for (const op of operators) {
-    const userData = {
-      username: op.username.toLowerCase(),
-      name: op.name,
-      email: `${op.username.toLowerCase()}@gruporoveri.com`,
-      role: 'operator',
-      is_active: true
-    }
+  // Normalizar usernames para lowercase
+  const normalizedOperators = operators.map(op => ({
+    ...op,
+    username: op.username.toLowerCase()
+  }))
+
+  // Remover duplicatas por username
+  const uniqueOperators = normalizedOperators.filter((op, index, self) =>
+    index === self.findIndex(o => o.username === op.username)
+  )
+
+  console.log(`Operadores únicos: ${uniqueOperators.length}`)
+
+  let inserted = 0
+  let errors = 0
+  const errorList = []
+
+  for (const op of uniqueOperators) {
+    const email = `${op.username}@gruporoveri.com`
+    const password = op.username
 
     const { error } = await supabase
       .from('users')
-      .upsert(userData, { onConflict: 'username' })
+      .insert({
+        email,
+        password,
+        name: op.name,
+        role: 'operator'
+      })
 
     if (error) {
-      if (error.code === '23505') {
-        skipped++
-      } else {
-        console.error(`Erro ao inserir ${op.username}:`, error.message)
-        errors++
-      }
+      errors++
+      errorList.push(`${op.username}: ${error.message}`)
     } else {
       inserted++
     }
@@ -524,16 +533,20 @@ async function insertOperators() {
 
   console.log('\n=== RESULTADO ===')
   console.log(`Inseridos: ${inserted}`)
-  console.log(`Já existentes (ignorados): ${skipped}`)
   console.log(`Erros: ${errors}`)
-  console.log(`Total processado: ${operators.length}`)
-  
-  // Verificar total de operadores no banco
+  console.log(`Total processado: ${uniqueOperators.length}`)
+
+  if (errorList.length > 0 && errorList.length <= 20) {
+    console.log('\nErros encontrados:')
+    errorList.forEach(e => console.log(`  - ${e}`))
+  }
+
+  // Verificar total no banco
   const { count } = await supabase
     .from('users')
     .select('*', { count: 'exact', head: true })
     .eq('role', 'operator')
-  
+
   console.log(`\nTotal de operadores no banco: ${count}`)
 }
 
