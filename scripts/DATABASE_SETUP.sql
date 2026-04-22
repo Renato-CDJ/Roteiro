@@ -393,17 +393,17 @@ CREATE INDEX IF NOT EXISTS idx_training_views_user ON training_views(user_id);
 
 -- Admin Master (Acesso Total)
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('admin', 'Administrador Master', 'admin@empresa.com', 'admin123', 'admin', 'master', true)
+VALUES ('admin', 'Administrador Master', 'admin@gruporoveri.com', 'admin123', 'admin', 'master', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- Admin Monitoria (Equipe de Qualidade)
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('monitoria', 'Equipe Monitoria', 'monitoria@empresa.com', 'monitoria123', 'admin', 'monitoria', true)
+VALUES ('monitoria', 'Equipe Monitoria', 'monitoria@gruporoveri.com', 'monitoria123', 'admin', 'monitoria', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- Admin Supervisao
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('supervisao', 'Equipe Supervisao', 'supervisao@empresa.com', 'supervisao123', 'admin', 'supervisao', true)
+VALUES ('supervisao', 'Equipe Supervisao', 'supervisao@gruporoveri.com', 'supervisao123', 'admin', 'supervisao', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================
@@ -466,15 +466,15 @@ ON CONFLICT DO NOTHING;
 -- CREDENCIAIS PADRAO DOS ADMINS:
 -- 
 -- Admin Master:
---   Email: admin@empresa.com
+--   Email: admin@gruporoveri.com
 --   Senha: admin123
 -- 
 -- Admin Monitoria:
---   Email: monitoria@empresa.com
+--   Email: monitoria@gruporoveri.com
 --   Senha: monitoria123
 -- 
 -- Admin Supervisao:
---   Email: supervisao@empresa.com
+--   Email: supervisao@gruporoveri.com
 --   Senha: supervisao123
 -- 
 -- IMPORTANTE: Altere as senhas apos o primeiro acesso!
