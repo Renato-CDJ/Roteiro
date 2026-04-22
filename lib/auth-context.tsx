@@ -197,6 +197,7 @@ async function validateUserCredentials(
 
     // Verificar senha para admins/supervisores
     const requiresPassword = userData.role === "admin" || userData.role === "supervisor"
+    
     if (requiresPassword && userData.password && userData.password !== password) {
       return { success: false, error: "Senha incorreta" }
     }
@@ -215,7 +216,7 @@ async function validateUserCredentials(
 
     return { success: true, user }
   } catch (error: any) {
-    console.error("[Supabase] Validation error:", error)
+    console.error("[Auth] Validation error:", error)
     return { success: false, error: "Erro ao validar credenciais" }
   }
 }
