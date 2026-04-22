@@ -108,9 +108,9 @@ function AnimatedTitle() {
       
       {/* Texto principal */}
       <h1 
-        className="relative text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight mb-4 transition-all duration-300"
+        className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 transition-all duration-300"
         style={{ 
-          filter: isHovered ? "drop-shadow(0 0 25px rgba(251, 146, 60, 0.4))" : "none",
+          filter: isHovered ? "drop-shadow(0 0 20px rgba(251, 146, 60, 0.3))" : "none",
         }}
       >
         <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
@@ -151,16 +151,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-start pt-12 sm:pt-16 md:pt-20 bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
         <div className="w-full max-w-md px-2 sm:px-0">
           {/* Titulo */}
-          <div className="mb-10 sm:mb-14 text-center">
+          <div className="mb-8 sm:mb-10 text-center">
             <AnimatedTitle />
             
             {/* Linha estatica */}
-            <div className="h-1 w-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
+            <div className="h-1 w-24 mx-auto mb-5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
             
-            <p className="text-zinc-500 dark:text-zinc-400 text-base sm:text-lg font-medium tracking-wide">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
               Sistema de Atendimento
             </p>
           </div>
