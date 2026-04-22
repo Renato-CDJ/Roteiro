@@ -393,17 +393,64 @@ CREATE INDEX IF NOT EXISTS idx_training_views_user ON training_views(user_id);
 
 -- Admin Master (Acesso Total)
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('admin', 'Administrador Master', 'admin@gruporoveri.com', 'admin123', 'admin', 'master', true)
+VALUES ('admin', 'Administrador Master', 'admin@gruporoveri.com', 'rcp@$', 'admin', 'master', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- Admin Monitoria (Equipe de Qualidade)
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('monitoria', 'Equipe Monitoria', 'monitoria@gruporoveri.com', 'monitoria123', 'admin', 'monitoria', true)
+VALUES ('monitoria', 'Equipe Monitoria', 'monitoria@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- Admin Supervisao
 INSERT INTO users (username, name, email, password, role, admin_type, is_active)
-VALUES ('supervisao', 'Equipe Supervisao', 'supervisao@gruporoveri.com', 'supervisao123', 'admin', 'supervisao', true)
+VALUES ('supervisao', 'Equipe Supervisao', 'supervisao@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true)
+ON CONFLICT (email) DO NOTHING;
+
+-- ============================================================
+-- INSERIR USUARIOS DE MONITORIA (monitoria1 a monitoria10)
+-- ============================================================
+INSERT INTO users (username, name, email, password, role, admin_type, is_active) VALUES
+('monitoria1', 'Monitoria 1', 'monitoria1@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria2', 'Monitoria 2', 'monitoria2@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria3', 'Monitoria 3', 'monitoria3@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria4', 'Monitoria 4', 'monitoria4@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria5', 'Monitoria 5', 'monitoria5@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria6', 'Monitoria 6', 'monitoria6@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria7', 'Monitoria 7', 'monitoria7@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria8', 'Monitoria 8', 'monitoria8@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria9', 'Monitoria 9', 'monitoria9@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true),
+('monitoria10', 'Monitoria 10', 'monitoria10@gruporoveri.com', 'm1234@$.', 'admin', 'monitoria', true)
+ON CONFLICT (email) DO NOTHING;
+
+-- ============================================================
+-- INSERIR USUARIOS DE SUPERVISAO (supervisor1 a supervisor25)
+-- ============================================================
+INSERT INTO users (username, name, email, password, role, admin_type, is_active) VALUES
+('supervisor1', 'Supervisor 1', 'supervisor1@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor2', 'Supervisor 2', 'supervisor2@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor3', 'Supervisor 3', 'supervisor3@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor4', 'Supervisor 4', 'supervisor4@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor5', 'Supervisor 5', 'supervisor5@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor6', 'Supervisor 6', 'supervisor6@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor7', 'Supervisor 7', 'supervisor7@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor8', 'Supervisor 8', 'supervisor8@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor9', 'Supervisor 9', 'supervisor9@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor10', 'Supervisor 10', 'supervisor10@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor11', 'Supervisor 11', 'supervisor11@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor12', 'Supervisor 12', 'supervisor12@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor13', 'Supervisor 13', 'supervisor13@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor14', 'Supervisor 14', 'supervisor14@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor15', 'Supervisor 15', 'supervisor15@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor16', 'Supervisor 16', 'supervisor16@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor17', 'Supervisor 17', 'supervisor17@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor18', 'Supervisor 18', 'supervisor18@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor19', 'Supervisor 19', 'supervisor19@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor20', 'Supervisor 20', 'supervisor20@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor21', 'Supervisor 21', 'supervisor21@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor22', 'Supervisor 22', 'supervisor22@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor23', 'Supervisor 23', 'supervisor23@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor24', 'Supervisor 24', 'supervisor24@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true),
+('supervisor25', 'Supervisor 25', 'supervisor25@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================
@@ -463,19 +510,18 @@ ON CONFLICT DO NOTHING;
 -- 1. Execute o script RLS_POLICIES.sql para habilitar Row Level Security
 -- 2. Execute o script seed-operators.sql para adicionar operadores (opcional)
 -- 
--- CREDENCIAIS PADRAO DOS ADMINS:
+-- CREDENCIAIS DOS USUARIOS:
 -- 
 -- Admin Master:
 --   Email: admin@gruporoveri.com
---   Senha: admin123
+--   Senha: rcp@$
 -- 
--- Admin Monitoria:
---   Email: monitoria@gruporoveri.com
---   Senha: monitoria123
+-- Monitoria (monitoria, monitoria1 a monitoria10):
+--   Email: monitoria@gruporoveri.com (ou monitoriaX@gruporoveri.com)
+--   Senha: m1234@$.
 -- 
--- Admin Supervisao:
---   Email: supervisao@gruporoveri.com
---   Senha: supervisao123
+-- Supervisao (supervisao, supervisor1 a supervisor25):
+--   Email: supervisao@gruporoveri.com (ou supervisorX@gruporoveri.com)
+--   Senha: s1234@$.
 -- 
--- IMPORTANTE: Altere as senhas apos o primeiro acesso!
 -- ============================================================
