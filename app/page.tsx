@@ -91,10 +91,7 @@ export default function HomePage() {
           <div className="mb-8 sm:mb-10 text-center">
             <AnimatedTitle />
             
-            {/* Linha estatica */}
-            <div className="h-1 w-24 mx-auto mb-5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500" />
-            
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+<p className="text-zinc-600 dark:text-zinc-300 text-lg font-semibold tracking-wide">
               Sistema de Atendimento
             </p>
           </div>

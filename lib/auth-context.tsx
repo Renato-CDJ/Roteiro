@@ -115,47 +115,6 @@ function normalizeEmail(email: string): string {
   return trimmed
 }
 
-// Extrair username do email
-function extractUsernameFromEmail(email: string): string {
-  const [localPart] = email.split("@")
-  return localPart.replace(/[^a-zA-Z0-9]/g, "_")
-}
-
-// Criar operador automaticamente se nao existir
-async function createOperatorIfNotExists(email: string): Promise<{ success: boolean; user?: User; error?: string }> {
-  const supabase = createClient()
-  
-  try {
-    const username = extractUsernameFromEmail(email)
-    
-    const { data: newUser, error: insertError } = await supabase
-      .from("users")
-      .insert({
-        username,
-        email: email.toLowerCase(),
-        name: username,
-        role: "operator",
-        is_active: true,
-        is_online: true,
-        last_login: new Date().toISOString(),
-        last_activity: new Date().toISOString(),
-        allowed_tabs: [],
-      })
-      .select()
-      .single()
-
-    if (insertError) {
-      console.error("[Supabase] Error creating operator:", insertError)
-      return { success: false, error: "Erro ao criar operador" }
-    }
-
-    return { success: true, user: mapSupabaseUser(newUser) }
-  } catch (error: any) {
-    console.error("[Supabase] Error creating operator:", error)
-    return { success: false, error: "Erro ao criar operador" }
-  }
-}
-
 // Validate user credentials against Supabase users table
 async function validateUserCredentials(
   email: string,
@@ -177,15 +136,9 @@ async function validateUserCredentials(
       return { success: false, error: "Erro ao buscar usuario" }
     }
 
-    // Se nao encontrou usuario
+    // Se nao encontrou usuario, retornar erro
     if (!users || users.length === 0) {
-      // Se for admin, nao permitir auto-registro
-      if (isAdminEmail(normalizedEmail)) {
-        return { success: false, error: "Usuario administrador nao encontrado" }
-      }
-      
-      // Para operadores, criar automaticamente
-      return createOperatorIfNotExists(normalizedEmail)
+      return { success: false, error: "Usuario nao encontrado. Contate o administrador." }
     }
 
     const userData = users[0]

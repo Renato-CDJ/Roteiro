@@ -313,92 +313,99 @@ export const OperatorHeader = memo(function OperatorHeader({
               </div>
             </div>
 
-            <div className="flex items-center gap-1 md:gap-2">
-              <Button
-                variant="outline"
-                size="icon"
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <button
                 onClick={() => setShowInitialGuideModal(true)}
-                className="h-9 w-9 bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white border-0 shadow-md transition-colors"
-                title="Guia Inicial"
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                title="Contratos"
               >
-                <FileText className="h-4 w-4" />
-              </Button>
+                <div className="h-9 w-9 bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Contratos</span>
+              </button>
 
-              <Button
-                variant="outline"
-                size="icon"
+              <button
                 onClick={() => setShowResultCodesModal(true)}
-                className="h-9 w-9 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 shadow-md transition-colors"
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                 title="Codigos de Resultado"
               >
-                <ListChecks className="h-4 w-4" />
-              </Button>
+                <div className="h-9 w-9 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <ListChecks className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Resultados</span>
+              </button>
 
-              <Button
-                variant="outline"
-                size="icon"
+              <button
                 onClick={() => setShowMessagesModal(true)}
-                className="h-9 w-9 bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 shadow-md transition-colors relative"
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group relative"
                 title="Central da Qualidade"
               >
-                <Bell className="h-4 w-4" />
-                {totalBadgeCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                  >
-                    {totalBadgeCount}
-                  </Badge>
-                )}
-              </Button>
+                <div className="h-9 w-9 bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors relative">
+                  <Bell className="h-4 w-4" />
+                  {totalBadgeCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                    >
+                      {totalBadgeCount}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Qualidade</span>
+              </button>
 
-              <Button
-                variant="outline"
-                size="icon"
+              <button
                 onClick={onBackToStart}
-                className="h-9 w-9 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 shadow-md transition-colors"
-                title="Voltar ao Início"
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                title="Voltar ao Inicio"
               >
-                <Home className="h-4 w-4" />
-              </Button>
+                <div className="h-9 w-9 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <Home className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Inicio</span>
+              </button>
 
               {isSessionActive && onToggleControls && (
-                <Button
-                  variant="outline"
-                  size="icon"
+                <button
                   onClick={onToggleControls}
-                  className="h-9 w-9 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white border-0 shadow-md transition-colors"
+                  className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                   title={showControls ? "Ocultar Controles" : "Exibir Controles"}
                 >
-                  {showControls ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
+                  <div className="h-9 w-9 bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                    {showControls ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </div>
+                  <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Controles</span>
+                </button>
               )}
 
               {isSessionActive && onToggleSidebar && (
-                <Button
-                  variant="outline"
-                  size="icon"
+                <button
                   onClick={onToggleSidebar}
-                  className="h-9 w-9 bg-blue-500 hover:bg-blue-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white border-0 shadow-md transition-colors"
+                  className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                   title={isSidebarOpen ? "Ocultar Painel" : "Exibir Painel"}
                 >
-                  {isSidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
-                </Button>
+                  <div className="h-9 w-9 bg-cyan-500 hover:bg-cyan-600 dark:bg-cyan-600 dark:hover:bg-cyan-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                    {isSidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+                  </div>
+                  <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Painel</span>
+                </button>
               )}
 
-              <Button
-                variant="outline"
-                size="icon"
+              <button
                 onClick={toggleTheme}
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                 title="Alternar tema"
-                className="h-9 w-9 border-2 shadow-md bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
               >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-orange-500" />
-                ) : (
-                  <Moon className="h-5 w-5 text-amber-600" />
-                )}
-              </Button>
+                <div className="h-9 w-9 border-2 shadow-md bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 rounded-lg flex items-center justify-center transition-colors">
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5 text-orange-500" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-amber-600" />
+                  )}
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Tema</span>
+              </button>
 
               <Button
                 variant="ghost"
