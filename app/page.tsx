@@ -1,77 +1,56 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
 
-// Componente animado para o titulo "Roteiro" com efeito de holofotes de palco
+// Componente animado para o titulo "Roteiro" com efeito de shimmer elegante
 function AnimatedTitle() {
-  const [isHovered, setIsHovered] = useState(false)
-  
   return (
-    <div 
-      className="relative cursor-default select-none py-8"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Holofote esquerdo - feixe de luz vindo do canto superior esquerdo */}
-      <div 
-        className="absolute pointer-events-none transition-all duration-700 ease-out"
-        style={{
-          top: "-100px",
-          left: "-80px",
-          width: "180px",
-          height: "220px",
-          background: "linear-gradient(135deg, rgba(251, 146, 60, 0.4) 0%, rgba(251, 146, 60, 0.15) 30%, transparent 60%)",
-          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
-          opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(-5deg)" : "scale(0.8) rotate(-5deg)",
-          transformOrigin: "top center",
-          filter: "blur(12px)",
-        }}
-      />
-      
-      {/* Holofote direito - feixe de luz vindo do canto superior direito */}
-      <div 
-        className="absolute pointer-events-none transition-all duration-700 ease-out"
-        style={{
-          top: "-100px",
-          right: "-80px",
-          width: "180px",
-          height: "220px",
-          background: "linear-gradient(-135deg, rgba(251, 146, 60, 0.4) 0%, rgba(251, 146, 60, 0.15) 30%, transparent 60%)",
-          clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
-          opacity: isHovered ? 1 : 0,
-          transform: isHovered ? "scale(1) rotate(5deg)" : "scale(0.8) rotate(5deg)",
-          transformOrigin: "top center",
-          transitionDelay: "80ms",
-          filter: "blur(12px)",
-        }}
-      />
-      
-      {/* Brilho central onde os holofotes se encontram */}
-      <div 
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-500 ease-out"
-        style={{
-          width: "120%",
-          height: "100%",
-          background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(251, 146, 60, 0.15) 0%, transparent 70%)",
-          opacity: isHovered ? 1 : 0,
-        }}
-      />
-      
-      {/* Texto principal */}
-      <h1 
-        className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4 transition-all duration-300"
-        style={{ 
-          filter: isHovered ? "drop-shadow(0 0 20px rgba(251, 146, 60, 0.3))" : "none",
-        }}
-      >
-        <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+    <div className="relative cursor-default select-none py-6">
+      <h1 className="relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight mb-4">
+        <span 
+          className="inline-block bg-gradient-to-r from-orange-600 via-amber-400 via-orange-500 to-orange-600 bg-clip-text text-transparent bg-[length:200%_100%] animate-shimmer"
+          style={{
+            animation: "shimmer 3s ease-in-out infinite",
+          }}
+        >
           Roteiro
         </span>
       </h1>
+      
+      {/* Linha de luz que passa por baixo do texto */}
+      <div 
+        className="absolute bottom-2 left-0 right-0 h-[2px] overflow-hidden"
+        style={{ opacity: 0.6 }}
+      >
+        <div 
+          className="h-full w-1/3 bg-gradient-to-r from-transparent via-orange-400 to-transparent"
+          style={{
+            animation: "slideLight 2.5s ease-in-out infinite",
+          }}
+        />
+      </div>
+      
+      <style jsx>{`
+        @keyframes shimmer {
+          0%, 100% {
+            backgroundPosition: 0% 50%;
+          }
+          50% {
+            backgroundPosition: 100% 50%;
+          }
+        }
+        @keyframes slideLight {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(400%);
+          }
+        }
+      `}</style>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarIcon, CheckCircle2, Info, CreditCard, Building2, Home, AlertTriangle } from "lucide-react"
-import { getMaxPromiseDate, isHoliday } from "@/lib/business-days"
+import { getMaxPromiseDate, isHoliday, isSaturday, isSunday, getNextBusinessDay } from "@/lib/business-days"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type ProductType = "cartao" | "comercial" | "habitacional"
@@ -57,6 +57,12 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
     // Data anterior a hoje não está disponível
     if (dateTime < todayTime) return false
 
+    // REGRA: Sábados NÃO são permitidos como data de vencimento
+    if (isSaturday(dateTime)) return false
+
+    // Domingos NÃO são permitidos como data de vencimento
+    if (isSunday(dateTime)) return false
+
     // Feriados nacionais não estão disponíveis
     if (isHoliday(dateTime)) return false
 
@@ -67,6 +73,15 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
     }
 
     return true
+  }
+
+  // Função para ajustar data quando cliente quer pagar no sábado
+  // Move automaticamente para o próximo dia útil
+  const adjustDateIfSaturday = (date: Date): Date => {
+    if (isSaturday(date)) {
+      return getNextBusinessDay(date)
+    }
+    return date
   }
 
   const productOptions = [
@@ -313,6 +328,19 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 </p>
               </div>
             )}
+
+            {/* Regras de Contagem */}
+            <div className="bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 rounded-md p-2 space-y-1">
+              <div className="flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <p className="text-[10px] font-bold text-amber-900 dark:text-amber-100">Regras de Contagem</p>
+              </div>
+              <ul className="text-[9px] text-amber-800 dark:text-amber-200 ml-4 space-y-0.5 list-disc list-inside">
+                <li>Contagem em dias corridos (inclui sab/dom/feriados)</li>
+                <li>Sábados, domingos e feriados NÃO podem ser data de vencimento</li>
+                <li>Se cliente informar sábado, sistema move para próximo dia útil</li>
+              </ul>
+            </div>
           </div>
         )}
       </CardContent>
