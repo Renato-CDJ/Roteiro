@@ -36,6 +36,14 @@ export function isWeekend(date: Date): boolean {
   return day === 0 || day === 6 // Sunday or Saturday
 }
 
+export function isSaturday(date: Date): boolean {
+  return date.getDay() === 6
+}
+
+export function isSunday(date: Date): boolean {
+  return date.getDay() === 0
+}
+
 export function isHoliday(date: Date): boolean {
   return ALL_HOLIDAYS.some(
     (holiday) =>
@@ -47,6 +55,43 @@ export function isHoliday(date: Date): boolean {
 
 export function isBusinessDay(date: Date): boolean {
   return !isWeekend(date) && !isHoliday(date)
+}
+
+/**
+ * Verifica se a data é um dia não útil (sábado, domingo ou feriado)
+ */
+export function isNonBusinessDay(date: Date): boolean {
+  return isWeekend(date) || isHoliday(date)
+}
+
+/**
+ * Retorna o dia útil anterior a uma data
+ * Se a data já for um dia útil, retorna ela mesma
+ */
+export function getPreviousBusinessDay(date: Date): Date {
+  const result = new Date(date)
+  result.setHours(0, 0, 0, 0)
+  
+  while (isNonBusinessDay(result)) {
+    result.setDate(result.getDate() - 1)
+  }
+  
+  return result
+}
+
+/**
+ * Retorna o próximo dia útil após uma data
+ * Se a data já for um dia útil, retorna ela mesma
+ */
+export function getNextBusinessDay(date: Date): Date {
+  const result = new Date(date)
+  result.setHours(0, 0, 0, 0)
+  
+  while (isNonBusinessDay(result)) {
+    result.setDate(result.getDate() + 1)
+  }
+  
+  return result
 }
 
 export function addBusinessDays(startDate: Date, businessDays: number): Date {
@@ -69,8 +114,11 @@ export function addBusinessDays(startDate: Date, businessDays: number): Date {
  * - Habitacional e Comercial: D+9 (dia atual + 9 dias corridos, pulando feriados nacionais)
  * - Cartão: D+6 (dia atual + 6 dias corridos, pulando feriados nacionais)
  * 
- * D+N significa: a partir do dia atual (D), conta-se N dias corridos,
- * pulando apenas feriados nacionais (finais de semana são contados normalmente)
+ * REGRAS ATUALIZADAS:
+ * - Contagem em dias corridos (inclui sábados e domingos na contagem)
+ * - Sábados, domingos e feriados são pulados na contagem, mas se a data final cair neles,
+ *   retorna o dia útil ANTERIOR como prazo limite para informar ao cliente
+ * - Se o contato for no sábado, conta como dia D
  */
 export function getMaxPromiseDate(productType: "cartao" | "comercial" | "habitacional"): Date {
   const today = new Date()
@@ -85,10 +133,16 @@ export function getMaxPromiseDate(productType: "cartao" | "comercial" | "habitac
   // Conta dias corridos a partir de hoje, pulando apenas feriados nacionais
   while (daysAdded < daysToAdd) {
     maxDate.setDate(maxDate.getDate() + 1)
-    // Só pula feriados nacionais (finais de semana contam normalmente)
+    // Só pula feriados nacionais (finais de semana contam normalmente na contagem)
     if (!isHoliday(maxDate)) {
       daysAdded++
     }
+  }
+
+  // Se a data máxima cair em sábado, domingo ou feriado,
+  // retorna o dia útil anterior como prazo limite
+  if (isNonBusinessDay(maxDate)) {
+    return getPreviousBusinessDay(maxDate)
   }
 
   return maxDate
