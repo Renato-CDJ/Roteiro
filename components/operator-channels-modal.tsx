@@ -125,7 +125,7 @@ export const OperatorChannelsModal = memo(function OperatorChannelsModal({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 gap-0 flex flex-col border-border/50 overflow-hidden">
+        <DialogContent className="max-w-2xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col border-border/50 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 flex-shrink-0">
             <DialogHeader>
@@ -180,23 +180,14 @@ export const OperatorChannelsModal = memo(function OperatorChannelsModal({
                   <button
                     key={channel.id}
                     onClick={() => handleSelectChannel(channel)}
-                    className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group overflow-hidden"
+                    className="w-full text-left px-3 py-2.5 rounded-lg border border-border/50 bg-card hover:bg-indigo-500/5 hover:border-indigo-500/40 transition-colors group overflow-hidden"
                   >
-                    <div className="flex items-start gap-3 w-full">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                        <Radio className="h-4 w-4 text-indigo-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-foreground group-hover:text-indigo-500 transition-colors break-words">
-                          {channel.name}
-                        </h4>
-                        {(channel.description || channel.contact) && (
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 break-words">
-                            {channel.contact || channel.description}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-indigo-500 transition-colors mt-0.5" />
+                    <div className="flex items-center gap-3 w-full">
+                      <Radio className="h-3.5 w-3.5 text-indigo-500 flex-shrink-0" />
+                      <span className="flex-1 min-w-0 text-sm font-medium text-foreground group-hover:text-indigo-500 transition-colors truncate">
+                        {channel.name}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-indigo-500 transition-colors" />
                     </div>
                   </button>
                 ))

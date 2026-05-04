@@ -117,7 +117,7 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 gap-0 flex flex-col border-border/50 overflow-hidden">
+        <DialogContent className="max-w-2xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col border-border/50 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 flex-shrink-0">
             <DialogHeader>

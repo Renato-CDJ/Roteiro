@@ -236,25 +236,27 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-primary" />
                 <p className="text-[10px] font-semibold text-foreground">Data Atual</p>
               </div>
-              <div className="flex justify-center p-1 bg-card rounded-lg border border-border overflow-hidden">
+              <div className="w-full bg-card rounded-lg border border-border overflow-hidden">
                 <Calendar
                   mode="single"
                   selected={today}
                   disabled={(date) => date.getTime() !== today.getTime()}
-                  className="rounded-lg scale-[0.82] origin-top"
+                  className="w-full"
                   classNames={{
                     day_today: "bg-primary text-primary-foreground font-bold ring-2 ring-primary/20",
-                    months: "flex flex-col space-y-1",
-                    month: "space-y-1 w-full",
-                    caption: "flex justify-center pt-1 relative items-center",
+                    months: "flex flex-col w-full",
+                    month: "w-full",
+                    caption: "flex justify-center py-1 relative items-center",
                     caption_label: "text-xs font-semibold",
                     nav: "space-x-1 flex items-center",
                     nav_button:
                       "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
                     table: "w-full border-collapse",
-                    head_cell: "text-muted-foreground rounded-md w-8 font-semibold text-[10px]",
-                    cell: "h-7 w-7 text-center text-xs p-0 relative",
-                    day: "h-7 w-7 p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors",
+                    head_row: "flex w-full",
+                    head_cell: "text-muted-foreground flex-1 font-semibold text-[10px] text-center",
+                    row: "flex w-full mt-1",
+                    cell: "flex-1 text-center text-xs p-0 relative",
+                    day: "w-full aspect-square p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors flex items-center justify-center",
                   }}
                 />
               </div>
@@ -276,13 +278,13 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 <p className="text-[10px] font-semibold text-foreground">Datas Disponíveis</p>
               </div>
-              <div className="flex justify-center p-1 bg-card rounded-lg border border-border overflow-hidden">
+              <div className="w-full bg-card rounded-lg border border-border overflow-hidden">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={(date) => !isDateInRange(date)}
-                  className="rounded-lg scale-[0.82] origin-top"
+                  className="w-full"
                   modifiers={{
                     available: (date) => isDateInRange(date) && date.getTime() !== today.getTime(),
                   }}
@@ -295,17 +297,19 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                     day_selected:
                       "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-bold hover:bg-emerald-700 dark:hover:bg-emerald-600 ring-2 ring-emerald-400 dark:ring-emerald-600",
                     day_disabled: "text-muted-foreground opacity-30 line-through cursor-not-allowed",
-                    months: "flex flex-col space-y-1",
-                    month: "space-y-1 w-full",
-                    caption: "flex justify-center pt-1 relative items-center",
+                    months: "flex flex-col w-full",
+                    month: "w-full",
+                    caption: "flex justify-center py-1 relative items-center",
                     caption_label: "text-xs font-semibold",
                     nav: "space-x-1 flex items-center",
                     nav_button:
                       "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
                     table: "w-full border-collapse",
-                    head_cell: "text-muted-foreground rounded-md w-8 font-semibold text-[10px]",
-                    cell: "h-7 w-7 text-center text-xs p-0 relative",
-                    day: "h-7 w-7 p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors",
+                    head_row: "flex w-full",
+                    head_cell: "text-muted-foreground flex-1 font-semibold text-[10px] text-center",
+                    row: "flex w-full mt-1",
+                    cell: "flex-1 text-center text-xs p-0 relative",
+                    day: "w-full aspect-square p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors flex items-center justify-center",
                   }}
                 />
               </div>
