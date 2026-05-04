@@ -349,7 +349,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   productCategory, 
   currentStep 
 }: OperatorSidebarProps) {
-  const [activeSection, setActiveSection] = useState<"calendar" | "checkTabulation" | "situation" | "channel">("calendar")
+  const [activeSection, setActiveSection] = useState<"calendar" | "checkTabulation">("calendar")
   
   // Estado para modais - apenas um ativo por vez
   const [modalState, setModalState] = useState<{
@@ -437,17 +437,15 @@ export const OperatorSidebar = memo(function OperatorSidebar({
       {/* Tabs */}
       <div className="border-b border-border/50 p-1.5 flex gap-1">
         {[
-          { id: "calendar" as const, icon: CalendarIcon, label: "Calen." },
-          { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verif.", badge: currentStep?.tabulations?.length },
-          { id: "situation" as const, icon: AlertCircle, label: "Situ." },
-          { id: "channel" as const, icon: Radio, label: "Canal" },
+          { id: "calendar" as const, icon: CalendarIcon, label: "Calendario" },
+          { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verificar", badge: currentStep?.tabulations?.length },
         ].map(({ id, icon: Icon, label, badge }) => (
           <Button
             key={id}
             variant={activeSection === id ? "default" : "ghost"}
             size="sm"
             onClick={() => setActiveSection(id)}
-            className={`flex-1 flex-col h-auto py-1.5 px-1 gap-0.5 relative ${
+            className={`flex-1 flex-col h-auto py-1.5 px-2 gap-0.5 relative ${
               activeSection === id
                 ? "bg-orange-500 hover:bg-orange-600 text-white"
                 : "hover:bg-muted/50"
