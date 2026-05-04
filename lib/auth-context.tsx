@@ -174,8 +174,8 @@ async function validateUserCredentials(
 
     return { success: true, user }
   } catch (error: any) {
-    console.error("[Auth] Validation error:", error)
-    return { success: false, error: "Erro ao validar credenciais" }
+    console.error("[v0] Validation error:", error?.message || error)
+    return { success: false, error: error?.message || "Erro ao validar credenciais" }
   }
 }
 
