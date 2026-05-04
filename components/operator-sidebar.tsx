@@ -198,45 +198,43 @@ export const OperatorSidebar = memo(function OperatorSidebar({
 
   return (
     <aside className="w-full md:w-[320px] lg:w-[380px] max-w-full border-l border-border/50 bg-card flex flex-col h-full shrink-0">
-      {/* Tabs */}
-      <div className="border-b border-border/50 p-1.5 flex gap-1">
+      {/* Tabs compactas */}
+      <div className="border-b border-border/50 px-1.5 pt-1 pb-0 flex gap-1 flex-shrink-0">
         {[
           { id: "calendar" as const, icon: CalendarIcon, label: "Calendario" },
           { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verificar", badge: currentStep?.tabulations?.length },
         ].map(({ id, icon: Icon, label, badge }) => (
-          <Button
+          <button
             key={id}
-            variant={activeSection === id ? "default" : "ghost"}
-            size="sm"
             onClick={() => setActiveSection(id)}
-            className={`flex-1 flex-col h-auto py-1.5 px-2 gap-0.5 relative ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-t-md text-xs font-medium transition-colors relative border-b-2 ${
               activeSection === id
-                ? "bg-orange-500 hover:bg-orange-600 text-white"
-                : "hover:bg-muted/50"
+                ? "bg-orange-500/10 text-orange-500 border-orange-500"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40 border-transparent"
             }`}
           >
-            <Icon className="h-4 w-4" />
-            <span className="text-[10px] font-medium">{label}</span>
+            <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>{label}</span>
             {badge && badge > 0 && activeSection !== id && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 ring-2 ring-card" />
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
             )}
-          </Button>
+          </button>
         ))}
       </div>
 
-      {/* Conteudo */}
-      <ScrollArea className="flex-1">
-        <div className="p-3">
+      {/* Conteudo - sem padding excessivo */}
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="p-2">
           {activeSection === "calendar" && (
-            <div className="space-y-4">
+            <div className="space-y-2">
               <PromiseCalendarInline productCategory={productCategory} />
               
-              <div className="border-t border-border/50 pt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded bg-orange-500">
-                    <CheckCircle2 className="h-3 w-3 text-white" />
+              <div className="border-t border-border/50 pt-2">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="p-0.5 rounded bg-orange-500">
+                    <CheckCircle2 className="h-2.5 w-2.5 text-white" />
                   </div>
-                  <span className="text-xs font-semibold">Tabulacao Recomendada de acordo com a sua tela atual</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground leading-tight">Tabulacao recomendada para esta tela</span>
                 </div>
                 <RecommendedTabulation 
                   currentStep={currentStep} 
@@ -247,14 +245,14 @@ export const OperatorSidebar = memo(function OperatorSidebar({
           )}
 
           {activeSection === "checkTabulation" && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600">
-                  <CheckCircle2 className="h-4 w-4 text-white" />
+                <div className="p-1 rounded-lg bg-orange-500/10">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold">Tabulacao Recomendada</h3>
-                  <p className="text-xs text-muted-foreground">De acordo com a sua tela atual</p>
+                  <h3 className="text-xs font-semibold">Tabulacao Recomendada</h3>
+                  <p className="text-[10px] text-muted-foreground">De acordo com a sua tela atual</p>
                 </div>
               </div>
               <RecommendedTabulation 

@@ -172,26 +172,19 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
                   <button
                     key={situation.id}
                     onClick={() => handleSelectSituation(situation)}
-                    className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group overflow-hidden"
+                    className="w-full text-left px-3 py-2.5 rounded-lg border border-border/50 bg-card hover:bg-amber-500/5 hover:border-amber-500/40 transition-colors group overflow-hidden"
                   >
-                    <div className="flex items-start gap-3 w-full">
+                    <div className="flex items-center gap-3 w-full">
                       {situation.color && (
                         <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0 mt-1 ring-2 ring-border/50" 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-1 ring-border/50" 
                           style={{ backgroundColor: situation.color }} 
                         />
                       )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-foreground group-hover:text-amber-500 transition-colors break-words">
-                          {situation.name}
-                        </h4>
-                        {situation.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 break-words">
-                            {situation.description}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-amber-500 transition-colors mt-0.5" />
+                      <span className="flex-1 min-w-0 text-sm font-medium text-foreground group-hover:text-amber-500 transition-colors truncate">
+                        {situation.name}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-amber-500 transition-colors" />
                     </div>
                   </button>
                 ))
