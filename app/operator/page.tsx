@@ -31,7 +31,12 @@ const mapScriptRowToStep = (step: any): ScriptStep => ({
   order: step.step_order ?? 0,
   buttons: step.buttons || [],
   tabulations: step.tabulations || [],
-  alert: step.alert,
+  // alert pode ser string (do Supabase) ou objeto (já mapeado)
+  alert: step.alert 
+    ? typeof step.alert === "string" 
+      ? { title: "Alerta", message: step.alert, createdAt: new Date() }
+      : step.alert
+    : undefined,
   isActive: step.is_active,
   createdAt: step.created_at ? new Date(step.created_at) : new Date(),
   updatedAt: step.updated_at ? new Date(step.updated_at) : new Date(),
@@ -95,7 +100,7 @@ const OperatorContent = memo(function OperatorContent() {
     if (currentStep?.alert?.message) {
       setShowAlertBar(true)
     }
-  }, [currentStep?.id])
+  }, [currentStep?.id, currentStep?.alert])
 
   // Auto-logout check - intervalo aumentado para 60s para reduzir CPU
   useEffect(() => {
