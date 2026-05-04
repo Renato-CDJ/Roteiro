@@ -34,8 +34,8 @@ const DetailModal = memo(function DetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-border/50">
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4">
+      <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 gap-0 overflow-hidden border-border/50 flex flex-col">
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 flex-shrink-0">
           <DialogHeader>
             <DialogTitle className="text-white text-lg font-semibold flex items-center justify-center gap-2 text-center">
               {situation.color && (
@@ -44,22 +44,24 @@ const DetailModal = memo(function DetailModal({
                   style={{ backgroundColor: situation.color }} 
                 />
               )}
-              <span className="truncate">{situation.name}</span>
+              <span className="break-words">{situation.name}</span>
             </DialogTitle>
           </DialogHeader>
         </div>
         
-        <div className="p-4">
-          {situation.description ? (
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {situation.description}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">
-              Sem descricao disponivel
-            </p>
-          )}
-        </div>
+        <ScrollArea className="flex-1 min-h-0 max-h-[60vh]">
+          <div className="p-4">
+            {situation.description ? (
+              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">
+                {situation.description}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Sem descricao disponivel
+              </p>
+            )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
@@ -115,12 +117,12 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-lg w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col border-border/50">
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 gap-0 flex flex-col border-border/50 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 flex-shrink-0">
             <DialogHeader>
               <DialogTitle className="text-white text-lg font-semibold flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
                 Situacoes
               </DialogTitle>
             </DialogHeader>
@@ -170,26 +172,26 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
                   <button
                     key={situation.id}
                     onClick={() => handleSelectSituation(situation)}
-                    className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group"
+                    className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group overflow-hidden"
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 w-full">
                       {situation.color && (
                         <div 
                           className="w-3 h-3 rounded-full flex-shrink-0 mt-1 ring-2 ring-border/50" 
                           style={{ backgroundColor: situation.color }} 
                         />
                       )}
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <h4 className="font-medium text-sm text-foreground group-hover:text-amber-500 transition-colors truncate">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm text-foreground group-hover:text-amber-500 transition-colors break-words">
                           {situation.name}
                         </h4>
                         {situation.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 break-words">
                             {situation.description}
                           </p>
                         )}
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-amber-500 transition-colors" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-amber-500 transition-colors mt-0.5" />
                     </div>
                   </button>
                 ))
