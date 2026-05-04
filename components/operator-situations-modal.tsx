@@ -36,20 +36,27 @@ const SituationDetailModal = memo(function SituationDetailModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col overflow-hidden">
-        {/* Header com cor laranja (amber) */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white flex-shrink-0">
+        {/* Header com cor da situação */}
+        <div 
+          className="p-6 text-white flex-shrink-0"
+          style={{ 
+            background: `linear-gradient(135deg, ${situation.color || '#f59e0b'}, ${situation.color || '#f59e0b'}cc)`,
+          }}
+        >
           <DialogHeader>
-            <div className="flex items-start gap-4 min-w-0">
-              <div className="p-3 bg-white/20 rounded-xl shrink-0">
-                <AlertCircle className="h-8 w-8" />
-              </div>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <DialogTitle className="text-xl font-bold text-white break-words overflow-wrap-anywhere">
-                  {situation.name}
-                </DialogTitle>
-                <DialogDescription className="text-amber-100 mt-1">
-                  Detalhes da situação
-                </DialogDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <AlertCircle className="h-8 w-8" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-white break-words">
+                    {situation.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 mt-1">
+                    Detalhes da situação
+                  </DialogDescription>
+                </div>
               </div>
             </div>
           </DialogHeader>
@@ -64,16 +71,16 @@ const SituationDetailModal = memo(function SituationDetailModal({
                   <Eye className="h-4 w-4" />
                   Descrição / Orientações
                 </div>
-                <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-5 border border-amber-200 dark:border-amber-800">
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-base break-words overflow-wrap-anywhere">
+                <div className="bg-muted/30 rounded-xl p-5 border">
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-base">
                     {situation.description}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <AlertCircle className="h-8 w-8 text-amber-500" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <AlertCircle className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="font-medium text-muted-foreground">Nenhuma descrição disponível</p>
                 <p className="text-sm text-muted-foreground/70 mt-1">
@@ -85,8 +92,8 @@ const SituationDetailModal = memo(function SituationDetailModal({
         </ScrollArea>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-amber-50 dark:bg-amber-950/20 flex justify-end">
-          <Button onClick={onClose} className="bg-amber-500 hover:bg-amber-600 text-white">
+        <div className="p-4 border-t bg-muted/30 flex justify-end">
+          <Button onClick={onClose} variant="outline">
             Fechar
           </Button>
         </div>
