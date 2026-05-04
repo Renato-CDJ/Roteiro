@@ -55,35 +55,33 @@ const SituationDetailModal = memo(function SituationDetailModal({
           </DialogHeader>
         </div>
 
-        {/* Conteúdo com scroll */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full max-h-[calc(80vh-180px)]">
-            <div className="p-5">
-              {situation.description ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Eye className="h-4 w-4" />
-                    Descrição / Orientações
-                  </div>
-                  <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-                    <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm break-words">
-                      {situation.description}
-                    </p>
-                  </div>
+        {/* Conteúdo com scroll nativo */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="p-5">
+            {situation.description ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Eye className="h-4 w-4" />
+                  Descrição / Orientações
                 </div>
-              ) : (
-                <div className="text-center py-10">
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                    <AlertCircle className="h-7 w-7 text-amber-500" />
-                  </div>
-                  <p className="font-medium text-muted-foreground">Nenhuma descrição disponível</p>
-                  <p className="text-sm text-muted-foreground/70 mt-1">
-                    Esta situação não possui orientações detalhadas
+                <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm break-words">
+                    {situation.description}
                   </p>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <AlertCircle className="h-7 w-7 text-amber-500" />
+                </div>
+                <p className="font-medium text-muted-foreground">Nenhuma descrição disponível</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">
+                  Esta situação não possui orientações detalhadas
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer fixo */}
