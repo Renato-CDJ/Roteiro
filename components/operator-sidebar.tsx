@@ -4,13 +4,10 @@ import type React from "react"
 import { useState, useMemo, useCallback, memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useCachedSituations, useCachedChannels } from "@/hooks/use-cached-data"
-import { CheckCircle2, AlertCircle, Radio, Search, CalendarIcon, Maximize2, X, ChevronRight } from "lucide-react"
+import { CheckCircle2, CalendarIcon, Maximize2, ChevronRight } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PromiseCalendarInline } from "@/components/promise-calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import type { ScriptStep } from "@/lib/types"
 
 interface OperatorSidebarProps {
@@ -115,188 +112,6 @@ const DetailModal = memo(function DetailModal({
   )
 })
 
-// Modal de lista completa otimizado
-const FullListModal = memo(function FullListModal({
-  open,
-  onClose,
-  title,
-  items,
-  type,
-  onItemClick,
-}: {
-  open: boolean
-  onClose: () => void
-  title: string
-  items: ListItemData[]
-  type: "situation" | "channel"
-  onItemClick: (item: ListItemData) => void
-}) {
-  const [search, setSearch] = useState("")
-
-  const filteredItems = useMemo(() => {
-    if (!search.trim()) return items
-    const query = search.toLowerCase()
-    return items.filter(item => 
-      item.name.toLowerCase().includes(query) ||
-      item.description?.toLowerCase().includes(query)
-    )
-  }, [items, search])
-
-  // Limitar itens visiveis para performance
-  const visibleItems = useMemo(() => filteredItems.slice(0, 100), [filteredItems])
-
-  if (!open) return null
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col border-border/50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex-shrink-0">
-          <DialogHeader>
-            <DialogTitle className="text-white text-lg font-semibold">
-              {title}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {/* Busca */}
-          <div className="relative mt-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
-            <Input
-              placeholder="Buscar..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {/* Contador */}
-        <div className="px-4 py-2 bg-muted/30 border-b border-border/50 text-xs text-muted-foreground flex-shrink-0">
-          {filteredItems.length === items.length 
-            ? `${items.length} itens`
-            : `${filteredItems.length} de ${items.length} itens`
-          }
-        </div>
-        
-        {/* Lista com scroll */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="p-3 space-y-1.5">
-            {visibleItems.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                Nenhum item encontrado
-              </div>
-            ) : (
-              visibleItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onItemClick(item)}
-                  className="w-full text-left p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors group"
-                >
-                  <div className="flex items-start gap-3">
-                    {item.color && (
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0 mt-1 ring-2 ring-border/50" 
-                        style={{ backgroundColor: item.color }} 
-                      />
-                    )}
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <h4 className="font-medium text-sm text-foreground group-hover:text-orange-500 transition-colors truncate">
-                        {item.name}
-                      </h4>
-                      {(item.description || item.contact) && (
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                          {type === "channel" ? item.contact : item.description}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 group-hover:text-orange-500 transition-colors" />
-                  </div>
-                </button>
-              ))
-            )}
-            {filteredItems.length > 100 && (
-              <p className="text-center py-2 text-xs text-muted-foreground">
-                Mostrando 100 de {filteredItems.length}. Use a busca para filtrar.
-              </p>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-})
-
-// Componente de conteudo para cada aba - lazy loaded
-const TabContent = memo(function TabContent({
-  type,
-  items,
-  selectedId,
-  onSelectItem,
-  onViewAll,
-}: {
-  type: "situation" | "channel"
-  items: ListItemData[]
-  selectedId: string
-  onSelectItem: (item: ListItemData) => void
-  onViewAll: () => void
-}) {
-  const titles = {
-    situation: "Situacoes",
-    channel: "Canais",
-  }
-
-  // Limitar itens para renderizacao inicial rapida - reduzido para 15 para melhor fit na tela
-  const visibleItems = useMemo(() => items.slice(0, 15), [items])
-
-  return (
-    <div className="space-y-3 overflow-hidden">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">{titles[type]}</h3>
-        <Badge variant="secondary" className="text-xs">
-          {items.length}
-        </Badge>
-      </div>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full justify-start text-xs h-8 border-dashed"
-        onClick={onViewAll}
-      >
-        <Search className="h-3.5 w-3.5 mr-2" />
-        Ver todos e buscar
-      </Button>
-      
-      <div className="space-y-1 overflow-hidden">
-        {visibleItems.map((item) => (
-          <SimpleListItem
-            key={item.id}
-            item={item}
-            onClick={() => onSelectItem(item)}
-            isSelected={selectedId === item.id}
-          />
-        ))}
-        {items.length > 15 && (
-          <button
-            onClick={onViewAll}
-            className="w-full text-center py-2 text-xs text-orange-500 hover:underline"
-          >
-            +{items.length - 15} mais...
-          </button>
-        )}
-      </div>
-    </div>
-  )
-})
-
 // Componente de tabulacao recomendada
 const RecommendedTabulation = memo(function RecommendedTabulation({
   currentStep,
@@ -353,8 +168,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   
   // Estado para modais - apenas um ativo por vez
   const [modalState, setModalState] = useState<{
-    type: "detail" | "list" | null
-    listType?: "situation" | "channel"
+    type: "detail" | null
     item?: ListItemData | null
     title?: string
   }>({ type: null })
@@ -362,54 +176,11 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   // Estado de selecao
   const [selectedIds, setSelectedIds] = useState({
     tabulation: "",
-    situation: "",
-    channel: "",
   })
 
-  // Dados do cache - ja memoizados pelo hook
-  const { situations: situationsRaw } = useCachedSituations()
-  const { channels: channelsRaw } = useCachedChannels()
 
-  // Mapear dados uma vez
-  const situations = useMemo<ListItemData[]>(() => 
-    situationsRaw
-      .filter((s: any) => s.is_active !== false)
-      .map((s: any) => ({
-        id: s.id,
-        name: s.name,
-        description: s.description || "",
-        color: s.color || "#6b7280",
-      }))
-  , [situationsRaw])
 
-  const channels = useMemo<ListItemData[]>(() => 
-    channelsRaw
-      .filter((c: any) => c.is_active !== false)
-      .map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description || "",
-        contact: c.icon || "",
-      }))
-  , [channelsRaw])
 
-  // Handlers memoizados
-  const handleSelectItem = useCallback((type: "situation" | "channel", item: ListItemData) => {
-    setSelectedIds(prev => ({ ...prev, [type]: item.id }))
-    setModalState({ 
-      type: "detail", 
-      item,
-      title: item.name,
-    })
-  }, [])
-
-  const handleOpenList = useCallback((type: "situation" | "channel") => {
-    const titles = {
-      situation: "Todas as Situacoes", 
-      channel: "Todos os Canais",
-    }
-    setModalState({ type: "list", listType: type, title: titles[type] })
-  }, [])
 
   const handleCloseModal = useCallback(() => {
     setModalState({ type: null })
@@ -422,13 +193,6 @@ export const OperatorSidebar = memo(function OperatorSidebar({
       title: tab.name,
     })
   }, [])
-
-  // Items para lista atual
-  const currentListItems = useMemo(() => {
-    if (modalState.listType === "situation") return situations
-    if (modalState.listType === "channel") return channels
-    return []
-  }, [modalState.listType, situations, channels])
 
   if (!isOpen) return null
 
@@ -499,26 +263,6 @@ export const OperatorSidebar = memo(function OperatorSidebar({
               />
             </div>
           )}
-
-          {activeSection === "situation" && (
-            <TabContent
-              type="situation"
-              items={situations}
-              selectedId={selectedIds.situation}
-              onSelectItem={(item) => handleSelectItem("situation", item)}
-              onViewAll={() => handleOpenList("situation")}
-            />
-          )}
-
-          {activeSection === "channel" && (
-            <TabContent
-              type="channel"
-              items={channels}
-              selectedId={selectedIds.channel}
-              onSelectItem={(item) => handleSelectItem("channel", item)}
-              onViewAll={() => handleOpenList("channel")}
-            />
-          )}
         </div>
       </ScrollArea>
 
@@ -531,20 +275,7 @@ export const OperatorSidebar = memo(function OperatorSidebar({
         color={modalState.item?.color}
       />
 
-      {/* Modal de lista */}
-      <FullListModal
-        open={modalState.type === "list"}
-        onClose={handleCloseModal}
-        title={modalState.title || ""}
-        items={currentListItems}
-        type={modalState.listType || "tabulation"}
-        onItemClick={(item) => {
-          handleCloseModal()
-          if (modalState.listType) {
-            handleSelectItem(modalState.listType, item)
-          }
-        }}
-      />
+
     </aside>
   )
 })
