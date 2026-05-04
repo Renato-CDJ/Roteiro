@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useCachedSituations } from "@/hooks/use-cached-data"
-import { Search, AlertCircle, ZoomIn, ZoomOut, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, AlertCircle, ZoomIn, ZoomOut, ChevronDown, ChevronUp, X, Eye } from "lucide-react"
 
 interface OperatorSituationsModalProps {
   open: boolean
@@ -21,6 +21,87 @@ interface SituationData {
   color?: string
 }
 
+// Modal de detalhes da situação individual
+const SituationDetailModal = memo(function SituationDetailModal({
+  situation,
+  open,
+  onClose,
+}: {
+  situation: SituationData | null
+  open: boolean
+  onClose: () => void
+}) {
+  if (!situation) return null
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col overflow-hidden">
+        {/* Header com cor da situação */}
+        <div 
+          className="p-6 text-white flex-shrink-0"
+          style={{ 
+            background: `linear-gradient(135deg, ${situation.color || '#f59e0b'}, ${situation.color || '#f59e0b'}cc)`,
+          }}
+        >
+          <DialogHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <AlertCircle className="h-8 w-8" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-white break-words">
+                    {situation.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 mt-1">
+                    Detalhes da situação
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        {/* Conteúdo */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-6">
+            {situation.description ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Eye className="h-4 w-4" />
+                  Descrição / Orientações
+                </div>
+                <div className="bg-muted/30 rounded-xl p-5 border">
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-base">
+                    {situation.description}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <AlertCircle className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="font-medium text-muted-foreground">Nenhuma descrição disponível</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">
+                  Esta situação não possui orientações detalhadas
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className="p-4 border-t bg-muted/30 flex justify-end">
+          <Button onClick={onClose} variant="outline">
+            Fechar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+})
+
 export const OperatorSituationsModal = memo(function OperatorSituationsModal({
   open,
   onOpenChange,
@@ -28,6 +109,8 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
   const [search, setSearch] = useState("")
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
   const [globalZoom, setGlobalZoom] = useState(100)
+  const [selectedSituation, setSelectedSituation] = useState<SituationData | null>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
 
   const { situations: situationsRaw } = useCachedSituations()
 
@@ -63,6 +146,16 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
     setSearch("")
     setExpandedCards({})
   }, [onOpenChange])
+
+  const handleSituationClick = useCallback((situation: SituationData) => {
+    setSelectedSituation(situation)
+    setShowDetailModal(true)
+  }, [])
+
+  const handleCloseDetailModal = useCallback(() => {
+    setShowDetailModal(false)
+    setSelectedSituation(null)
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -154,13 +247,11 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
                 return (
                   <Card
                     key={situation.id}
-                    className="group border hover:border-amber-500/50 transition-all duration-200 hover:shadow-md"
+                    className="group border hover:border-amber-500/50 transition-all duration-200 hover:shadow-md cursor-pointer"
+                    onClick={() => handleSituationClick(situation)}
                   >
                     <CardContent className="p-0 overflow-hidden">
-                      <div 
-                        className="flex items-start gap-4 p-4 cursor-pointer w-full"
-                        onClick={() => shouldTruncate && toggleExpand(situation.id)}
-                      >
+                      <div className="flex items-start gap-4 p-4 w-full">
                         {/* Icone da situacao */}
                         <div 
                           className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg"
@@ -182,38 +273,33 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
                           </h3>
                           {situation.description && (
                             <p
-                              className={`text-muted-foreground leading-relaxed transition-all break-words ${!isExpanded && shouldTruncate ? "line-clamp-2" : ""}`}
+                              className={`text-muted-foreground leading-relaxed transition-all break-words line-clamp-2`}
                               style={{ fontSize: `${globalZoom * 0.875}%` }}
                             >
                               {situation.description}
                             </p>
                           )}
                           
-                          {/* Botao expandir/recolher */}
-                          {shouldTruncate && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2 h-7 text-xs text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 p-0"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleExpand(situation.id)
-                              }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Mostrar menos
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Ler mais
-                                </>
-                              )}
-                            </Button>
-                          )}
+                          {/* Indicador de clique para ver mais */}
+                          <div className="mt-2 flex items-center gap-1 text-xs text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Eye className="h-3 w-3" />
+                            <span>Clique para ver detalhes</span>
+                          </div>
                         </div>
+
+                        {/* Botão de visualização */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="shrink-0 h-9 w-9 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleSituationClick(situation)
+                          }}
+                          title="Ver detalhes"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -223,6 +309,13 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
           </div>
         </ScrollArea>
       </DialogContent>
+
+      {/* Modal de detalhes da situação */}
+      <SituationDetailModal
+        situation={selectedSituation}
+        open={showDetailModal}
+        onClose={handleCloseDetailModal}
+      />
     </Dialog>
   )
 })
