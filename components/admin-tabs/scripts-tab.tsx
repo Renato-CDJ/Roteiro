@@ -59,7 +59,11 @@ export function ScriptsTab() {
     order: s.step_order || 0,
     buttons: s.buttons || [],
     tabulations: s.tabulations || [],
-    alert: s.alert ? { title: "Alerta", message: s.alert, createdAt: new Date() } : undefined,
+    alert: s.alert 
+      ? typeof s.alert === "string" 
+        ? { title: "Alerta", message: s.alert, createdAt: new Date() }
+        : { title: s.alert.title || "Alerta", message: s.alert.message, createdAt: new Date() }
+      : undefined,
     createdAt: new Date(s.created_at),
     updatedAt: new Date(s.updated_at),
   }))
@@ -257,7 +261,9 @@ export function ScriptsTab() {
           step_order: editingStep.order || 0,
           buttons: editingStep.buttons,
           tabulations: editingStep.tabulations,
-          alert: editingStep.alert?.message || null,
+          alert: editingStep.alert?.message 
+            ? { title: editingStep.alert.title || "Alerta", message: editingStep.alert.message }
+            : null,
           is_active: true,
         })
         if (error) throw new Error(error)
@@ -271,7 +277,9 @@ export function ScriptsTab() {
           content: editingStep.content,
           buttons: editingStep.buttons,
           tabulations: editingStep.tabulations,
-          alert: editingStep.alert?.message || null,
+          alert: editingStep.alert?.message 
+            ? { title: editingStep.alert.title || "Alerta", message: editingStep.alert.message }
+            : null,
         })
         if (error) throw new Error(error)
         toast({

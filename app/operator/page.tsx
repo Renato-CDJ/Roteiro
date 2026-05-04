@@ -19,6 +19,7 @@ import {
 } from "@/hooks/use-cached-data"
 import type { ScriptStep, AttendanceConfig as AttendanceConfigType } from "@/lib/types"
 import { useRouter } from "next/navigation"
+import { AlertTriangle, X } from "lucide-react"
 
 
 const mapScriptRowToStep = (step: any): ScriptStep => ({
@@ -30,7 +31,12 @@ const mapScriptRowToStep = (step: any): ScriptStep => ({
   order: step.step_order ?? 0,
   buttons: step.buttons || [],
   tabulations: step.tabulations || [],
-  alert: step.alert,
+  // alert pode ser string (do Supabase) ou objeto (já mapeado)
+  alert: step.alert 
+    ? typeof step.alert === "string" 
+      ? { title: "Alerta", message: step.alert, createdAt: new Date() }
+      : step.alert
+    : undefined,
   isActive: step.is_active,
   createdAt: step.created_at ? new Date(step.created_at) : new Date(),
   updatedAt: step.updated_at ? new Date(step.updated_at) : new Date(),
@@ -60,6 +66,7 @@ const OperatorContent = memo(function OperatorContent() {
   >(undefined)
   const [showChatModal, setShowChatModal] = useState(false)
   const [allSteps, setAllSteps] = useState<ScriptStep[]>([])
+  const [showAlertBar, setShowAlertBar] = useState(true)
 
   // Load all steps when product changes (from cache)
   useEffect(() => {
@@ -85,7 +92,15 @@ const OperatorContent = memo(function OperatorContent() {
     setCurrentProductCategory(undefined)
     setShowChatModal(false)
     setAllSteps([])
+    setShowAlertBar(true)
   }, [])
+
+  // Reset alert bar when step changes
+  useEffect(() => {
+    if (currentStep?.alert?.message) {
+      setShowAlertBar(true)
+    }
+  }, [currentStep?.id, currentStep?.alert])
 
   // Auto-logout check - intervalo aumentado para 60s para reduzir CPU
   useEffect(() => {
@@ -320,6 +335,34 @@ const OperatorContent = memo(function OperatorContent() {
         onProductSelect={handleProductSelect}
         onOpenChat={() => setShowChatModal(true)}
       />
+
+      {/* Barra de Alerta para Operador */}
+      {isSessionActive && currentStep?.alert?.message && showAlertBar && (
+        <div className="relative bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 text-white px-4 py-3 shadow-lg animate-in slide-in-from-top duration-300">
+          <div className="container mx-auto flex items-center gap-3">
+            <div className="p-1.5 bg-white/20 rounded-lg shrink-0 animate-pulse">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="font-bold text-sm">
+                  {currentStep.alert.title || "Alerta Importante"}
+                </span>
+              </div>
+              <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap break-words">
+                {currentStep.alert.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAlertBar(false)}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors shrink-0"
+              aria-label="Fechar alerta"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden min-h-0">
         <main className="flex-1 overflow-auto">

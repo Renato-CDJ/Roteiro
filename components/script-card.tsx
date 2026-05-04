@@ -5,7 +5,7 @@ import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { CheckCircle2, AlertCircle, ArrowLeft, AlertTriangle, Search, X } from "lucide-react"
+import { CheckCircle2, AlertCircle, ArrowLeft, Search, X } from "lucide-react"
 import type { ScriptStep, ContentSegment } from "@/lib/types"
 import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -171,13 +171,10 @@ export const ScriptCard = memo(function ScriptCard({
   const [showTabulation, setShowTabulation] = useState(false)
   const [showTabulationPulse, setShowTabulationPulse] = useState(false)
   const [showAlert, setShowAlert] = useState(false)
-  const [showAlertBalloon, setShowAlertBalloon] = useState(false)
   const [searchText, setSearchText] = useState("")
   const [showSearch, setShowSearch] = useState(false)
 
   const hasTabulations = step.tabulations && step.tabulations.length > 0
-  const hasAlert = step.alert && step.alert.message
-  const alertTitle = step.alert?.title || "Alerta Importante"
 
   useEffect(() => {
     saveAccessibilitySettings(textSize[0], buttonSize[0])
@@ -202,19 +199,7 @@ export const ScriptCard = memo(function ScriptCard({
     return () => window.removeEventListener("keydown", handleKeyPress)
   }, [canGoBack, onGoBack])
 
-  useEffect(() => {
-    if (!hasAlert) {
-      setShowAlertBalloon(false)
-      return
-    }
-
-    setShowAlertBalloon(true)
-    const timer = setTimeout(() => {
-      setShowAlertBalloon(false)
-    }, 10000)
-
-    return () => clearTimeout(timer)
-  }, [hasAlert, step.id]) // Reset when step changes
+  
 
   const processedContent = useMemo(() => {
     const safeContent = step.content || ""
@@ -274,7 +259,7 @@ export const ScriptCard = memo(function ScriptCard({
     [allSteps, onSearchStep],
   )
 
-  const handleBalloonClose = useCallback(() => setShowAlertBalloon(false), [])
+  
 
   const contentStyles = useMemo(() => {
     const styles: React.CSSProperties = {
@@ -403,37 +388,7 @@ export const ScriptCard = memo(function ScriptCard({
         </Button>
       )}
 
-      {hasAlert && showAlertBalloon && (
-        <div className="fixed top-[140px] left-8 z-[9999] w-[90%] max-w-md animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="relative bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/90 dark:to-amber-900/90 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-amber-300 dark:border-amber-700 p-4">
-            {/* Close button */}
-            <button
-              onClick={handleBalloonClose}
-              className="absolute top-2 right-2 p-1 rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
-              aria-label="Fechar alerta"
-            >
-              <X className="h-4 w-4 text-amber-700 dark:text-amber-300" />
-            </button>
-
-            {/* Alert icon and title */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-lg bg-amber-500 dark:bg-amber-600 animate-pulse">
-                <AlertTriangle className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="font-bold text-amber-900 dark:text-amber-100 text-sm">{alertTitle}</h3>
-            </div>
-
-            {/* Alert message */}
-            <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">
-              {step.alert?.message}
-            </p>
-
-            {/* Balloon arrow pointing down */}
-            <div className="absolute -bottom-3 left-12 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-amber-300 dark:border-t-amber-700"></div>
-            <div className="absolute -bottom-[10px] left-12 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-amber-100 dark:border-t-amber-900/90"></div>
-          </div>
-        </div>
-      )}
+      
 
       <Card className="relative shadow-2xl border-2 border-orange-200/80 dark:border-orange-500/60 w-full overflow-hidden backdrop-blur-sm">
         <Popover open={showSearch} onOpenChange={setShowSearch}>
