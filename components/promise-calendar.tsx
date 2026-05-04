@@ -108,19 +108,19 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
   if (productCategory === "boleto_pre_formatado") {
     return (
       <Card className="border-border bg-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-foreground">
-            <CalendarIcon className="h-4 w-4 text-primary" />
+        <CardHeader className="pb-1 pt-3 px-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
+            <CalendarIcon className="h-3.5 w-3.5 text-primary" />
             Calendário de Promessas
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
-            <AlertTriangle className="h-10 w-10 text-amber-500" />
-            <p className="text-sm font-medium text-muted-foreground">
+        <CardContent className="px-3 pb-3">
+          <div className="flex flex-col items-center justify-center py-4 text-center space-y-2">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+            <p className="text-xs font-medium text-muted-foreground">
               De acordo com a data do boleto, não pode ser alterado em hipótese alguma.
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               Categoria: <span className="font-semibold">Boleto Pré-Formatado</span>
             </p>
           </div>
@@ -132,19 +132,19 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
   if (productCategory === "outros") {
     return (
       <Card className="border-border bg-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold flex items-center gap-2 text-foreground">
-            <CalendarIcon className="h-4 w-4 text-primary" />
+        <CardHeader className="pb-1 pt-3 px-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
+            <CalendarIcon className="h-3.5 w-3.5 text-primary" />
             Calendário de Promessas
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
-            <AlertTriangle className="h-10 w-10 text-amber-500" />
-            <p className="text-sm font-medium text-muted-foreground">
+        <CardContent className="px-3 pb-3">
+          <div className="flex flex-col items-center justify-center py-4 text-center space-y-2">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+            <p className="text-xs font-medium text-muted-foreground">
               O produto selecionado não possui datas de promessa disponíveis.
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               Categoria: <span className="font-semibold">Outros</span>
             </p>
           </div>
@@ -155,9 +155,9 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
   return (
     <Card className="border-border bg-card">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-bold flex items-center gap-2 text-foreground">
-          <CalendarIcon className="h-4 w-4 text-primary" />
+      <CardHeader className="pb-1 pt-3 px-3">
+        <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
+          <CalendarIcon className="h-3.5 w-3.5 text-primary" />
           Calendário de Promessas
           {productCategory !== undefined && (
             <TooltipProvider delayDuration={200}>
@@ -180,13 +180,13 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
           )}
         </CardTitle>
         {!productCategory && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] text-muted-foreground mt-0.5">
             Selecione o tipo de produto e escolha uma data disponível
           </p>
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-3 pb-3">
         {!productCategory && (
           <div className="space-y-2">
             <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
@@ -194,7 +194,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
               Tipo de Produto
             </label>
             <TooltipProvider delayDuration={200}>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-2 justify-center">
                 {productOptions.map((product) => {
                   const Icon = product.icon
                   const isSelected = selectedProduct === product.value
@@ -203,15 +203,15 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => handleProductSelect(product.value)}
-                          className={`w-20 h-20 p-2 rounded-xl transition-all duration-200 flex flex-col items-center justify-center gap-1.5 ${
+                          className={`w-16 h-16 p-1.5 rounded-xl transition-all duration-200 flex flex-col items-center justify-center gap-1 ${
                             isSelected
                               ? "bg-orange-500 dark:bg-gradient-to-br dark:from-orange-500 dark:to-amber-500 shadow-lg scale-105"
-                              : "bg-muted/30 hover:bg-muted/50 hover:scale-102"
+                              : "bg-muted/30 hover:bg-muted/50"
                           }`}
                         >
-                          <Icon className={`h-7 w-7 ${isSelected ? "text-white" : "text-muted-foreground"}`} />
+                          <Icon className={`h-5 w-5 ${isSelected ? "text-white" : "text-muted-foreground"}`} />
                           <p
-                            className={`font-semibold text-[10px] text-center leading-tight ${isSelected ? "text-white" : "text-foreground"}`}
+                            className={`font-semibold text-[9px] text-center leading-tight ${isSelected ? "text-white" : "text-foreground"}`}
                           >
                             {product.name}
                           </p>
@@ -229,23 +229,23 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
         )}
 
         {!selectedProduct ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Current Date Calendar */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-md">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/50 rounded-md">
                 <CalendarIcon className="h-3 w-3 text-primary" />
-                <p className="text-xs font-semibold text-foreground">Data Atual</p>
+                <p className="text-[10px] font-semibold text-foreground">Data Atual</p>
               </div>
-              <div className="flex justify-center p-2 bg-card rounded-lg border border-border">
+              <div className="flex justify-center bg-card rounded-lg border border-border overflow-hidden p-2">
                 <Calendar
                   mode="single"
                   selected={today}
                   disabled={(date) => date.getTime() !== today.getTime()}
-                  className="rounded-lg scale-90"
+                  className="mx-auto"
                   classNames={{
                     day_today: "bg-primary text-primary-foreground font-bold ring-2 ring-primary/20",
-                    months: "flex flex-col space-y-2",
-                    month: "space-y-2 w-full",
+                    months: "flex flex-col",
+                    month: "space-y-2",
                     caption: "flex justify-center pt-1 relative items-center",
                     caption_label: "text-xs font-semibold",
                     nav: "space-x-1 flex items-center",
@@ -262,27 +262,27 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
             {/* Info Message */}
             <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 rounded-md">
-              <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <Info className="h-3 w-3 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] text-blue-900 dark:text-blue-100 font-medium">
                 Selecione um tipo de produto acima para visualizar as datas disponíveis
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Available Dates Calendar */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-md">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/50 rounded-md">
                 <CalendarIcon className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-xs font-semibold text-foreground">Datas Disponíveis</p>
+                <p className="text-[10px] font-semibold text-foreground">Datas Disponíveis</p>
               </div>
-              <div className="flex justify-center p-2 bg-card rounded-lg border border-border">
+              <div className="flex justify-center bg-card rounded-lg border border-border overflow-hidden p-2">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={(date) => !isDateInRange(date)}
-                  className="rounded-lg scale-90"
+                  className="mx-auto"
                   modifiers={{
                     available: (date) => isDateInRange(date) && date.getTime() !== today.getTime(),
                   }}
@@ -295,8 +295,8 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                     day_selected:
                       "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-bold hover:bg-emerald-700 dark:hover:bg-emerald-600 ring-2 ring-emerald-400 dark:ring-emerald-600",
                     day_disabled: "text-muted-foreground opacity-30 line-through cursor-not-allowed",
-                    months: "flex flex-col space-y-2",
-                    month: "space-y-2 w-full",
+                    months: "flex flex-col",
+                    month: "space-y-2",
                     caption: "flex justify-center pt-1 relative items-center",
                     caption_label: "text-xs font-semibold",
                     nav: "space-x-1 flex items-center",
@@ -315,7 +315,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
             {selectedDate && (
               <div className="bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40 border-l-4 border-emerald-500 rounded-md p-2">
                 <div className="flex items-center gap-1 mb-0.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                   <p className="text-[10px] font-bold text-emerald-900 dark:text-emerald-100">Data Selecionada</p>
                 </div>
                 <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 ml-4">
@@ -330,12 +330,12 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
             )}
 
             {/* Regras de Contagem */}
-            <div className="bg-orange-50 dark:bg-orange-950/40 border-l-4 border-orange-500 rounded-lg p-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                <p className="text-sm font-bold text-orange-900 dark:text-orange-100">Regras de Contagem</p>
+            <div className="bg-orange-50 dark:bg-orange-950/40 border-l-4 border-orange-500 rounded-lg p-2 space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                <p className="text-xs font-bold text-orange-900 dark:text-orange-100">Regras de Contagem</p>
               </div>
-              <ul className="text-xs text-orange-900 dark:text-orange-100 ml-6 space-y-1.5 list-disc">
+              <ul className="text-[10px] text-orange-900 dark:text-orange-100 ml-5 space-y-1 list-disc">
                 <li>Contagem em dias corridos (inclui sab/dom/feriados)</li>
                 <li>Sábados, domingos e feriados <strong>NÃO</strong> podem ser agendado o pagamento</li>
                 <li>Se cliente informar sábado, agendar o pagamento para próximo dia útil</li>

@@ -197,9 +197,9 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col overflow-hidden">
         {/* Header com gradiente */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white flex-shrink-0">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-white">
               <div className="p-2 bg-white/20 rounded-lg">
@@ -248,7 +248,7 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
         </div>
 
         {/* Contador de resultados */}
-        <div className="px-6 py-3 bg-muted/50 border-b flex items-center justify-between">
+        <div className="px-6 py-3 bg-muted/50 border-b flex items-center justify-between flex-shrink-0">
           <span className="text-sm text-muted-foreground">
             {filteredContracts.length} {filteredContracts.length === 1 ? "contrato encontrado" : "contratos encontrados"}
           </span>
@@ -265,7 +265,7 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
         </div>
 
         {/* Lista de contratos */}
-        <ScrollArea className="flex-1 h-[50vh]">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="p-6 space-y-3">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16">
@@ -292,11 +292,11 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
                 return (
                   <Card
                     key={contract.id}
-                    className="group border hover:border-orange-500/50 transition-all duration-200 hover:shadow-md overflow-hidden"
+                    className="group border hover:border-orange-500/50 transition-all duration-200 hover:shadow-md"
                   >
-                    <CardContent className="p-0">
+                    <CardContent className="p-0 overflow-hidden">
                       <div 
-                        className="flex items-start gap-4 p-4 cursor-pointer"
+                        className="flex items-start gap-4 p-4 cursor-pointer w-full"
                         onClick={() => shouldTruncate && toggleExpand(contract.id)}
                       >
                         {/* Icone do contrato */}
@@ -305,23 +305,23 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
                         </div>
                         
                         {/* Conteudo */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 overflow-hidden">
                           <div className="flex items-center gap-2 flex-wrap mb-2">
                             <h3 
-                              className="font-semibold text-foreground group-hover:text-orange-500 transition-colors"
+                              className="font-semibold text-foreground group-hover:text-orange-500 transition-colors break-words"
                               style={{ fontSize: `${globalZoom}%` }}
                             >
                               {contract.name}
                             </h3>
                             <Badge 
                               variant="secondary" 
-                              className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                              className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 flex-shrink-0"
                             >
                               {category}
                             </Badge>
                           </div>
                           <p
-                            className={`text-muted-foreground leading-relaxed transition-all ${!isExpanded && shouldTruncate ? "line-clamp-2" : ""}`}
+                            className={`text-muted-foreground leading-relaxed transition-all break-words ${!isExpanded && shouldTruncate ? "line-clamp-2" : ""}`}
                             style={{ fontSize: `${globalZoom * 0.875}%` }}
                           >
                             {contract.description}

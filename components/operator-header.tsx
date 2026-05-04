@@ -20,6 +20,8 @@ import {
   Bell,
   FileText,
   ListChecks,
+  AlertCircle,
+  Radio,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCachedProducts, useCachedMessages } from "@/hooks/use-cached-data"
@@ -32,6 +34,8 @@ import { Label } from "@/components/ui/label"
 import { QualityCenterModal } from "@/components/quality-center-modal"
 import { OperatorInitialGuideModal } from "@/components/operator-initial-guide-modal"
 import { OperatorResultCodesModal } from "@/components/operator-result-codes-modal"
+import { OperatorSituationsModal } from "@/components/operator-situations-modal"
+import { OperatorChannelsModal } from "@/components/operator-channels-modal"
 
 interface OperatorHeaderProps {
   searchQuery?: string
@@ -71,6 +75,8 @@ export const OperatorHeader = memo(function OperatorHeader({
   const [showMessagesModal, setShowMessagesModal] = useState(false)
   const [showInitialGuideModal, setShowInitialGuideModal] = useState(false)
   const [showResultCodesModal, setShowResultCodesModal] = useState(false)
+  const [showSituationsModal, setShowSituationsModal] = useState(false)
+  const [showChannelsModal, setShowChannelsModal] = useState(false)
 
   // Map products from Supabase
   const products = useMemo(() => productsData
@@ -326,6 +332,28 @@ export const OperatorHeader = memo(function OperatorHeader({
               </button>
 
               <button
+                onClick={() => setShowSituationsModal(true)}
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                title="Situacoes"
+              >
+                <div className="h-9 w-9 bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <AlertCircle className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Situacoes</span>
+              </button>
+
+              <button
+                onClick={() => setShowChannelsModal(true)}
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                title="Canais"
+              >
+                <div className="h-9 w-9 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <Radio className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Canais</span>
+              </button>
+
+              <button
                 onClick={() => setShowResultCodesModal(true)}
                 className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                 title="Codigos de Resultado"
@@ -429,6 +457,8 @@ export const OperatorHeader = memo(function OperatorHeader({
       <QualityCenterModal isOpen={showMessagesModal} onClose={() => setShowMessagesModal(false)} />
       <OperatorInitialGuideModal open={showInitialGuideModal} onOpenChange={setShowInitialGuideModal} />
       <OperatorResultCodesModal open={showResultCodesModal} onOpenChange={setShowResultCodesModal} />
+      <OperatorSituationsModal open={showSituationsModal} onOpenChange={setShowSituationsModal} />
+      <OperatorChannelsModal open={showChannelsModal} onOpenChange={setShowChannelsModal} />
     </>
   )
 })
