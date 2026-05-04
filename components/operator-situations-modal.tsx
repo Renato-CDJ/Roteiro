@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useCachedSituations } from "@/hooks/use-cached-data"
-import { Search, AlertCircle, ZoomIn, ZoomOut, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, AlertCircle, ZoomIn, ZoomOut, ChevronDown, ChevronUp, Eye, X } from "lucide-react"
 
 interface OperatorSituationsModalProps {
   open: boolean
@@ -28,6 +28,7 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
   const [search, setSearch] = useState("")
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
   const [globalZoom, setGlobalZoom] = useState(100)
+  const [selectedSituation, setSelectedSituation] = useState<SituationData | null>(null)
 
   const { situations: situationsRaw } = useCachedSituations()
 
@@ -62,7 +63,16 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
     onOpenChange(false)
     setSearch("")
     setExpandedCards({})
+    setSelectedSituation(null)
   }, [onOpenChange])
+
+  const openDescriptionModal = useCallback((situation: SituationData) => {
+    setSelectedSituation(situation)
+  }, [])
+
+  const closeDescriptionModal = useCallback(() => {
+    setSelectedSituation(null)
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -189,30 +199,46 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
                             </p>
                           )}
                           
-                          {/* Botao expandir/recolher */}
-                          {shouldTruncate && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2 h-7 text-xs text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 p-0"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleExpand(situation.id)
-                              }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Mostrar menos
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Ler mais
-                                </>
-                              )}
-                            </Button>
-                          )}
+                          {/* Botoes de acao */}
+                          <div className="flex items-center gap-2 mt-2">
+                            {shouldTruncate && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleExpand(situation.id)
+                                }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Mostrar menos
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    Ler mais
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                            {situation.description && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs border-amber-500/50 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 hover:border-amber-500"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openDescriptionModal(situation)
+                                }}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Visualizar
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -223,6 +249,84 @@ export const OperatorSituationsModal = memo(function OperatorSituationsModal({
           </div>
         </ScrollArea>
       </DialogContent>
+
+      {/* Modal de Descricao Completa */}
+      <Dialog open={!!selectedSituation} onOpenChange={(open) => !open && closeDescriptionModal()}>
+        <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] p-0 gap-0 flex flex-col overflow-hidden">
+          {selectedSituation && (
+            <>
+              {/* Header do modal de descricao */}
+              <div 
+                className="p-6 text-white flex-shrink-0"
+                style={{ 
+                  background: `linear-gradient(135deg, ${selectedSituation.color}, ${selectedSituation.color}dd)`,
+                }}
+              >
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold flex items-center gap-3 text-white">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                    {selectedSituation.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 mt-2">
+                    Descricao completa da situacao
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              {/* Controle de zoom */}
+              <div className="px-6 py-3 bg-muted/50 border-b flex items-center justify-end flex-shrink-0">
+                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setGlobalZoom(Math.max(80, globalZoom - 10))}
+                    className="h-8 w-8"
+                    title="Diminuir texto"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium w-12 text-center">{globalZoom}%</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setGlobalZoom(Math.min(150, globalZoom + 10))}
+                    className="h-8 w-8"
+                    title="Aumentar texto"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Conteudo da descricao */}
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-6">
+                  <div 
+                    className="prose prose-sm max-w-none text-foreground leading-relaxed whitespace-pre-wrap"
+                    style={{ fontSize: `${globalZoom}%` }}
+                  >
+                    {selectedSituation.description || "Nenhuma descricao disponivel."}
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t bg-muted/30 flex justify-end flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={closeDescriptionModal}
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Fechar
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 })
