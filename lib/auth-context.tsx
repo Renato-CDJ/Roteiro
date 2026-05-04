@@ -124,12 +124,17 @@ async function validateUserCredentials(
     const supabase = createClient()
     const normalizedEmail = normalizeEmail(email)
     
+    console.log("[v0] Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
+    console.log("[v0] Normalized email:", normalizedEmail)
+    
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
       .from("users")
       .select("*")
       .ilike("email", normalizedEmail)
       .limit(1)
+
+    console.log("[v0] Query result - users:", users, "error:", error)
 
     if (error) {
       console.error("[Supabase] Query error:", error)
