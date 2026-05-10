@@ -406,6 +406,11 @@ INSERT INTO users (username, name, email, password, role, admin_type, is_active)
 VALUES ('supervisao', 'Equipe Supervisao', 'supervisao@gruporoveri.com', 's1234@$.', 'admin', 'supervisao', true)
 ON CONFLICT (email) DO NOTHING;
 
+-- Operador (Acesso unico para todos os operadores - sem senha)
+INSERT INTO users (username, name, email, password, role, admin_type, is_active)
+VALUES ('Operador', 'Operador', 'operador@gruporoveri.com', '', 'operator', NULL, true)
+ON CONFLICT (email) DO NOTHING;
+
 -- ============================================================
 -- INSERIR USUARIOS DE MONITORIA (monitoria1 a monitoria10)
 -- ============================================================

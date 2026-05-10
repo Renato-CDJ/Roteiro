@@ -1,14 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, memo, useEffect } from "react"
+import { useState, useCallback, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
 import { AlertCircle, Lock, Sun, Moon, Shield, User, ArrowLeft } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useRouter } from "next/navigation"
 
 import { useTheme } from "next-themes"
 import Image from "next/image"
@@ -21,16 +20,7 @@ export const LoginForm = memo(function LoginForm() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const { theme, setTheme } = useTheme()
-  const { login, user, isAuthenticated } = useAuth()
-  const router = useRouter()
-  
-  // Redirecionar quando autenticado
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const destination = user.role === "admin" || user.role === "supervisor" ? "/admin" : "/operator"
-      router.push(destination)
-    }
-  }, [isAuthenticated, user, router])
+  const { login } = useAuth()
 
   const handleAdminLogin = useCallback(
     async (e: React.FormEvent) => {
@@ -54,7 +44,7 @@ export const LoginForm = memo(function LoginForm() {
           return
         }
         
-        // Redirecionamento sera feito pelo useEffect quando user mudar
+        window.location.href = "/admin"
       } catch (err) {
         setError("Erro ao fazer login")
         setIsLoading(false)
@@ -77,7 +67,7 @@ export const LoginForm = memo(function LoginForm() {
         return
       }
       
-      // Redirecionamento sera feito pelo useEffect quando user mudar
+      window.location.href = "/operator"
     } catch (err) {
       setError("Erro ao fazer login")
       setIsLoading(false)

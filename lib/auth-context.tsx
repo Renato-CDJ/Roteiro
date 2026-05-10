@@ -115,33 +115,14 @@ function normalizeEmail(email: string): string {
   return trimmed
 }
 
-// Usuario operador hardcoded (nao requer banco de dados)
-const OPERADOR_USER: User = {
-  id: "operador-hardcoded",
-  username: "Operador",
-  fullName: "Operador",
-  email: "operador@gruporoveri.com",
-  role: "operator",
-  allowedTabs: [],
-  isOnline: true,
-  isActive: true,
-  createdAt: new Date(),
-}
-
 // Validate user credentials against Supabase users table
 async function validateUserCredentials(
   email: string,
   password: string
 ): Promise<{ success: boolean; user?: User; error?: string }> {
   try {
-    const normalizedEmail = normalizeEmail(email)
-    
-    // Verificar se e o usuario operador hardcoded
-    if (normalizedEmail === "operador@gruporoveri.com") {
-      return { success: true, user: OPERADOR_USER }
-    }
-
     const supabase = createClient()
+    const normalizedEmail = normalizeEmail(email)
     
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
@@ -195,11 +176,6 @@ async function validateUserCredentials(
 
 // Update user online status
 async function updateUserOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
-  // Ignorar usuario operador hardcoded (nao existe no banco)
-  if (userId === "operador-hardcoded") {
-    return
-  }
-
   try {
     const supabase = createClient()
     await supabase
@@ -216,11 +192,6 @@ async function updateUserOnlineStatus(userId: string, isOnline: boolean): Promis
 
 // Get user by ID
 async function getUserById(userId: string): Promise<User | null> {
-  // Verificar se e o usuario operador hardcoded
-  if (userId === "operador-hardcoded") {
-    return OPERADOR_USER
-  }
-
   const supabase = createClient()
   const { data, error } = await supabase
     .from("users")
