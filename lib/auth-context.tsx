@@ -115,14 +115,33 @@ function normalizeEmail(email: string): string {
   return trimmed
 }
 
+// Usuario operador hardcoded (nao requer banco de dados)
+const OPERADOR_USER: User = {
+  id: "operador-hardcoded",
+  username: "Operador",
+  fullName: "Operador",
+  email: "operador@gruporoveri.com",
+  role: "operator",
+  allowedTabs: [],
+  isOnline: true,
+  isActive: true,
+  createdAt: new Date(),
+}
+
 // Validate user credentials against Supabase users table
 async function validateUserCredentials(
   email: string,
   password: string
 ): Promise<{ success: boolean; user?: User; error?: string }> {
   try {
-    const supabase = createClient()
     const normalizedEmail = normalizeEmail(email)
+    
+    // Verificar se e o usuario operador hardcoded
+    if (normalizedEmail === "operador@gruporoveri.com") {
+      return { success: true, user: OPERADOR_USER }
+    }
+
+    const supabase = createClient()
     
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
