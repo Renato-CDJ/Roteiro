@@ -74,7 +74,7 @@ export const LoginForm = memo(function LoginForm() {
   }, [theme, setTheme])
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden transition-all duration-300 ease-out hover:shadow-2xl hover:-translate-y-1 hover:border-orange-200 dark:hover:border-orange-900/50">
+    <Card className="w-full max-w-md mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
       {/* Botao tema */}
       <div className="absolute top-4 right-4 z-20">
         <Button
