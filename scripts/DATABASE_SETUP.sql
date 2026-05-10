@@ -520,18 +520,7 @@ INSERT INTO tabulations (name, description, color, is_active) VALUES
 ('Cliente Acordo Ativo Receptivo', 'Cliente com acordo vigente retorna no receptivo para esclarecimentos ou solicitar boleto', '#0ea5e9', true),
 ('Promessa Acordo Parcelamento', 'Cliente confirma pagamento parcelado do CARTAO DE CREDITO', '#2563eb', true),
 ('Transbordo Entre Canais', 'Atendimento iniciado em um canal precisa ser transbordado para outro canal', '#7c3aed', true),
-('Recusa Acao/Campanha', 'Cliente nao aceita a acao/campanha ofertada', '#991b1b', true)
-ON CONFLICT DO NOTHING;
-
--- RECUSA ACAO/CAMPANHA COM MOTIVO (Codigos RA3)
-INSERT INTO tabulations (name, description, color, is_active) VALUES
-('RA3-0 Sem Capacidade Pagamento', 'Recusa Acao - Motivo: Sem capacidade de pagamento', '#b91c1c', true),
-('RA3-1 Contato Sem Negociacao', 'Recusa Acao - Motivo: Contato sem negociacao/acordo', '#b91c1c', true),
-('RA3-3 Negociacao Outro Canal', 'Recusa Acao - Motivo: Negociacao em outro canal', '#b91c1c', true),
-('RA3-4 Solicita Retorno', 'Recusa Acao - Motivo: Pessoa solicita retorno em outro momento', '#b91c1c', true),
-('RA3-6 Divida Nao Reconhecida', 'Recusa Acao - Motivo: Divida nao reconhecida', '#b91c1c', true),
-('RA3-7 Promessa Sem Boleto', 'Recusa Acao - Motivo: Promessa de pagamento sem emissao de boleto', '#b91c1c', true),
-('RA3-8 Promessa Com Boleto', 'Recusa Acao - Motivo: Promessa de pagamento com emissao de boleto', '#b91c1c', true)
+('Recusa Acao/Campanha', 'Cliente nao aceita a acao/campanha ofertada. Motivos: Sem capacidade de pagamento | Contato sem negociacao/acordo | Negociacao em outro canal | Pessoa solicita retorno em outro momento | Divida nao reconhecida | Promessa de pagamento sem emissao de boleto | Promessa de pagamento com emissao de boleto', '#991b1b', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
