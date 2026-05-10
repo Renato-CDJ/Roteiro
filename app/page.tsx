@@ -99,11 +99,6 @@ export default function HomePage() {
           {/* Formulario */}
           <LoginForm />
         </div>
-        
-        {/* Rodape */}
-        <p className="absolute bottom-4 text-xs text-zinc-400 dark:text-zinc-600">
-          Grupo Roveri
-        </p>
     </div>
   )
 }

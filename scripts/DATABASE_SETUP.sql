@@ -454,52 +454,73 @@ INSERT INTO users (username, name, email, password, role, admin_type, is_active)
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================
--- INSERIR DADOS INICIAIS - CANAIS
+-- INSERIR DADOS INICIAIS - CANAIS DE ATENDIMENTO CAIXA
 -- ============================================================
 INSERT INTO channels (name, description, icon, is_active) VALUES
-('Telefone', 'Ligacao telefonica tradicional', 'phone', true),
-('WhatsApp', 'Mensagem via WhatsApp', 'message-circle', true),
-('E-mail', 'Contato por e-mail', 'mail', true),
-('SMS', 'Mensagem de texto SMS', 'smartphone', true),
-('Chat Online', 'Chat no site da empresa', 'message-square', true),
-('Presencial', 'Atendimento presencial', 'users', true),
-('Redes Sociais', 'Contato via redes sociais', 'share-2', true),
-('Video Chamada', 'Atendimento por video', 'video', true)
+('Alo CAIXA', '4004 0 104 (Capitais) / 0800 104 0 104 (Demais regioes) - PF, PJ, Ente Publico - Conta corrente, poupanca, emprestimos, cartao, habitacao, negocios, loterias', 'phone', true),
+('CAIXA Cidadao', '0800 726 0207 - PIS, Beneficios Sociais, FGTS e Cartao Social - Eletronico 24h / Humano seg-sex 8h-21h, sab 10h-16h', 'phone', true),
+('Agencia Digital', '4004 0 104 (Capitais) / 0800 104 0 104 (Demais) - Servicos e consultoria financeira - 8h as 18h (exceto fds e feriados)', 'building', true),
+('Atendimento Surdos', 'Atendimento 24h com Interprete de Libras via ICOM - https://icom.app/8AG8Z - www.caixa.gov.br/libras', 'ear', true),
+('SAC CAIXA', '0800 726 0101 - Reclamacoes, sugestoes, elogios, cancelamentos - Atendimento 24h', 'headphones', true),
+('Ouvidoria CAIXA', '0800 725 7474 - Reclamacoes nao solucionadas - Dias uteis 9h as 18h', 'message-circle', true),
+('Canal de Denuncias', '0800 721 0738 - Fatos irregulares contra CAIXA - 24h - https://www.caixa.gov.br/denuncia', 'alert-triangle', true),
+('WhatsApp CAIXA', '0800 101 0104 - Negociacao de dividas via www.caixa.gov.br/negociar', 'message-circle', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- INSERIR DADOS INICIAIS - SITUACOES
 -- ============================================================
 INSERT INTO situations (name, description, color, is_active) VALUES
-('Primeira Ligacao', 'Primeiro contato com o cliente', '#3b82f6', true),
-('Retorno', 'Retorno de ligacao agendada', '#f59e0b', true),
-('Rechamada', 'Nova tentativa de contato', '#8b5cf6', true),
-('Confirmacao', 'Ligacao para confirmar dados/venda', '#22c55e', true),
-('Pos-Venda', 'Contato apos conclusao da venda', '#06b6d4', true),
-('Cobranca', 'Contato referente a cobranca', '#ef4444', true),
-('Suporte', 'Atendimento de suporte ao cliente', '#10b981', true),
-('Cancelamento', 'Solicitacao de cancelamento', '#dc2626', true),
-('Reativacao', 'Tentativa de reativar cliente', '#7c3aed', true),
-('Pesquisa', 'Pesquisa de satisfacao', '#0ea5e9', true)
+('Falencia/Concordata', 'Socio ou responsavel informa que a empresa entrou em falencia. Orientar a acessar www.caixa.gov.br/negociar ou WhatsApp 0800 101 0104. Tabulacao: Recado com terceiro', '#ef4444', true),
+('Falecido', 'Terceiro informa que o titular faleceu. Necessario comparecer a agencia com certidao de obito para interromper ligacoes. Tabulacao: FALECIDO', '#1f2937', true),
+('LGPD - Questionamento de Dados', 'Cliente questiona sobre posse de dados. Informar Lei LGPD 13.709 e e-mail dpo@gruporoveri.com.br para duvidas', '#8b5cf6', true),
+('Solicitacao de Protocolo', 'Cliente solicita protocolo. Informar que nao e SAC, ligacoes sao gravadas e solicitar na agencia de relacionamento', '#f59e0b', true),
+('Nao Reside no Imovel', 'Cliente informa que nao reside no imovel. Divida em seu nome/CPF, sugerir contato com quem realiza pagamento', '#06b6d4', true),
+('Solicitacao de Ligacao', 'Cliente solicita escuta da ligacao. PR/RJ/SP/MT: 7 dias uteis. Outros estados: solicitar na agencia', '#3b82f6', true),
+('FIES - Pausar Pagamento', 'Cliente FIES questiona renegociacao. Orientar verificar em http://sifesweb.caixa.gov.br, APP FIES CAIXA ou agencia', '#22c55e', true),
+('Emprestimo Consignado', 'Cliente questiona desconto na folha. Orientar verificar se valor foi descontado, agendar retorno se necessario', '#f97316', true),
+('Divida Nao Reconhecida', 'Cliente nao reconhece a divida. Orientar procurar agencia CAIXA ou ligar 0800 101 0104. Cartao: central no verso', '#dc2626', true),
+('Produto Nao Atendido', 'Produto que nao atendo. Confirmar IP, informar transferencia, transferir em Campanha Receptivo, tabular Transferencia de Ligacao', '#64748b', true),
+('Atendimento CNPJ', 'Atendimento PJ. Falar nome do socio ou solicitar socio/responsavel financeiro. Verificar em Detalhes do Cliente', '#0ea5e9', true),
+('SINEB 2.0', 'Oferta de renegociacao. Exclusao CPF em 10 dias uteis apos pagamento. Juros corrigidos diariamente. Condicoes nao garantidas', '#7c3aed', true),
+('Lei MT 12395/2024 e RS 16276/2025', 'Cliente MT ou RS solicita composicao de valores: valor originario, juros, multas, taxas, custas, honorarios e total', '#10b981', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
--- INSERIR DADOS INICIAIS - TABULACOES
+-- INSERIR DADOS INICIAIS - TABULACOES (CODIGO DE RESULTADO)
 -- ============================================================
+
+-- TABULACOES ANTES DA IP (Identificacao Positiva)
 INSERT INTO tabulations (name, description, color, is_active) VALUES
-('Venda Concluida', 'Cliente fechou a compra', '#22c55e', true),
-('Nao Tem Interesse', 'Cliente nao demonstrou interesse no produto', '#ef4444', true),
-('Retornar Depois', 'Cliente pediu para retornar em outro momento', '#f59e0b', true),
-('Numero Errado', 'Numero nao pertence ao cliente', '#6b7280', true),
-('Caixa Postal', 'Ligacao caiu na caixa postal', '#8b5cf6', true),
-('Nao Atende', 'Cliente nao atendeu a ligacao', '#64748b', true),
-('Ocupado', 'Linha ocupada', '#f97316', true),
-('Desligou', 'Cliente desligou durante a ligacao', '#dc2626', true),
-('Agendamento', 'Agendou retorno para data especifica', '#3b82f6', true),
-('Sem Condicoes', 'Cliente sem condicoes financeiras no momento', '#71717a', true),
-('Ja E Cliente', 'Cliente ja possui o produto/servico', '#06b6d4', true),
-('Falecido', 'Titular falecido', '#1f2937', true),
-('Pediu Exclusao', 'Cliente pediu para ser excluido da lista', '#991b1b', true)
+('Ligacao Caiu', 'Atendimento interrompido sem possibilidade de confirmar CPF. Ex: Alo, Quem e, De onde fala, Sou eu, Do que se trata', '#ef4444', true),
+('Ligacao Muda', 'Ligacao iniciou muda, sem fala do cliente. Ruidos ou vozes nao direcionadas = Ligacao muda', '#6b7280', true),
+('Recado com Terceiro', 'Terceiro informa falencia, conhece cliente, ou pede para ligar outro dia/horario/telefone', '#f59e0b', true),
+('Falecido', 'Terceiro informa que o titular faleceu', '#1f2937', true),
+('Desconhecido no Telefone', 'Terceiro nao conhece ninguem com nome do cliente. Ex: Nao conheco, Nao e desse numero, Nunca ouvi falar', '#64748b', true),
+('Pessoa Nao Confirma Dados', 'Cliente recusa confirmar dados: CPF nao confere, recusa informar, nao lembra, nao pode falar', '#dc2626', true),
+('Falencia ou Concordata', 'Socio ou responsavel financeiro informa falencia da empresa', '#991b1b', true),
+('Desconhecido', 'Terceiro nao conhece ninguem com nome do cliente no telefone cadastrado', '#71717a', true),
+('Sinal de Fax', 'Ligacao direcionada para sinal de FAX', '#8b5cf6', true),
+('Caixa Postal', 'Ligacao direcionada diretamente a caixa postal', '#a855f7', true)
+ON CONFLICT DO NOTHING;
+
+-- TABULACOES APOS A IP (Identificacao Positiva)
+INSERT INTO tabulations (name, description, color, is_active) VALUES
+('Contato Interrompido Apos IP', 'Ligacao interrompida sem posicionamento do cliente sobre a divida. Ex: Cliente responde NAO e desliga', '#f97316', true),
+('Pessoa Solicita Retorno', 'Cliente pede para retornar a ligacao em outro dia/horario', '#3b82f6', true),
+('Pagamento Ja Efetuado', 'Cliente informa que ja efetuou o pagamento', '#22c55e', true),
+('Promessa Pagamento Sem Boleto', 'Cliente informa que ira pagar/depositar dentro de 10 dias corridos', '#10b981', true),
+('Contato Sem Negociacao', 'Cliente nao pode falar e desliga, ou informa pagamento FORA dos 10 dias corridos', '#f59e0b', true),
+('Sem Capacidade de Pagamento', 'Cliente sem recursos: desemprego, mudancas economicas, nao pode pagar no momento', '#ef4444', true),
+('Divida Nao Reconhecida', 'Cliente alega desconhecer a divida', '#dc2626', true),
+('Negociacao em Outro Canal', 'Cliente ja esta negociando em outro canal', '#06b6d4', true),
+('Promessa Pagamento Com Boleto', 'Cliente solicita boleto e informa data de pagamento dentro de 10 dias corridos', '#22c55e', true),
+('Aceita Acao Sem Boleto', 'Cliente aceita acao/campanha sem emissao de boleto', '#16a34a', true),
+('Aceita Acao Com Boleto', 'Cliente aceita acao/campanha com emissao de boleto', '#15803d', true),
+('Cliente Acordo Ativo Receptivo', 'Cliente com acordo vigente retorna no receptivo para esclarecimentos ou solicitar boleto', '#0ea5e9', true),
+('Promessa Acordo Parcelamento', 'Cliente confirma pagamento parcelado do CARTAO DE CREDITO', '#2563eb', true),
+('Transbordo Entre Canais', 'Atendimento iniciado em um canal precisa ser transbordado para outro canal', '#7c3aed', true),
+('Recusa Acao/Campanha', 'Cliente nao aceita a acao/campanha ofertada. Motivos: Sem capacidade de pagamento | Contato sem negociacao/acordo | Negociacao em outro canal | Pessoa solicita retorno em outro momento | Divida nao reconhecida | Promessa de pagamento sem emissao de boleto | Promessa de pagamento com emissao de boleto', '#991b1b', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
