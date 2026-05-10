@@ -195,6 +195,11 @@ async function validateUserCredentials(
 
 // Update user online status
 async function updateUserOnlineStatus(userId: string, isOnline: boolean): Promise<void> {
+  // Ignorar usuario operador hardcoded (nao existe no banco)
+  if (userId === "operador-hardcoded") {
+    return
+  }
+
   try {
     const supabase = createClient()
     await supabase
@@ -211,6 +216,11 @@ async function updateUserOnlineStatus(userId: string, isOnline: boolean): Promis
 
 // Get user by ID
 async function getUserById(userId: string): Promise<User | null> {
+  // Verificar se e o usuario operador hardcoded
+  if (userId === "operador-hardcoded") {
+    return OPERADOR_USER
+  }
+
   const supabase = createClient()
   const { data, error } = await supabase
     .from("users")
