@@ -30,32 +30,11 @@ export const LoginForm = memo(function LoginForm() {
   }, [])
 
   const handleModeSelect = useCallback(
-    async (selected: LoginMode) => {
+    (selected: LoginMode) => {
       resetForm()
-      
-      // Auto-login para Operador
-      if (selected === "operator") {
-        setIsLoading(true)
-        try {
-          const result = await login("operador", "")
-          
-          if (result.success) {
-            window.location.href = "/operator"
-          } else {
-            setError(result.error || "Erro ao fazer login automático")
-            setMode("select")
-            setIsLoading(false)
-          }
-        } catch (error) {
-          setError("Erro ao fazer login automático")
-          setMode("select")
-          setIsLoading(false)
-        }
-      } else {
-        setMode(selected)
-      }
+      setMode(selected)
     },
-    [resetForm, login],
+    [resetForm],
   )
 
   const handleBack = useCallback(() => {
