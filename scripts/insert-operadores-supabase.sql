@@ -472,7 +472,7 @@ VALUES
   ('madanes', 'madanes@gruporoveri.com', 'MARIA DA CONCEICAO NUNES', 'operator', true, false, '{}', NOW(), NOW()),
   ('vibueno', 'vibueno@gruporoveri.com', 'VINICIUS COSTA BUENO', 'operator', true, false, '{}', NOW(), NOW()),
   ('PSFREITAS', 'PSFREITAS@gruporoveri.com', 'PIETRA SILVA FREITAS', 'operator', true, false, '{}', NOW(), NOW()),
-  ('RENJESUS', 'PSFREITAS@gruporoveri.com', 'RENATO CALIXTO DE JESUS', 'operator', true, false, '{}', NOW(), NOW()),
+  ('RENJESUS', 'RENJESUS@gruporoveri.com', 'RENATO CALIXTO DE JESUS', 'operator', true, false, '{}', NOW(), NOW()),
   ('ANFIORENTINI', 'ANFIORENTINI@gruporoveri.com', 'ANA CLARA FIORENTINI', 'operator', true, false, '{}', NOW(), NOW()),
   ('LARIRODRIGUES', 'LARIRODRIGUES@gruporoveri.com', 'LARISSA RODRIGUES DA SILVA', 'operator', true, false, '{}', NOW(), NOW()),
   ('INBACCON', 'INBACCON@gruporoveri.com', 'DIEGO BACCON', 'operator', true, false, '{}', NOW(), NOW()),
@@ -482,9 +482,6 @@ VALUES
   ('BRRIBEIRO', 'BRRIBEIRO@gruporoveri.com', 'BRENDA RODRIGUES RIBEIRO', 'operator', true, false, '{}', NOW(), NOW()),
   ('LPOLIVEIRA', 'LPOLIVEIRA@gruporoveri.com', 'LETICIA PAIS DE OLIVEIRA      ', 'operator', true, false, '{}', NOW(), NOW()),
   ('CCORREIA', 'CCORREIA@gruporoveri.com', 'CELMA DAIANE DO NASCIMENTO', 'operator', true, false, '{}', NOW(), NOW()),
-  ('vibueno', 'vibueno@gruporoveri.com', 'VINICIUS COSTA BUENO', 'operator', true, false, '{}', NOW(), NOW()),
-  ('vibueno', 'vibueno@gruporoveri.com', 'VINICIUS COSTA BUENO', 'operator', true, false, '{}', NOW(), NOW()),
-  ('vibueno', 'vibueno@gruporoveri.com', 'VINICIUS COSTA BUENO', 'operator', true, false, '{}', NOW(), NOW()),
   ('BTESILVA', 'BTESILVA@gruporoveri.com', 'BEATRIZ TEIXEIRA DA SILVA', 'operator', true, false, '{}', NOW(), NOW()),
   ('CAMALMEIDA', 'CAMALMEIDA@gruporoveri.com', 'CAMILA DE ALMEIDA SILVA', 'operator', true, false, '{}', NOW(), NOW()),
   ('TAYLSANTOS', 'TAYLSANTOS@gruporoveri.com', 'TAYNA DOS SANTOS LIMA FERREIRA', 'operator', true, false, '{}', NOW(), NOW()),
@@ -495,6 +492,7 @@ VALUES
   ('TSIOLIVEIRA', 'TSIOLIVEIRA@gruporoveri.com', 'THAIS SILVA OLIVEIRA', 'operator', true, false, '{}', NOW(), NOW()),
   ('TAMRODRIGUES', 'TAMRODRIGUES@gruporoveri.com', 'TATIANA DE MARQUES RODRIGUES', 'operator', true, false, '{}', NOW(), NOW()),
   ('mapere', 'mapere@gruporoveri.com', 'MARIA IZABELLE DE FREITAS PERE', 'operator', true, false, '{}', NOW(), NOW())
+
 ON CONFLICT (email) DO UPDATE SET
   username = EXCLUDED.username,
   name = EXCLUDED.name,
