@@ -74,7 +74,7 @@ export function OperatorCampaignsModal({ isOpen, onClose }: OperatorCampaignsMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-orange-500 to-orange-600 text-white">
           <DialogTitle className="flex items-center gap-3 text-xl">
