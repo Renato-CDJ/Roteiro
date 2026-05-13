@@ -301,23 +301,25 @@ export const ScriptCard = memo(function ScriptCard({
   const renderedButtons = useMemo(() => {
     return step.buttons
       .sort((a, b) => a.order - b.order)
-      .map((button) => {
+      .map((button, index) => {
         const isPrimary = button.primary || button.variant === "primary" || button.variant === "default"
 
         return (
           <Button
             key={button.id}
-            size="lg"
+            size="default"
             onClick={() => onButtonClick(button.nextStepId, button.label)}
-            className={`font-bold transition-colors shadow-lg border-0 rounded-xl max-w-full text-wrap ${
+            className={`font-semibold transition-all duration-200 rounded-lg max-w-full text-wrap shadow-md hover:shadow-lg ${
               isPrimary
-                ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
-                : "bg-amber-500 hover:bg-amber-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
+                ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                : index === 1
+                  ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border"
+                  : "bg-muted hover:bg-muted/80 text-foreground border border-border"
             }`}
             style={{
-              fontSize: `clamp(12px, ${navButtonFontSize}px, 18px)`,
-              padding: `${Math.min(navButtonPadding, 16)}px ${Math.min(navButtonPadding * 1.5, 24)}px`,
-              minHeight: `${Math.min(navButtonPadding * 2.5, 48)}px`,
+              fontSize: `clamp(11px, ${navButtonFontSize * 0.9}px, 15px)`,
+              padding: `${Math.min(navButtonPadding * 0.7, 12)}px ${Math.min(navButtonPadding * 1.2, 20)}px`,
+              minHeight: `${Math.min(navButtonPadding * 2, 40)}px`,
             }}
           >
             {button.label}
@@ -327,7 +329,7 @@ export const ScriptCard = memo(function ScriptCard({
   }, [step.buttons, step.id, navButtonFontSize, navButtonPadding, onButtonClick])
 
   return (
-    <div className="space-y-4 w-full max-w-7xl mx-auto">
+    <div className="space-y-3 w-full max-w-4xl mx-auto">
       {showControls && (
         <div className="py-3 px-2 md:px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center max-w-4xl mx-auto">
@@ -370,8 +372,8 @@ export const ScriptCard = memo(function ScriptCard({
       )}
 
       {productName && (
-        <div className="flex items-center justify-center py-2 px-2 md:px-4 border-t border-border/30">
-          <span className="inline-flex items-center px-4 py-1.5 bg-primary/10 text-primary rounded-md text-xs font-semibold border border-primary/20">
+        <div className="flex items-center justify-center py-2">
+          <span className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">
             {productName}
           </span>
         </div>
@@ -390,68 +392,75 @@ export const ScriptCard = memo(function ScriptCard({
 
       
 
-      <Card className="relative shadow-2xl border-2 border-orange-200/80 dark:border-orange-500/60 w-full overflow-hidden backdrop-blur-sm">
-        <Popover open={showSearch} onOpenChange={setShowSearch}>
-          <PopoverTrigger asChild>
+      <Card className="relative border border-border/50 bg-card/95 backdrop-blur-sm shadow-xl w-full overflow-hidden">
+        {/* Subtle accent line at top */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary" />
+        
+        {/* Header toolbar */}
+        <div className="flex items-center justify-between px-4 md:px-6 pt-5 pb-2">
+          <Popover open={showSearch} onOpenChange={setShowSearch}>
+            <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={handleSearchOpen}
-                className="absolute top-4 left-4 z-20 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-500/50 shadow-lg transition-colors"
+                className="h-9 w-9 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                 title="Buscar tela do roteiro"
               >
-                <Search className="h-5 w-5 text-blue-500 dark:text-cyan-400" />
+                <Search className="h-4 w-4" />
               </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start" side="bottom">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <h4 className="font-semibold text-sm">Buscar Tela</h4>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-3" align="start" side="bottom">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <h4 className="font-medium text-sm">Buscar Tela</h4>
+                </div>
+                <Input
+                  placeholder="Digite titulo ou conteudo..."
+                  value={searchText}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="w-full h-9 text-sm"
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">A tela sera exibida conforme voce digita</p>
               </div>
-              <Input
-                placeholder="Digite título ou conteúdo..."
-                value={searchText}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full"
-                autoFocus
-              />
-              <p className="text-xs text-muted-foreground">A tela será exibida conforme você digita</p>
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverContent>
+          </Popover>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowTabulation(true)}
-          className={`absolute top-3 right-3 md:top-4 md:right-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-white dark:to-gray-100 dark:hover:from-gray-100 dark:hover:to-white text-white dark:text-black font-bold border-0 shadow-lg hover:shadow-xl transition-all duration-200 z-10 text-xs md:text-sm`}
-        >
-          {hasTabulations ? (
-            <AlertCircle className="h-4 w-4 md:h-5 md:w-5 md:mr-2" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 md:mr-2" />
-          )}
-          <span className="hidden md:inline">Verificar Tabulação</span>
-          {hasTabulations && showTabulationPulse && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" style={{ animation: "ping 2s cubic-bezier(0, 0, 0.2, 1) infinite" }}></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 shadow-md shadow-green-500/50"></span>
-            </span>
-          )}
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTabulation(true)}
+            className={`relative h-9 px-3 text-xs font-medium bg-secondary/50 hover:bg-secondary border-border text-foreground transition-all ${hasTabulations ? "border-primary/50" : ""}`}
+          >
+            {hasTabulations ? (
+              <AlertCircle className="h-4 w-4 mr-1.5 text-primary" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 mr-1.5 text-muted-foreground" />
+            )}
+            <span className="hidden sm:inline">Verificar Tabulacao</span>
+            <span className="sm:hidden">Tabulacao</span>
+            {hasTabulations && showTabulationPulse && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+              </span>
+            )}
+          </Button>
+        </div>
 
-        <CardHeader className="pb-5 pt-7 px-4 md:px-8">
+        <CardHeader className="pb-4 pt-2 px-4 md:px-6">
           <SafeHtml
             as="h2"
             html={highlightedTitle}
-            className="text-2xl md:text-3xl lg:text-4xl text-center font-bold text-balance leading-tight text-orange-900 dark:text-white drop-shadow-sm"
+            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-foreground"
           />
         </CardHeader>
 
-        <CardContent className="space-y-6 pb-8 px-4 md:px-8">
+        <CardContent className="pb-6 px-4 md:px-6">
           <div
-            className="bg-gradient-to-br from-orange-50/60 via-amber-50/40 to-orange-50/60 dark:from-gray-600/40 dark:via-gray-600/40 dark:to-gray-600/40 rounded-2xl p-6 md:p-10 leading-relaxed min-h-[280px] md:min-h-[320px] border-2 border-orange-200/60 dark:border-orange-500/40 shadow-inner backdrop-blur-sm"
+            className="bg-secondary/30 rounded-xl p-5 md:p-6 leading-relaxed min-h-[180px] md:min-h-[220px] border border-border/50"
             style={contentStyles}
           >
             {typeof renderedContent === "string" ? (
@@ -463,8 +472,8 @@ export const ScriptCard = memo(function ScriptCard({
         </CardContent>
       </Card>
 
-      <div className="flex justify-center items-center pt-6 px-4">
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 lg:gap-5 w-full max-w-full md:max-w-3xl">{renderedButtons}</div>
+      <div className="flex justify-center items-center pt-5 px-4">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3 w-full max-w-2xl">{renderedButtons}</div>
       </div>
 
       <Dialog open={showTabulation} onOpenChange={setShowTabulation}>
