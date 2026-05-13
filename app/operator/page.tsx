@@ -368,12 +368,12 @@ const OperatorContent = memo(function OperatorContent() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-3 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
             {showConfig && !isSessionActive ? (
-              <div className="space-y-6 max-w-4xl mx-auto">
-                <div className="text-center space-y-2">
-                  <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-balance">
+              <div className="space-y-8 max-w-6xl mx-auto">
+                <div className="text-center space-y-3 py-4">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 dark:from-orange-400 dark:via-orange-300 dark:to-amber-300 bg-clip-text text-transparent">
                     Bem-vindo, {user.fullName}
                   </h1>
-                  <p className="text-muted-foreground text-base md:text-lg text-pretty">
+                  <p className="text-muted-foreground text-base md:text-lg text-pretty font-medium">
                     Configure as opções abaixo para iniciar um novo atendimento
                   </p>
                 </div>
