@@ -415,3 +415,17 @@ export interface QualityComment {
   content: string
   createdAt: Date
 }
+
+export interface Campaign {
+  id: string
+  name: string // Nome da campanha (ex: SINEB - 224,225 e 226)
+  howItWorks: string // Como funciona?
+  positiveCase: string // Em caso positivo
+  negativeCase: string // Em caso negativo
+  delayRange: string // Faixa de atraso
+  complement: string // Complemento
+  systemSite: string // Sistema/Site
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
