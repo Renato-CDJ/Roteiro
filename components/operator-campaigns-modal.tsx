@@ -136,19 +136,22 @@ export function OperatorCampaignsModal({ isOpen, onClose }: OperatorCampaignsMod
                             <span className="truncate">{campaign.name}</span>
                           </CardTitle>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
-                            {campaign.system_site && (
-                              <Badge variant="outline" className="font-mono text-xs">
-                                {campaign.system_site}
-                              </Badge>
-                            )}
                             {campaign.delay_range && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs gap-1">
+                                <span className="font-semibold opacity-70">Faixa de atraso:</span>
                                 {campaign.delay_range}
                               </Badge>
                             )}
                             {campaign.complement && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs gap-1">
+                                <span className="font-semibold opacity-70">Complemento:</span>
                                 {campaign.complement}
+                              </Badge>
+                            )}
+                            {campaign.system_site && (
+                              <Badge variant="outline" className="font-mono text-xs gap-1">
+                                <span className="font-semibold opacity-70">Sistema/Site:</span>
+                                {campaign.system_site}
                               </Badge>
                             )}
                           </div>
