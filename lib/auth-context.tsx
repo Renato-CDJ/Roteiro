@@ -174,8 +174,11 @@ async function validateUserCredentials(
 
     return { success: true, user }
   } catch (error: any) {
-    console.error("[Auth] Validation error:", error)
-    return { success: false, error: "Erro ao validar credenciais" }
+    console.error("[v0] Validation error completo:", error?.message, error)
+    if (error?.message?.includes("ambiente") || error?.message?.includes("env")) {
+      return { success: false, error: "Banco de dados não configurado. Contate o administrador." }
+    }
+    return { success: false, error: `Erro interno: ${error?.message || "desconhecido"}` }
   }
 }
 
