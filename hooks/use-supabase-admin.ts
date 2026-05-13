@@ -30,6 +30,7 @@ const TABLES = {
   CONTRACTS: "contracts",
   PHRASEOLOGY: "phraseology",
   SUPERVISOR_TEAMS: "supervisor_teams",
+  CAMPAIGNS: "campaigns",
 } as const
 
 // Mapeamento de table para chave de versão
@@ -507,6 +508,22 @@ export function usePhraseology() {
     created_at: string
     updated_at: string
   }>(TABLES.PHRASEOLOGY)
+}
+
+export function useCampaigns() {
+  return useSupabaseTable<{
+    id: string
+    name: string
+    how_it_works: string
+    positive_case: string
+    negative_case: string
+    delay_range: string
+    complement: string
+    system_site: string
+    is_active: boolean
+    created_at: string
+    updated_at: string
+  }>(TABLES.CAMPAIGNS)
 }
 
 // Import scripts from JSON file

@@ -22,6 +22,7 @@ import {
   ListChecks,
   AlertCircle,
   Radio,
+  Megaphone,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCachedProducts, useCachedMessages } from "@/hooks/use-cached-data"
@@ -36,6 +37,7 @@ import { OperatorInitialGuideModal } from "@/components/operator-initial-guide-m
 import { OperatorResultCodesModal } from "@/components/operator-result-codes-modal"
 import { OperatorSituationsModal } from "@/components/operator-situations-modal"
 import { OperatorChannelsModal } from "@/components/operator-channels-modal"
+import { OperatorCampaignsModal } from "@/components/operator-campaigns-modal"
 
 interface OperatorHeaderProps {
   searchQuery?: string
@@ -77,6 +79,7 @@ export const OperatorHeader = memo(function OperatorHeader({
   const [showResultCodesModal, setShowResultCodesModal] = useState(false)
   const [showSituationsModal, setShowSituationsModal] = useState(false)
   const [showChannelsModal, setShowChannelsModal] = useState(false)
+  const [showCampaignsModal, setShowCampaignsModal] = useState(false)
 
   // Map products from Supabase
   const products = useMemo(() => productsData
@@ -354,6 +357,17 @@ export const OperatorHeader = memo(function OperatorHeader({
               </button>
 
               <button
+                onClick={() => setShowCampaignsModal(true)}
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                title="Campanhas"
+              >
+                <div className="h-9 w-9 bg-rose-500 hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
+                  <Megaphone className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Campanhas</span>
+              </button>
+
+              <button
                 onClick={() => setShowResultCodesModal(true)}
                 className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                 title="Codigos de Resultado"
@@ -459,6 +473,7 @@ export const OperatorHeader = memo(function OperatorHeader({
       <OperatorResultCodesModal open={showResultCodesModal} onOpenChange={setShowResultCodesModal} />
       <OperatorSituationsModal open={showSituationsModal} onOpenChange={setShowSituationsModal} />
       <OperatorChannelsModal open={showChannelsModal} onOpenChange={setShowChannelsModal} />
+      <OperatorCampaignsModal isOpen={showCampaignsModal} onClose={() => setShowCampaignsModal(false)} />
     </>
   )
 })

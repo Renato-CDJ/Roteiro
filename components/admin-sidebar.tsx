@@ -21,6 +21,7 @@ import {
   BookOpen,
   ListChecks,
   Award,
+  Megaphone,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
@@ -46,16 +47,17 @@ const menuItems: {
   { id: "operator-view", label: "Visualizar Roteiro", icon: FileText, permission: "scripts", onlyForSupervisaoOrMonitoria: true },
   { id: "scripts", label: "Roteiros", icon: FileText, permission: "scripts", hideForSupervisao: true },
   { id: "products", label: "Produtos", icon: Package, permission: "products" },
+  { id: "campaigns", label: "Campanhas", icon: Megaphone, permission: "products" },
   { id: "initial-guide", label: "Guia Inicial", icon: BookOpen, permission: "dashboard" },
   { id: "attendance-config", label: "Configurar Atendimento", icon: Settings2, permission: "attendanceConfig" },
-  { id: "tabulations", label: "Tabulações", icon: Tags, permission: "tabulations" },
-  { id: "situations", label: "Situações", icon: AlertCircle, permission: "situations" },
+  { id: "tabulations", label: "Tabulacoes", icon: Tags, permission: "tabulations" },
+  { id: "situations", label: "Situacoes", icon: AlertCircle, permission: "situations" },
   { id: "channels", label: "Canais", icon: Radio, permission: "channels" },
   { id: "notes", label: "Bloco de Notas", icon: StickyNote, permission: "notes" },
   { id: "operators", label: "Operadores", icon: Users, permission: "operators" },
-  { id: "presentations", label: "Apresentações", icon: Presentation, permission: "messagesQuiz" },
+  { id: "presentations", label: "Apresentacoes", icon: Presentation, permission: "messagesQuiz" },
   { id: "result-codes", label: "Codigos de Resultado", icon: ListChecks, permission: "tabulations" },
-  { id: "settings", label: "Configurações", icon: Settings, permission: "settings" },
+  { id: "settings", label: "Configuracoes", icon: Settings, permission: "settings" },
 ]
 
 export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
