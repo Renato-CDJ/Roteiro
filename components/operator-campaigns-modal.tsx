@@ -135,24 +135,34 @@ export function OperatorCampaignsModal({ isOpen, onClose }: OperatorCampaignsMod
                             <Megaphone className="h-4 w-4 text-orange-500 shrink-0" />
                             <span className="truncate">{campaign.name}</span>
                           </CardTitle>
-                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                          {/* Info Cards */}
+                          <div className="flex flex-wrap items-stretch gap-2 mt-3">
                             {campaign.delay_range && (
-                              <Badge variant="secondary" className="text-xs gap-1">
-                                <span className="font-semibold opacity-70">Faixa de atraso:</span>
-                                {campaign.delay_range}
-                              </Badge>
+                              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg px-3 py-2">
+                                <div className="w-1.5 h-8 rounded-full bg-blue-500" />
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 font-semibold">Faixa de atraso</span>
+                                  <span className="text-sm font-medium text-foreground">{campaign.delay_range}</span>
+                                </div>
+                              </div>
                             )}
                             {campaign.complement && (
-                              <Badge variant="secondary" className="text-xs gap-1">
-                                <span className="font-semibold opacity-70">Complemento:</span>
-                                {campaign.complement}
-                              </Badge>
+                              <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 rounded-lg px-3 py-2">
+                                <div className="w-1.5 h-8 rounded-full bg-purple-500" />
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] uppercase tracking-wide text-purple-600 dark:text-purple-400 font-semibold">Complemento</span>
+                                  <span className="text-sm font-medium text-foreground">{campaign.complement}</span>
+                                </div>
+                              </div>
                             )}
                             {campaign.system_site && (
-                              <Badge variant="outline" className="font-mono text-xs gap-1">
-                                <span className="font-semibold opacity-70">Sistema/Site:</span>
-                                {campaign.system_site}
-                              </Badge>
+                              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-lg px-3 py-2">
+                                <div className="w-1.5 h-8 rounded-full bg-emerald-500" />
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400 font-semibold">Sistema/Site</span>
+                                  <span className="text-sm font-medium font-mono text-foreground">{campaign.system_site}</span>
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>
