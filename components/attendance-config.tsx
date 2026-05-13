@@ -1,15 +1,38 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useCachedProducts } from "@/hooks/use-cached-data"
 import { getAttendanceTypes, getPersonTypes } from "@/lib/store"
 import type { AttendanceConfig as AttendanceConfigType } from "@/lib/types"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { Phone, PhoneIncoming, User, Building2, Package, Play, RotateCcw, Check, ChevronRight } from "lucide-react"
 
 interface AttendanceConfigProps {
   onStart: (config: AttendanceConfigType) => void
+}
+
+const getAttendanceIcon = (value: string) => {
+  switch (value) {
+    case "ativo":
+      return Phone
+    case "receptivo":
+      return PhoneIncoming
+    default:
+      return Phone
+  }
+}
+
+const getPersonIcon = (value: string) => {
+  switch (value) {
+    case "fisica":
+      return User
+    case "juridica":
+      return Building2
+    default:
+      return User
+  }
 }
 
 export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
@@ -75,100 +98,189 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
     setProduct("")
   }
 
-  return (
-    <div className="max-w-5xl mx-auto">
-      <TooltipProvider>
-        <Card className="relative shadow-2xl border-0 bg-gradient-to-br from-white via-orange-50/30 to-amber-50/30 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-orange-400/10 to-amber-400/10 dark:from-orange-500/5 dark:to-amber-500/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-orange-400/10 to-amber-400/10 dark:from-orange-500/5 dark:to-amber-500/5 rounded-full blur-3xl"></div>
+  // Calculate progress steps
+  const currentStep = !attendanceType ? 1 : (!isReceptivo && !personType) ? 2 : !product ? 3 : 4
+  const totalSteps = isReceptivo ? 2 : 3
 
-          <CardHeader className="pb-6 relative z-10">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">
-              Configuração de Atendimento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-10 pb-10 relative z-10">
-            {/* Tipo de atendimento - Now using dynamic options */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-foreground text-center">Tipo de Atendimento</h3>
-              <div className="flex gap-4 justify-center flex-wrap">
-                {attendanceTypes.map((type) => (
-                  <Button
-                    key={type.id}
-                    variant={attendanceType === type.value ? "default" : "outline"}
-                    onClick={() => {
-                      setAttendanceType(type.value)
-                      setPersonType(null)
-                      setProduct("")
-                    }}
-                    className={
-                      attendanceType === type.value
-                        ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 font-semibold border-0 shadow-lg hover:shadow-xl transition-all min-w-[120px] h-10 text-sm"
-                        : "bg-card hover:bg-accent text-foreground border-2 border-border hover:border-orange-400 dark:hover:border-orange-500 min-w-[120px] h-10 text-sm font-medium transition-all"
+  return (
+    <div className="max-w-4xl mx-auto px-4">
+      <TooltipProvider>
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          {Array.from({ length: totalSteps }, (_, i) => {
+            const stepNum = i + 1
+            const isCompleted = currentStep > stepNum
+            const isActive = currentStep === stepNum
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <div
+                  className={`
+                    w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300
+                    ${isCompleted 
+                      ? "bg-primary text-primary-foreground" 
+                      : isActive 
+                        ? "bg-primary/20 text-primary border-2 border-primary" 
+                        : "bg-muted text-muted-foreground"
                     }
-                  >
-                    {type.label}
-                  </Button>
-                ))}
+                  `}
+                >
+                  {isCompleted ? <Check className="w-5 h-5" /> : stepNum}
+                </div>
+                {i < totalSteps - 1 && (
+                  <ChevronRight className={`w-5 h-5 ${isCompleted ? "text-primary" : "text-muted-foreground/50"}`} />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <Card className="relative border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+          
+          <CardContent className="relative z-10 p-6 md:p-8 lg:p-10 space-y-8">
+            {/* Tipo de atendimento */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                  Tipo de Atendimento
+                </h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+              </div>
+              <div className="flex gap-3 justify-center flex-wrap">
+                {attendanceTypes.map((type) => {
+                  const Icon = getAttendanceIcon(type.value)
+                  const isSelected = attendanceType === type.value
+                  return (
+                    <button
+                      key={type.id}
+                      onClick={() => {
+                        setAttendanceType(type.value)
+                        setPersonType(null)
+                        setProduct("")
+                      }}
+                      className={`
+                        group relative flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200
+                        ${isSelected
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
+                          : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                        }
+                      `}
+                    >
+                      <div className={`
+                        p-2 rounded-lg transition-colors
+                        ${isSelected ? "bg-primary-foreground/20" : "bg-background group-hover:bg-primary/10"}
+                      `}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span>{type.label}</span>
+                      {isSelected && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-primary" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
-            {/* Pessoa - Oculto para Receptivo */}
-            {!isReceptivo && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-foreground text-center">Tipo de Pessoa</h3>
-                <div className="flex gap-4 justify-center flex-wrap">
-                  {personTypes.map((type) => (
-                    <Button
-                      key={type.id}
-                      variant={personType === type.value ? "default" : "outline"}
-                      onClick={() => setPersonType(type.value)}
-                      className={
-                        personType === type.value
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 font-semibold border-0 shadow-lg hover:shadow-xl transition-all min-w-[120px] h-10 text-sm"
-                          : "bg-card hover:bg-accent text-foreground border-2 border-border hover:border-orange-400 dark:hover:border-orange-500 min-w-[120px] h-10 text-sm font-medium transition-all"
-                      }
-                    >
-                      {type.label}
-                    </Button>
-                  ))}
+            {/* Tipo de Pessoa - Oculto para Receptivo */}
+            {attendanceType && !isReceptivo && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                    Tipo de Pessoa
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                </div>
+                <div className="flex gap-3 justify-center flex-wrap">
+                  {personTypes.map((type) => {
+                    const Icon = getPersonIcon(type.value)
+                    const isSelected = personType === type.value
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => setPersonType(type.value)}
+                        className={`
+                          group relative flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200
+                          ${isSelected
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
+                            : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                          }
+                        `}
+                      >
+                        <div className={`
+                          p-2 rounded-lg transition-colors
+                          ${isSelected ? "bg-primary-foreground/20" : "bg-background group-hover:bg-primary/10"}
+                        `}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <span>{type.label}</span>
+                        {isSelected && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-primary" />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
 
+            {/* Seleção de Produto */}
             {canSelectProduct && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-foreground text-center">Selecione o Produto</h3>
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                    Selecione o Produto
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                </div>
                 {filteredProducts.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground bg-card/50 rounded-xl border-2 border-dashed border-border">
-                    <p className="text-lg font-semibold">Nenhum produto disponível</p>
-                    <p className="text-sm mt-2">Entre em contato com o administrador.</p>
+                  <div className="text-center py-10 text-muted-foreground bg-secondary/30 rounded-xl border border-dashed border-border">
+                    <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Nenhum produto disponivel</p>
+                    <p className="text-sm mt-1">Entre em contato com o administrador.</p>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-4 justify-center">
-                    {filteredProducts.map((prod) => (
-                      <Tooltip key={prod.id}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant={product === prod.id ? "default" : "outline"}
-                            onClick={() => setProduct(prod.id)}
-                            className={
-                              product === prod.id
-                                ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 font-semibold uppercase border-0 shadow-lg hover:shadow-xl transition-all min-w-[120px] h-10 text-sm"
-                                : "bg-card hover:bg-accent text-foreground border-2 border-border hover:border-orange-400 dark:hover:border-orange-500 uppercase min-w-[120px] h-10 text-sm font-medium transition-all"
-                            }
-                          >
-                            {prod.name}
-                          </Button>
-                        </TooltipTrigger>
-                        {prod.description && (
-                          <TooltipContent side="top" className="max-w-xs">
-                            <p>{prod.description}</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    ))}
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    {filteredProducts.map((prod) => {
+                      const isSelected = product === prod.id
+                      return (
+                        <Tooltip key={prod.id}>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setProduct(prod.id)}
+                              className={`
+                                group relative flex items-center gap-3 px-5 py-3 rounded-xl font-medium transition-all duration-200
+                                ${isSelected
+                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
+                                  : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                                }
+                              `}
+                            >
+                              <Package className="w-4 h-4" />
+                              <span className="uppercase text-sm">{prod.name}</span>
+                              {isSelected && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
+                                  <Check className="w-3 h-3 text-primary" />
+                                </div>
+                              )}
+                            </button>
+                          </TooltipTrigger>
+                          {prod.description && (
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p>{prod.description}</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -178,21 +290,26 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
       </TooltipProvider>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-8 px-4">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
         <Button
           size="lg"
           onClick={handleStart}
           disabled={!attendanceType || (!isReceptivo && !personType) || !product}
-          className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-400 dark:to-orange-500 dark:hover:from-orange-500 dark:hover:to-orange-600 text-white font-bold px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105 border-0 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
-          Iniciar Atendimento
+          <span className="relative z-10 flex items-center gap-3">
+            <Play className="w-5 h-5" />
+            Iniciar Atendimento
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
         </Button>
         <Button
           size="lg"
           variant="outline"
           onClick={handleReset}
-          className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 dark:from-amber-600 dark:to-orange-600 dark:hover:from-amber-700 dark:hover:to-orange-700 text-white font-bold px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-105 border-0 rounded-2xl"
+          className="group flex items-center gap-3 px-8 py-6 text-lg font-medium border-2 border-border hover:border-muted-foreground/50 hover:bg-secondary/50 transition-all duration-300 rounded-xl"
         >
+          <RotateCcw className="w-5 h-5 transition-transform group-hover:-rotate-180 duration-500" />
           Limpar
         </Button>
       </div>
