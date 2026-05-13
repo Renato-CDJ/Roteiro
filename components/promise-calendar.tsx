@@ -329,18 +329,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
               </div>
             )}
 
-            {/* Regras de Contagem */}
-            <div className="bg-orange-50 dark:bg-orange-950/40 border-l-4 border-orange-500 rounded-lg p-2 space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                <p className="text-xs font-bold text-orange-900 dark:text-orange-100">Regras de Contagem</p>
-              </div>
-              <ul className="text-[10px] text-orange-900 dark:text-orange-100 ml-5 space-y-1 list-disc">
-                <li>Contagem em dias corridos (inclui sab/dom/feriados)</li>
-                <li>Sábados, domingos e feriados <strong>NÃO</strong> podem ser agendado o pagamento</li>
-                <li>Se cliente informar sábado, agendar o pagamento para próximo dia útil</li>
-              </ul>
-            </div>
+
           </div>
         )}
       </CardContent>
