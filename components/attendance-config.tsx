@@ -103,19 +103,19 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
   const totalSteps = isReceptivo ? 2 : 3
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
+    <div className="max-w-3xl mx-auto px-4 max-h-[calc(100vh-12rem)] flex flex-col">
       <TooltipProvider>
-        {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
+        {/* Progress Indicator - mais compacto */}
+        <div className="flex items-center justify-center gap-1.5 mb-4 shrink-0">
           {Array.from({ length: totalSteps }, (_, i) => {
             const stepNum = i + 1
             const isCompleted = currentStep > stepNum
             const isActive = currentStep === stepNum
             return (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="flex items-center gap-1.5">
                 <div
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300
+                    w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300
                     ${isCompleted 
                       ? "bg-primary text-primary-foreground" 
                       : isActive 
@@ -124,31 +124,31 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
                     }
                   `}
                 >
-                  {isCompleted ? <Check className="w-5 h-5" /> : stepNum}
+                  {isCompleted ? <Check className="w-3.5 h-3.5" /> : stepNum}
                 </div>
                 {i < totalSteps - 1 && (
-                  <ChevronRight className={`w-5 h-5 ${isCompleted ? "text-primary" : "text-muted-foreground/50"}`} />
+                  <ChevronRight className={`w-4 h-4 ${isCompleted ? "text-primary" : "text-muted-foreground/50"}`} />
                 )}
               </div>
             )
           })}
         </div>
 
-        <Card className="relative border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
+        <Card className="relative border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden flex-1 min-h-0">
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
           
-          <CardContent className="relative z-10 p-6 md:p-8 lg:p-10 space-y-8">
+          <CardContent className="relative z-10 p-4 md:p-6 space-y-5 overflow-y-auto max-h-full">
             {/* Tipo de atendimento */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-center gap-2">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
                   Tipo de Atendimento
                 </h3>
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
               </div>
-              <div className="flex gap-3 justify-center flex-wrap">
+              <div className="flex gap-2 justify-center flex-wrap">
                 {attendanceTypes.map((type) => {
                   const Icon = getAttendanceIcon(type.value)
                   const isSelected = attendanceType === type.value
@@ -161,23 +161,18 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
                         setProduct("")
                       }}
                       className={`
-                        group relative flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200
+                        group relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                         ${isSelected
-                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
-                          : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                          : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50"
                         }
                       `}
                     >
-                      <div className={`
-                        p-2 rounded-lg transition-colors
-                        ${isSelected ? "bg-primary-foreground/20" : "bg-background group-hover:bg-primary/10"}
-                      `}>
-                        <Icon className="w-5 h-5" />
-                      </div>
+                      <Icon className="w-4 h-4" />
                       <span>{type.label}</span>
                       {isSelected && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-primary" />
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary-foreground rounded-full flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-primary" />
                         </div>
                       )}
                     </button>
@@ -188,15 +183,15 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
 
             {/* Tipo de Pessoa - Oculto para Receptivo */}
             {attendanceType && !isReceptivo && (
-              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center justify-center gap-2">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
                     Tipo de Pessoa
                   </h3>
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
                 </div>
-                <div className="flex gap-3 justify-center flex-wrap">
+                <div className="flex gap-2 justify-center flex-wrap">
                   {personTypes.map((type) => {
                     const Icon = getPersonIcon(type.value)
                     const isSelected = personType === type.value
@@ -205,23 +200,18 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
                         key={type.id}
                         onClick={() => setPersonType(type.value)}
                         className={`
-                          group relative flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-200
+                          group relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                           ${isSelected
-                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
-                            : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                            : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50"
                           }
                         `}
                       >
-                        <div className={`
-                          p-2 rounded-lg transition-colors
-                          ${isSelected ? "bg-primary-foreground/20" : "bg-background group-hover:bg-primary/10"}
-                        `}>
-                          <Icon className="w-5 h-5" />
-                        </div>
+                        <Icon className="w-4 h-4" />
                         <span>{type.label}</span>
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-primary" />
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary-foreground rounded-full flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5 text-primary" />
                           </div>
                         )}
                       </button>
@@ -233,22 +223,22 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
 
             {/* Seleção de Produto */}
             {canSelectProduct && (
-              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center justify-center gap-2">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
                     Selecione o Produto
                   </h3>
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
                 </div>
                 {filteredProducts.length === 0 ? (
-                  <div className="text-center py-10 text-muted-foreground bg-secondary/30 rounded-xl border border-dashed border-border">
-                    <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Nenhum produto disponivel</p>
-                    <p className="text-sm mt-1">Entre em contato com o administrador.</p>
+                  <div className="text-center py-6 text-muted-foreground bg-secondary/30 rounded-lg border border-dashed border-border">
+                    <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="font-medium text-sm">Nenhum produto disponivel</p>
+                    <p className="text-xs mt-1">Entre em contato com o administrador.</p>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-3 justify-center">
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {filteredProducts.map((prod) => {
                       const isSelected = product === prod.id
                       return (
@@ -257,18 +247,18 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
                             <button
                               onClick={() => setProduct(prod.id)}
                               className={`
-                                group relative flex items-center gap-3 px-5 py-3 rounded-xl font-medium transition-all duration-200
+                                group relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
                                 ${isSelected
-                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
-                                  : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50 hover:shadow-md"
+                                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                                  : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50"
                                 }
                               `}
                             >
-                              <Package className="w-4 h-4" />
-                              <span className="uppercase text-sm">{prod.name}</span>
+                              <Package className="w-3.5 h-3.5" />
+                              <span className="uppercase text-xs">{prod.name}</span>
                               {isSelected && (
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary-foreground rounded-full flex items-center justify-center">
-                                  <Check className="w-3 h-3 text-primary" />
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary-foreground rounded-full flex items-center justify-center">
+                                  <Check className="w-2.5 h-2.5 text-primary" />
                                 </div>
                               )}
                             </button>
@@ -289,27 +279,26 @@ export function AttendanceConfig({ onStart }: AttendanceConfigProps) {
         </Card>
       </TooltipProvider>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+      {/* Action Buttons - mais compactos */}
+      <div className="flex justify-center gap-3 mt-4 shrink-0">
         <Button
-          size="lg"
+          size="default"
           onClick={handleStart}
           disabled={!attendanceType || (!isReceptivo && !personType) || !product}
-          className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         >
-          <span className="relative z-10 flex items-center gap-3">
-            <Play className="w-5 h-5" />
+          <span className="relative z-10 flex items-center gap-2">
+            <Play className="w-4 h-4" />
             Iniciar Atendimento
           </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
         </Button>
         <Button
-          size="lg"
+          size="default"
           variant="outline"
           onClick={handleReset}
-          className="group flex items-center gap-3 px-8 py-6 text-lg font-medium border-2 border-border hover:border-muted-foreground/50 hover:bg-secondary/50 transition-all duration-300 rounded-xl"
+          className="group flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-border hover:border-muted-foreground/50 hover:bg-secondary/50 transition-all duration-300 rounded-lg"
         >
-          <RotateCcw className="w-5 h-5 transition-transform group-hover:-rotate-180 duration-500" />
+          <RotateCcw className="w-4 h-4 transition-transform group-hover:-rotate-180 duration-500" />
           Limpar
         </Button>
       </div>
