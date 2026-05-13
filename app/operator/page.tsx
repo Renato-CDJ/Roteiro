@@ -368,13 +368,17 @@ const OperatorContent = memo(function OperatorContent() {
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-3 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
             {showConfig && !isSessionActive ? (
-              <div className="space-y-6 max-w-4xl mx-auto">
-                <div className="text-center space-y-2">
-                  <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-balance">
-                    Bem-vindo, {user.fullName}
+              <div className="space-y-8 max-w-4xl mx-auto">
+                <div className="text-center space-y-3">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    Pronto para atender
+                  </div>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-balance">
+                    Bem-vindo, <span className="text-primary">{user.fullName.split(" ")[0]}</span>
                   </h1>
-                  <p className="text-muted-foreground text-base md:text-lg text-pretty">
-                    Configure as opções abaixo para iniciar um novo atendimento
+                  <p className="text-muted-foreground text-base md:text-lg text-pretty max-w-xl mx-auto">
+                    Configure as opcoes abaixo para iniciar um novo atendimento
                   </p>
                 </div>
                 <AttendanceConfig onStart={handleStartAttendance} />
