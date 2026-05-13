@@ -373,6 +373,27 @@ CREATE TABLE IF NOT EXISTS training_views (
 );
 
 -- ============================================================
+-- 22. TABELA DE CAMPANHAS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  how_it_works TEXT DEFAULT '',
+  positive_case TEXT DEFAULT '',
+  negative_case TEXT DEFAULT '',
+  delay_range TEXT DEFAULT '',
+  complement TEXT DEFAULT '',
+  system_site TEXT DEFAULT '',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indice para busca por nome
+CREATE INDEX IF NOT EXISTS idx_campaigns_name ON campaigns(name);
+CREATE INDEX IF NOT EXISTS idx_campaigns_active ON campaigns(is_active);
+
+-- ============================================================
 -- INDICES ADICIONAIS PARA PERFORMANCE
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_quality_posts_type ON quality_posts(type);
