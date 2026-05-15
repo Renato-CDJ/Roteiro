@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS tabulations (
   name TEXT NOT NULL,
   description TEXT DEFAULT '',
   color TEXT DEFAULT '#6b7280',
+  category TEXT DEFAULT 'before' CHECK (category IN ('before', 'after')),
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -17,6 +17,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useTabulations } from "@/hooks/use-supabase-admin"
 import {
   Tags,
@@ -34,6 +41,7 @@ interface Tabulation {
   name: string
   description: string
   color: string
+  category: "before" | "after"
   is_active: boolean
   created_at: string
   updated_at: string
@@ -58,6 +66,7 @@ export function TabulationsTab() {
   const [formName, setFormName] = useState("")
   const [formDescription, setFormDescription] = useState("")
   const [formColor, setFormColor] = useState("#3b82f6")
+  const [formCategory, setFormCategory] = useState<"before" | "after">("before")
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
 
@@ -82,6 +91,7 @@ export function TabulationsTab() {
     setFormName("")
     setFormDescription("")
     setFormColor("#3b82f6")
+    setFormCategory("before")
     setEditingTabulation(null)
   }
 
@@ -96,6 +106,7 @@ export function TabulationsTab() {
       name: formName.trim(),
       description: formDescription.trim(),
       color: formColor,
+      category: formCategory,
       is_active: true,
     })
 
@@ -121,6 +132,7 @@ export function TabulationsTab() {
       name: formName.trim(),
       description: formDescription.trim(),
       color: formColor,
+      category: formCategory,
     })
 
     if (error) {
@@ -153,6 +165,7 @@ export function TabulationsTab() {
     setFormName(tabulation.name)
     setFormDescription(tabulation.description || "")
     setFormColor(tabulation.color || "#3b82f6")
+    setFormCategory(tabulation.category || "before")
   }
 
   const cancelEdit = () => {
@@ -186,6 +199,18 @@ export function TabulationsTab() {
           onChange={(e) => setFormDescription(e.target.value)}
           rows={3}
         />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Categoria</Label>
+        <Select value={formCategory} onValueChange={(value: "before" | "after") => setFormCategory(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="before">Antes da confirmacao de dados (CPF)</SelectItem>
+            <SelectItem value="after">Depois da confirmacao de dados (CPF)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2">
         <Label className="text-sm font-medium flex items-center gap-2">
@@ -352,6 +377,9 @@ export function TabulationsTab() {
                   <TableRow>
                     <TableHead className="text-xs font-semibold w-[50px]">Cor</TableHead>
                     <TableHead className="text-xs font-semibold min-w-[150px]">Nome</TableHead>
+                    <TableHead className="text-xs font-semibold min-w-[150px]">
+                      Categoria
+                    </TableHead>
                     <TableHead className="text-xs font-semibold min-w-[200px]">
                       Descricao
                     </TableHead>
@@ -376,6 +404,11 @@ export function TabulationsTab() {
                         <span className="text-sm font-medium text-foreground">
                           {tabulation.name}
                         </span>
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <Badge variant={tabulation.category === "before" ? "outline" : "secondary"}>
+                          {tabulation.category === "before" ? "Antes do CPF" : "Depois do CPF"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="py-3">
                         <span className="text-sm text-muted-foreground line-clamp-2">

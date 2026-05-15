@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useCachedTabulations } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut } from "lucide-react"
+import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -27,10 +26,11 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
       name: t.name,
       description: t.description || "",
       color: t.color || "#3b82f6",
+      category: t.category || "before",
       isActive: t.is_active,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name)), [tabulationsData])
+    })), [tabulationsData])
 
+  // Filter by search
   const filteredTabulations = useMemo(() => {
     if (!searchQuery) return tabulations
     const query = searchQuery.toLowerCase()
@@ -41,9 +41,55 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     )
   }, [tabulations, searchQuery])
 
+  // Separate by category
+  const beforeTabulations = useMemo(() => {
+    return filteredTabulations
+      .filter((t) => t.category === "before")
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [filteredTabulations])
+
+  const afterTabulations = useMemo(() => {
+    return filteredTabulations
+      .filter((t) => t.category === "after")
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [filteredTabulations])
+
+  const renderTabulationCard = (tabulation: typeof tabulations[0]) => (
+    <div
+      key={tabulation.id}
+      className="p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group"
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="w-4 h-4 rounded-full flex-shrink-0 mt-1 ring-2 ring-offset-2 ring-offset-background"
+          style={{ 
+            backgroundColor: tabulation.color,
+            ringColor: tabulation.color 
+          }}
+        />
+        <div className="flex-1 min-w-0">
+          <h4 
+            className="font-semibold text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
+            style={{ fontSize: `${globalZoom}%` }}
+          >
+            {tabulation.name}
+          </h4>
+          {tabulation.description && (
+            <p 
+              className="text-muted-foreground mt-1 leading-relaxed"
+              style={{ fontSize: `${globalZoom * 0.875}%` }}
+            >
+              {tabulation.description}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-3xl w-[90vw] max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
+      <DialogContent className="!max-w-5xl w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
         {/* Header com gradiente */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-6 text-white">
           <DialogHeader>
@@ -54,7 +100,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
               Tabulacoes Disponiveis
             </DialogTitle>
             <DialogDescription className="text-orange-100 mt-2">
-              Consulte as tabulacoes cadastradas para classificar atendimentos
+              Consulte as tabulacoes para classificar atendimentos - organizadas por momento de uso
             </DialogDescription>
           </DialogHeader>
           
@@ -97,6 +143,11 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         <div className="px-6 py-3 bg-muted/50 border-b flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
             {filteredTabulations.length} {filteredTabulations.length === 1 ? "tabulacao encontrada" : "tabulacoes encontradas"}
+            {beforeTabulations.length > 0 && afterTabulations.length > 0 && (
+              <span className="ml-2">
+                ({beforeTabulations.length} antes do CPF, {afterTabulations.length} depois do CPF)
+              </span>
+            )}
           </span>
           {searchQuery && (
             <Button 
@@ -135,39 +186,62 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
                 <p className="text-sm mt-1">Tente buscar por outro termo</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredTabulations.map((tabulation) => (
-                  <div
-                    key={tabulation.id}
-                    className="p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="w-4 h-4 rounded-full flex-shrink-0 mt-1 ring-2 ring-offset-2 ring-offset-background"
-                        style={{ 
-                          backgroundColor: tabulation.color,
-                          ringColor: tabulation.color 
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 
-                          className="font-semibold text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
-                          style={{ fontSize: `${globalZoom}%` }}
-                        >
-                          {tabulation.name}
-                        </h4>
-                        {tabulation.description && (
-                          <p 
-                            className="text-muted-foreground mt-1 leading-relaxed"
-                            style={{ fontSize: `${globalZoom * 0.875}%` }}
-                          >
-                            {tabulation.description}
-                          </p>
-                        )}
-                      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Coluna: Antes da confirmação de CPF */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-amber-500/30">
+                    <div className="p-2 bg-amber-500/10 rounded-lg">
+                      <ShieldQuestion className="h-5 w-5 text-amber-600" />
                     </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Antes da confirmacao de dados (CPF)</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Use quando o cliente ainda nao confirmou os dados
+                      </p>
+                    </div>
+                    <span className="ml-auto text-sm font-medium text-amber-600 bg-amber-500/10 px-2 py-1 rounded">
+                      {beforeTabulations.length}
+                    </span>
                   </div>
-                ))}
+                  
+                  {beforeTabulations.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                      <p className="text-sm">Nenhuma tabulacao nesta categoria</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {beforeTabulations.map(renderTabulationCard)}
+                    </div>
+                  )}
+                </div>
+
+                {/* Coluna: Depois da confirmação de CPF */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-green-500/30">
+                    <div className="p-2 bg-green-500/10 rounded-lg">
+                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Depois da confirmacao de dados (CPF)</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Use quando o cliente ja confirmou os dados
+                      </p>
+                    </div>
+                    <span className="ml-auto text-sm font-medium text-green-600 bg-green-500/10 px-2 py-1 rounded">
+                      {afterTabulations.length}
+                    </span>
+                  </div>
+                  
+                  {afterTabulations.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                      <p className="text-sm">Nenhuma tabulacao nesta categoria</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {afterTabulations.map(renderTabulationCard)}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
