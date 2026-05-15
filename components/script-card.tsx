@@ -453,14 +453,14 @@ export const ScriptCard = memo(function ScriptCard({
           <SafeHtml
             as="h2"
             html={highlightedTitle}
-            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-white"
+            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-foreground"
           />
         </CardHeader>
 
         <CardContent className="relative z-10 space-y-4 pb-6 px-4 md:px-8">
           {/* Area de conteudo do script */}
           <div
-            className="bg-zinc-800/50 rounded-xl p-5 md:p-8 leading-relaxed min-h-[200px] md:min-h-[280px] border border-zinc-700/50"
+            className="bg-white dark:bg-zinc-800/50 rounded-xl p-5 md:p-8 leading-relaxed min-h-[200px] md:min-h-[280px] border-2 border-orange-500/50 text-zinc-900 dark:text-zinc-100"
             style={contentStyles}
           >
             {typeof renderedContent === "string" ? (

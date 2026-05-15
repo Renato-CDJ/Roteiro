@@ -107,7 +107,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
   if (productCategory === "boleto_pre_formatado") {
     return (
-      <Card className="border border-zinc-700/50 bg-zinc-900/80 backdrop-blur-sm">
+      <Card className="border border-zinc-700 bg-zinc-900">
         <CardHeader className="pb-2 pt-3 px-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
             <div className="p-1 rounded-md bg-orange-500/20">
@@ -117,7 +117,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
-          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800/50 rounded-lg border border-dashed border-zinc-700">
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800 rounded-lg border border-dashed border-zinc-700">
             <AlertTriangle className="h-8 w-8 text-amber-500" />
             <p className="text-xs font-medium text-zinc-400">
               De acordo com a data do boleto, nao pode ser alterado em hipotese alguma.
@@ -133,7 +133,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
   if (productCategory === "outros") {
     return (
-      <Card className="border border-zinc-700/50 bg-zinc-900/80 backdrop-blur-sm">
+      <Card className="border border-zinc-700 bg-zinc-900">
         <CardHeader className="pb-2 pt-3 px-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
             <div className="p-1 rounded-md bg-orange-500/20">
@@ -143,7 +143,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
-          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800/50 rounded-lg border border-dashed border-zinc-700">
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800 rounded-lg border border-dashed border-zinc-700">
             <AlertTriangle className="h-8 w-8 text-amber-500" />
             <p className="text-xs font-medium text-zinc-400">
               O produto selecionado nao possui datas de promessa disponiveis.
@@ -158,7 +158,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
   }
 
   return (
-    <Card className="border border-zinc-700/50 bg-zinc-900/80 backdrop-blur-sm">
+    <Card className="border border-zinc-700 bg-zinc-900">
       <CardHeader className="pb-2 pt-3 px-3">
         <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
           <div className="p-1 rounded-md bg-orange-500/20">
@@ -240,7 +240,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-orange-500" />
                 <p className="text-[10px] font-bold text-white uppercase tracking-wide">Data Atual</p>
               </div>
-              <div className="flex justify-center bg-zinc-800/50 rounded-lg border border-zinc-700 p-2">
+              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={today}
@@ -265,7 +265,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
             </div>
 
             {/* Info Message */}
-            <div className="flex items-start gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700">
+            <div className="flex items-start gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
               <Info className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-zinc-400">
                 Selecione um tipo de produto acima para visualizar as datas disponiveis
@@ -280,7 +280,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-emerald-400" />
                 <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Datas Disponiveis</p>
               </div>
-              <div className="flex justify-center bg-zinc-800/50 rounded-lg border border-zinc-700 p-2">
+              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={selectedDate}

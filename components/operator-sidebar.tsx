@@ -165,9 +165,9 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   if (!isOpen) return null
 
   return (
-    <aside className="w-full md:w-[300px] lg:w-[340px] max-w-full border-l border-zinc-700/50 bg-zinc-900/80 backdrop-blur-sm flex flex-col h-full shrink-0">
+    <aside className="w-full md:w-[300px] lg:w-[340px] max-w-full border-l border-zinc-700 bg-zinc-900 flex flex-col h-full shrink-0">
       {/* Tabs estilizadas */}
-      <div className="border-b border-zinc-700/50 p-2 flex gap-2">
+      <div className="border-b border-zinc-700 p-2 flex gap-2 bg-zinc-900">
         {[
           { id: "calendar" as const, icon: CalendarIcon, label: "Calendario" },
           { id: "checkTabulation" as const, icon: CheckCircle2, label: "Tabulacao", badge: currentStep?.tabulations?.length },
@@ -191,14 +191,14 @@ export const OperatorSidebar = memo(function OperatorSidebar({
       </div>
 
       {/* Conteudo */}
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="flex-1 min-h-0 bg-zinc-900">
         <div className="p-3">
           {activeSection === "calendar" && (
             <div className="space-y-4">
               <PromiseCalendarInline productCategory={productCategory} />
               
               {/* Tabulacao recomendada inline */}
-              <div className="border-t border-zinc-700/50 pt-4">
+              <div className="border-t border-zinc-700 pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="p-1 rounded-md bg-orange-500/20">
                     <CheckCircle2 className="h-3.5 w-3.5 text-orange-500" />
