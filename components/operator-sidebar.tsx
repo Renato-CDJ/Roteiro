@@ -3,8 +3,7 @@
 import type React from "react"
 import { useState, useMemo, useCallback, memo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { CheckCircle2, CalendarIcon, Maximize2, ChevronRight } from "lucide-react"
+import { CheckCircle2, CalendarIcon, Maximize2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PromiseCalendarInline } from "@/components/promise-calendar"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -25,40 +24,7 @@ interface ListItemData {
   contact?: string
 }
 
-// Componente de item de lista ultra-leve
-const SimpleListItem = memo(function SimpleListItem({
-  item,
-  onClick,
-  isSelected,
-}: {
-  item: ListItemData
-  onClick: () => void
-  isSelected?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 rounded-lg border transition-colors duration-150 overflow-hidden ${
-        isSelected 
-          ? "bg-orange-500/10 border-orange-500/50 text-orange-500" 
-          : "bg-card border-border/50 hover:bg-muted/50 hover:border-border text-foreground"
-      }`}
-    >
-      <div className="flex items-center gap-2 w-full min-w-0">
-        {item.color && (
-          <div 
-            className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
-            style={{ backgroundColor: item.color }} 
-          />
-        )}
-        <span className="text-sm font-medium truncate flex-1 min-w-0">{item.name}</span>
-        <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-      </div>
-    </button>
-  )
-})
-
-// Modal de detalhe ultra-leve
+// Modal de detalhe
 const DetailModal = memo(function DetailModal({
   open,
   onClose,
@@ -78,11 +44,11 @@ const DetailModal = memo(function DetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-border/50">
-        {/* Header compacto - titulo centralizado */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden border border-border/50 bg-card">
+        {/* Header com gradiente */}
+        <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
           <DialogHeader>
-            <DialogTitle className="text-white text-lg font-semibold flex items-center justify-center gap-2 text-center">
+            <DialogTitle className="text-primary-foreground text-base font-semibold flex items-center justify-center gap-2 text-center">
               {color && (
                 <div 
                   className="w-3 h-3 rounded-full ring-2 ring-white/30 flex-shrink-0" 
@@ -102,7 +68,7 @@ const DetailModal = memo(function DetailModal({
               {description}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground italic">
+            <p className="text-sm text-muted-foreground italic text-center">
               Sem descricao disponivel
             </p>
           )}
@@ -122,8 +88,8 @@ const RecommendedTabulation = memo(function RecommendedTabulation({
 }) {
   if (!currentStep?.tabulations?.length) {
     return (
-      <div className="rounded-lg border border-dashed border-border/50 p-4 text-center">
-        <CheckCircle2 className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+      <div className="rounded-lg border border-dashed border-border/50 p-4 text-center bg-secondary/20">
+        <CheckCircle2 className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
         <p className="text-xs text-muted-foreground">
           Nenhuma tabulacao recomendada para esta tela
         </p>
@@ -137,10 +103,12 @@ const RecommendedTabulation = memo(function RecommendedTabulation({
         <button
           key={tabulation.id || index}
           onClick={() => onExpand({ name: tabulation.name, description: tabulation.description })}
-          className="w-full text-left p-3 rounded-lg border border-orange-200/50 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-500/5 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 transition-colors group"
+          className="w-full text-left p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors group"
         >
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div className="p-1 rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-medium text-foreground line-clamp-1">
                 {tabulation.name}
@@ -197,44 +165,47 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   if (!isOpen) return null
 
   return (
-    <aside className="w-full md:w-[320px] lg:w-[380px] max-w-full border-l border-border/50 bg-card flex flex-col h-full shrink-0">
-      {/* Tabs compactas */}
-      <div className="border-b border-border/50 px-1.5 pt-1 pb-0 flex gap-1 flex-shrink-0">
+    <aside className="w-full md:w-[300px] lg:w-[340px] max-w-full border-l border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full shrink-0">
+      {/* Tabs estilizadas */}
+      <div className="border-b border-border/50 p-2 flex gap-2">
         {[
           { id: "calendar" as const, icon: CalendarIcon, label: "Calendario" },
-          { id: "checkTabulation" as const, icon: CheckCircle2, label: "Verificar", badge: currentStep?.tabulations?.length },
+          { id: "checkTabulation" as const, icon: CheckCircle2, label: "Tabulacao", badge: currentStep?.tabulations?.length },
         ].map(({ id, icon: Icon, label, badge }) => (
           <button
             key={id}
             onClick={() => setActiveSection(id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-t-md text-xs font-medium transition-colors relative border-b-2 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
               activeSection === id
-                ? "bg-orange-500/10 text-orange-500 border-orange-500"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/40 border-transparent"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary border border-border/50"
             }`}
           >
-            <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+            <Icon className="h-3.5 w-3.5" />
             <span>{label}</span>
             {badge && badge > 0 && activeSection !== id && (
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             )}
           </button>
         ))}
       </div>
 
-      {/* Conteudo - sem padding excessivo */}
+      {/* Conteudo */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2">
+        <div className="p-3">
           {activeSection === "calendar" && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               <PromiseCalendarInline productCategory={productCategory} />
               
-              <div className="border-t border-border/50 pt-2">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <div className="p-0.5 rounded bg-orange-500">
-                    <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+              {/* Tabulacao recomendada inline */}
+              <div className="border-t border-border/50 pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1 rounded-md bg-primary/10">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <span className="text-[10px] font-semibold text-muted-foreground leading-tight">Tabulacao recomendada para esta tela</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Tabulacao Recomendada
+                  </span>
                 </div>
                 <RecommendedTabulation 
                   currentStep={currentStep} 
@@ -245,13 +216,13 @@ export const OperatorSidebar = memo(function OperatorSidebar({
           )}
 
           {activeSection === "checkTabulation" && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-orange-500/10">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-orange-500" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-semibold">Tabulacao Recomendada</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Tabulacao Recomendada</h3>
                   <p className="text-[10px] text-muted-foreground">De acordo com a sua tela atual</p>
                 </div>
               </div>
