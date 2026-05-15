@@ -309,10 +309,10 @@ export const ScriptCard = memo(function ScriptCard({
             key={button.id}
             onClick={() => onButtonClick(button.nextStepId, button.label)}
             className={`
-              group relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 max-w-full
+              group relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 max-w-full
               ${isPrimary
-                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30"
-                : "bg-secondary/50 hover:bg-secondary text-foreground border border-border hover:border-primary/50"
+                ? "bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30"
+                : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-orange-500/50"
               }
             `}
             style={{
@@ -329,7 +329,7 @@ export const ScriptCard = memo(function ScriptCard({
 
   return (
     <div className="space-y-4 w-full max-w-5xl mx-auto px-2 md:px-4">
-      {/* Controles de acessibilidade - estilo minimalista */}
+      {/* Controles de acessibilidade */}
       {showControls && (
         <div className="py-3">
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
@@ -343,7 +343,7 @@ export const ScriptCard = memo(function ScriptCard({
                 min={50}
                 max={120}
                 step={5}
-                className="flex-1 [&_[role=slider]]:bg-primary [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md"
+                className="flex-1 [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-orange-500"
               />
               <span className="text-xs font-medium text-muted-foreground tabular-nums w-10 text-right">
                 {textSize[0]}%
@@ -359,7 +359,7 @@ export const ScriptCard = memo(function ScriptCard({
                 min={50}
                 max={150}
                 step={5}
-                className="flex-1 [&_[role=slider]]:bg-primary [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md"
+                className="flex-1 [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-orange-500"
               />
               <span className="text-xs font-medium text-muted-foreground tabular-nums w-10 text-right">
                 {buttonSize[0]}%
@@ -369,10 +369,10 @@ export const ScriptCard = memo(function ScriptCard({
         </div>
       )}
 
-      {/* Badge do produto - estilo compacto */}
+      {/* Badge do produto */}
       {productName && (
         <div className="flex items-center justify-center">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-semibold uppercase tracking-wide shadow-md">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-500 text-white rounded-full text-xs font-semibold uppercase tracking-wide shadow-md shadow-orange-500/25">
             {productName}
           </span>
         </div>
@@ -384,16 +384,16 @@ export const ScriptCard = memo(function ScriptCard({
           variant="ghost"
           size="icon"
           onClick={onGoBack}
-          className="fixed left-3 md:left-6 top-1/2 -translate-y-1/2 z-50 h-10 w-10 md:h-11 md:w-11 rounded-full bg-secondary/80 hover:bg-secondary text-foreground border border-border/50 shadow-lg backdrop-blur-sm transition-all"
+          className="fixed left-3 md:left-6 top-1/2 -translate-y-1/2 z-50 h-10 w-10 md:h-11 md:w-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 shadow-lg transition-all"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
       )}
 
       {/* Card principal do script */}
-      <Card className="relative border border-border/50 bg-card/80 backdrop-blur-sm shadow-xl overflow-hidden">
-        {/* Gradiente sutil de fundo */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      <Card className="relative border border-orange-500/30 bg-card shadow-xl overflow-hidden">
+        {/* Gradiente sutil laranja no topo */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
 
         {/* Botao de busca */}
         <Popover open={showSearch} onOpenChange={setShowSearch}>
@@ -402,26 +402,26 @@ export const ScriptCard = memo(function ScriptCard({
               variant="ghost"
               size="icon"
               onClick={handleSearchOpen}
-              className="absolute top-3 left-3 md:top-4 md:left-4 z-20 h-9 w-9 rounded-full bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground border border-border/50 transition-colors"
+              className="absolute top-4 left-4 z-20 h-9 w-9 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 transition-colors"
               title="Buscar tela do roteiro"
             >
               <Search className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-3" align="start" side="bottom">
+          <PopoverContent className="w-72 p-3 bg-zinc-900 border-zinc-700" align="start" side="bottom">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Search className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 text-sm font-medium text-white">
+                <Search className="h-4 w-4 text-orange-500" />
                 Buscar Tela
               </div>
               <Input
                 placeholder="Digite titulo ou conteudo..."
                 value={searchText}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="h-9 text-sm"
+                className="h-9 text-sm bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
                 autoFocus
               />
-              <p className="text-[10px] text-muted-foreground">A tela sera exibida conforme voce digita</p>
+              <p className="text-[10px] text-zinc-500">A tela sera exibida conforme voce digita</p>
             </div>
           </PopoverContent>
         </Popover>
@@ -429,10 +429,10 @@ export const ScriptCard = memo(function ScriptCard({
         {/* Botao de tabulacao */}
         <button
           onClick={() => setShowTabulation(true)}
-          className={`absolute top-3 right-3 md:top-4 md:right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+          className={`absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
             hasTabulations
-              ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-              : "bg-secondary/50 text-foreground border border-border/50 hover:bg-secondary"
+              ? "bg-orange-500 text-white shadow-md shadow-orange-500/30"
+              : "bg-zinc-800/80 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white"
           }`}
         >
           {hasTabulations ? (
@@ -453,14 +453,14 @@ export const ScriptCard = memo(function ScriptCard({
           <SafeHtml
             as="h2"
             html={highlightedTitle}
-            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-foreground"
+            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-white"
           />
         </CardHeader>
 
         <CardContent className="relative z-10 space-y-4 pb-6 px-4 md:px-8">
           {/* Area de conteudo do script */}
           <div
-            className="bg-secondary/30 rounded-xl p-5 md:p-8 leading-relaxed min-h-[200px] md:min-h-[280px] border border-border/30"
+            className="bg-zinc-800/50 rounded-xl p-5 md:p-8 leading-relaxed min-h-[200px] md:min-h-[280px] border border-zinc-700/50"
             style={contentStyles}
           >
             {typeof renderedContent === "string" ? (
@@ -478,15 +478,15 @@ export const ScriptCard = memo(function ScriptCard({
       </div>
 
       <Dialog open={showTabulation} onOpenChange={setShowTabulation}>
-        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto border border-border/50 bg-card p-0 gap-0">
-          {/* Header com gradiente */}
-          <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
+        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto border border-zinc-700 bg-zinc-900 p-0 gap-0">
+          {/* Header com gradiente laranja */}
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center justify-center gap-2 text-lg font-semibold text-primary-foreground">
+              <DialogTitle className="flex items-center justify-center gap-2 text-lg font-bold text-white">
                 <CheckCircle2 className="h-5 w-5" />
                 Tabulacao Recomendada
               </DialogTitle>
-              <DialogDescription className="text-sm text-primary-foreground/80 text-center">
+              <DialogDescription className="text-sm text-white/80 text-center">
                 Se voce encerrar o atendimento nesta tela, utilize a(s) seguinte(s) tabulacao(oes):
               </DialogDescription>
             </DialogHeader>
@@ -497,17 +497,17 @@ export const ScriptCard = memo(function ScriptCard({
               step.tabulations.map((tabulation, index) => (
                 <div
                   key={tabulation.id || index}
-                  className="relative rounded-lg border border-border/50 bg-secondary/30 p-4 hover:bg-secondary/50 transition-colors"
+                  className="relative rounded-lg border border-zinc-700 bg-zinc-800/50 p-4 hover:bg-zinc-800 transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-1.5 rounded-full bg-primary/10 flex-shrink-0">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <div className="p-1.5 rounded-full bg-orange-500/20 flex-shrink-0">
+                      <CheckCircle2 className="h-4 w-4 text-orange-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-base text-foreground mb-1">
+                      <h4 className="font-bold text-base text-white mb-1">
                         {tabulation.name}
                       </h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
                         {tabulation.description}
                       </p>
                     </div>
@@ -515,19 +515,19 @@ export const ScriptCard = memo(function ScriptCard({
                 </div>
               ))
             ) : (
-              <div className="rounded-lg border border-dashed border-border/50 p-6 text-center">
-                <CheckCircle2 className="h-10 w-10 mx-auto text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-zinc-700 bg-zinc-800/30 p-6 text-center">
+                <CheckCircle2 className="h-10 w-10 mx-auto text-zinc-600 mb-2" />
+                <p className="text-sm text-zinc-500">
                   Nenhuma tabulacao especifica recomendada para esta tela. Continue o atendimento normalmente.
                 </p>
               </div>
             )}
           </div>
           
-          <div className="p-4 border-t border-border/50">
+          <div className="p-4 border-t border-zinc-700">
             <button
               onClick={() => setShowTabulation(false)}
-              className="w-full py-2.5 px-4 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
+              className="w-full py-2.5 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors"
             >
               Entendi
             </button>

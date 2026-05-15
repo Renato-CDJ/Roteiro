@@ -44,11 +44,11 @@ const DetailModal = memo(function DetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden border border-border/50 bg-card">
-        {/* Header com gradiente */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 p-4">
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden border border-zinc-700 bg-zinc-900">
+        {/* Header com gradiente laranja */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
           <DialogHeader>
-            <DialogTitle className="text-primary-foreground text-base font-semibold flex items-center justify-center gap-2 text-center">
+            <DialogTitle className="text-white text-base font-bold flex items-center justify-center gap-2 text-center">
               {color && (
                 <div 
                   className="w-3 h-3 rounded-full ring-2 ring-white/30 flex-shrink-0" 
@@ -64,11 +64,11 @@ const DetailModal = memo(function DetailModal({
         {/* Conteudo */}
         <div className="p-4">
           {description ? (
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
               {description}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground italic text-center">
+            <p className="text-sm text-zinc-500 italic text-center">
               Sem descricao disponivel
             </p>
           )}
@@ -88,9 +88,9 @@ const RecommendedTabulation = memo(function RecommendedTabulation({
 }) {
   if (!currentStep?.tabulations?.length) {
     return (
-      <div className="rounded-lg border border-dashed border-border/50 p-4 text-center bg-secondary/20">
-        <CheckCircle2 className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-        <p className="text-xs text-muted-foreground">
+      <div className="rounded-lg border border-dashed border-zinc-700 p-4 text-center bg-zinc-800/30">
+        <CheckCircle2 className="h-8 w-8 mx-auto text-zinc-600 mb-2" />
+        <p className="text-xs text-zinc-500">
           Nenhuma tabulacao recomendada para esta tela
         </p>
       </div>
@@ -103,23 +103,23 @@ const RecommendedTabulation = memo(function RecommendedTabulation({
         <button
           key={tabulation.id || index}
           onClick={() => onExpand({ name: tabulation.name, description: tabulation.description })}
-          className="w-full text-left p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+          className="w-full text-left p-3 rounded-lg border border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/10 transition-colors group"
         >
           <div className="flex items-start gap-2">
-            <div className="p-1 rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            <div className="p-1 rounded-md bg-orange-500/20 flex-shrink-0 mt-0.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-orange-500" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-foreground line-clamp-1">
+              <h4 className="text-sm font-medium text-white line-clamp-1">
                 {tabulation.name}
               </h4>
               {tabulation.description && (
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                <p className="text-xs text-zinc-400 mt-0.5 line-clamp-2">
                   {tabulation.description}
                 </p>
               )}
             </div>
-            <Maximize2 className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            <Maximize2 className="h-3.5 w-3.5 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
           </div>
         </button>
       ))}
@@ -165,9 +165,9 @@ export const OperatorSidebar = memo(function OperatorSidebar({
   if (!isOpen) return null
 
   return (
-    <aside className="w-full md:w-[300px] lg:w-[340px] max-w-full border-l border-border/50 bg-card/50 backdrop-blur-sm flex flex-col h-full shrink-0">
+    <aside className="w-full md:w-[300px] lg:w-[340px] max-w-full border-l border-zinc-700/50 bg-zinc-900/80 backdrop-blur-sm flex flex-col h-full shrink-0">
       {/* Tabs estilizadas */}
-      <div className="border-b border-border/50 p-2 flex gap-2">
+      <div className="border-b border-zinc-700/50 p-2 flex gap-2">
         {[
           { id: "calendar" as const, icon: CalendarIcon, label: "Calendario" },
           { id: "checkTabulation" as const, icon: CheckCircle2, label: "Tabulacao", badge: currentStep?.tabulations?.length },
@@ -175,10 +175,10 @@ export const OperatorSidebar = memo(function OperatorSidebar({
           <button
             key={id}
             onClick={() => setActiveSection(id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
               activeSection === id
-                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                : "bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary border border-border/50"
+                ? "bg-orange-500 text-white shadow-md shadow-orange-500/25"
+                : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -198,12 +198,12 @@ export const OperatorSidebar = memo(function OperatorSidebar({
               <PromiseCalendarInline productCategory={productCategory} />
               
               {/* Tabulacao recomendada inline */}
-              <div className="border-t border-border/50 pt-4">
+              <div className="border-t border-zinc-700/50 pt-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1 rounded-md bg-primary/10">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  <div className="p-1 rounded-md bg-orange-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-orange-500" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide">
                     Tabulacao Recomendada
                   </span>
                 </div>
@@ -218,12 +218,12 @@ export const OperatorSidebar = memo(function OperatorSidebar({
           {activeSection === "checkTabulation" && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 rounded-md bg-primary/10">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                <div className="p-1.5 rounded-md bg-orange-500/20">
+                  <CheckCircle2 className="h-4 w-4 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Tabulacao Recomendada</h3>
-                  <p className="text-[10px] text-muted-foreground">De acordo com a sua tela atual</p>
+                  <h3 className="text-sm font-bold text-white">Tabulacao Recomendada</h3>
+                  <p className="text-[10px] text-zinc-500">De acordo com a sua tela atual</p>
                 </div>
               </div>
               <RecommendedTabulation 
