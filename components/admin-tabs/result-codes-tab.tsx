@@ -57,7 +57,7 @@ const STATIC_TABULATIONS: StaticTabulation[] = [
     phase: "before",
     name: "LIGAÇÃO CAIU",
     description:
-      "Atendimento interrompido sem que seja possível continuar o diálogo entre operador e cliente e sem possibilidade de realização da confirmação do CPF. Exemplo de resposta por parte do cliente/terceiro: "Alô" / "Quem é" / "De onde fala" / "Sou eu" / "Do que se trata" / etc.",
+      `Atendimento interrompido sem que seja possível continuar o diálogo entre operador e cliente e sem possibilidade de realização da confirmação do CPF. Exemplo de resposta por parte do cliente/terceiro: "Alô" / "Quem é" / "De onde fala" / "Sou eu" / "Do que se trata" / etc.`,
   },
   {
     phase: "before",
@@ -80,13 +80,13 @@ const STATIC_TABULATIONS: StaticTabulation[] = [
     phase: "before",
     name: "DESCONHECIDO NO TELEFONE",
     description:
-      "Terceiro informa que não conhece ninguém com o nome do cliente no telefone do cadastro. Exemplo de resposta por parte do cliente/terceiro: "Não conheço" / "Não é desse número" / "Não é daqui" / "Nunca ouvi falar" / etc.",
+      `Terceiro informa que não conhece ninguém com o nome do cliente no telefone do cadastro. Exemplo de resposta por parte do cliente/terceiro: "Não conheço" / "Não é desse número" / "Não é daqui" / "Nunca ouvi falar" / etc.`,
   },
   {
     phase: "before",
     name: "PESSOA NÃO CONFIRMA DADOS",
     description:
-      "Cliente se recusa confirmar os dados para prosseguir com atendimento. Utilize quando: O cliente informa CPF/CNPJ, mas os dados não conferem, o cliente se recusa a informar CPF/CNPJ, o cliente não lembra os dados ou quando o cliente diz que não pode falar no momento. Exemplo de resposta por parte do cliente: "Não confirmo nada por telefone" / "Não, eu vou na agência" / "Não lembro meu CPF" / etc.",
+      `Cliente se recusa confirmar os dados para prosseguir com atendimento. Utilize quando: O cliente informa CPF/CNPJ, mas os dados não conferem, o cliente se recusa a informar CPF/CNPJ, o cliente não lembra os dados ou quando o cliente diz que não pode falar no momento. Exemplo de resposta por parte do cliente: "Não confirmo nada por telefone" / "Não, eu vou na agência" / "Não lembro meu CPF" / etc.`,
   },
   {
     phase: "before",
