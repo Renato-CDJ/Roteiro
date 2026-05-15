@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useScripts, useProducts, useResultCodes } from "@/hooks/use-supabase-admin"
+import { useScripts, useProducts, useTabulations } from "@/hooks/use-supabase-admin"
 import { createClient } from "@/lib/supabase/client"
 import {
   Tags,
@@ -46,7 +46,7 @@ interface ScriptStep {
   is_active: boolean
 }
 
-interface ResultCode {
+interface Tabulation {
   id: string
   name: string
   description: string
@@ -57,7 +57,7 @@ interface ResultCode {
 export function TabulationMappingTab() {
   const { data: scripts, loading: loadingScripts, update: updateScript } = useScripts()
   const { data: products, loading: loadingProducts } = useProducts()
-  const { data: resultCodes, loading: loadingCodes } = useResultCodes()
+  const { data: tabulations, loading: loadingTabulations } = useTabulations()
   const { toast } = useToast()
 
   const [selectedProductId, setSelectedProductId] = useState<string>("")
@@ -80,10 +80,10 @@ export function TabulationMappingTab() {
     return productScripts.find((s) => s.id === selectedStepId) || null
   }, [productScripts, selectedStepId])
 
-  // Active result codes for selection
-  const activeResultCodes = useMemo(() => {
-    return resultCodes.filter((rc) => rc.is_active)
-  }, [resultCodes])
+  // Active tabulations for selection
+  const activeTabulations = useMemo(() => {
+    return tabulations.filter((t) => t.is_active)
+  }, [tabulations])
 
   // Handle product selection
   const handleProductChange = useCallback((productId: string) => {
@@ -121,11 +121,11 @@ export function TabulationMappingTab() {
     try {
       // Build tabulations array with full data
       const tabulationsData = selectedTabulations.map((id) => {
-        const code = resultCodes.find((rc) => rc.id === id)
+        const tab = tabulations.find((t) => t.id === id)
         return {
           id,
-          name: code?.name || "",
-          description: code?.description || "",
+          name: tab?.name || "",
+          description: tab?.description || "",
         }
       })
 
@@ -156,7 +156,7 @@ export function TabulationMappingTab() {
     setSaving(false)
   }
 
-  const loading = loadingScripts || loadingProducts || loadingCodes
+  const loading = loadingScripts || loadingProducts || loadingTabulations
 
   if (loading) {
     return (
@@ -363,18 +363,18 @@ export function TabulationMappingTab() {
                       <Tags className="h-4 w-4 text-orange-500" />
                       Tabulacoes Recomendadas
                     </h4>
-                    {activeResultCodes.length === 0 ? (
+                    {activeTabulations.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground text-sm">
-                        Nenhum codigo de resultado cadastrado. Cadastre codigos na aba
-                        &quot;Codigos de Resultado&quot;.
+                        Nenhuma tabulacao cadastrada. Cadastre tabulacoes na aba
+                        &quot;Tabulacoes&quot;.
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {activeResultCodes.map((code) => {
-                          const isChecked = selectedTabulations.includes(code.id)
+                        {activeTabulations.map((tab) => {
+                          const isChecked = selectedTabulations.includes(tab.id)
                           return (
                             <label
-                              key={code.id}
+                              key={tab.id}
                               className={cn(
                                 "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all",
                                 "hover:bg-muted/50",
@@ -385,22 +385,22 @@ export function TabulationMappingTab() {
                             >
                               <Checkbox
                                 checked={isChecked}
-                                onCheckedChange={() => handleTabulationToggle(code.id)}
+                                onCheckedChange={() => handleTabulationToggle(tab.id)}
                                 className="mt-0.5"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                   <div
                                     className="w-3 h-3 rounded-full flex-shrink-0"
-                                    style={{ backgroundColor: code.color || "#3b82f6" }}
+                                    style={{ backgroundColor: tab.color || "#3b82f6" }}
                                   />
                                   <span className="text-sm font-medium text-foreground">
-                                    {code.name}
+                                    {tab.name}
                                   </span>
                                 </div>
-                                {code.description && (
+                                {tab.description && (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                    {code.description}
+                                    {tab.description}
                                   </p>
                                 )}
                               </div>
@@ -420,19 +420,19 @@ export function TabulationMappingTab() {
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedTabulations.map((tabId) => {
-                          const code = resultCodes.find((rc) => rc.id === tabId)
-                          if (!code) return null
+                          const tab = tabulations.find((t) => t.id === tabId)
+                          if (!tab) return null
                           return (
                             <Badge
                               key={tabId}
                               variant="outline"
                               className="text-xs"
                               style={{
-                                borderColor: code.color,
-                                backgroundColor: `${code.color}20`,
+                                borderColor: tab.color,
+                                backgroundColor: `${tab.color}20`,
                               }}
                             >
-                              {code.name}
+                              {tab.name}
                             </Badge>
                           )
                         })}
