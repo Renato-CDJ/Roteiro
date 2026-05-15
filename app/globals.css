@@ -14,9 +14,6 @@
 
 :root {
   --background: 0 0% 100%;
-  --login-panel: 220 16% 12%;
-  --login-panel-foreground: 0 0% 97%;
-  --login-panel-muted: 220 10% 55%;
   --foreground: 0 0% 9%;
   --card: 0 0% 100%;
   --card-foreground: 0 0% 9%;
@@ -53,9 +50,6 @@
 
 .dark {
   --background: 240 10% 10%;
-  --login-panel: 220 20% 8%;
-  --login-panel-foreground: 0 0% 97%;
-  --login-panel-muted: 220 10% 50%;
   --foreground: 0 0% 95%;
   --card: 240 10% 12%;
   --card-foreground: 0 0% 95%;
@@ -105,10 +99,6 @@
 }
 
 /* Utility classes for theme colors */
-.bg-login-panel { background-color: hsl(var(--login-panel)); }
-.text-login-panel-foreground { color: hsl(var(--login-panel-foreground)); }
-.text-login-panel-muted { color: hsl(var(--login-panel-muted)); }
-
 .bg-background { background-color: hsl(var(--background)); }
 .bg-foreground { background-color: hsl(var(--foreground)); }
 .bg-card { background-color: hsl(var(--card)); }
