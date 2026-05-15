@@ -1,19 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Edit, Trash2, Save, X, Loader2 } from "lucide-react"
-import { useTabulations } from "@/hooks/use-supabase-admin"
+import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useResultCodes } from "@/hooks/use-supabase-admin"
+import {
+  ListChecks,
+  Plus,
+  Trash2,
+  Edit,
+  Search,
+  ShieldCheck,
+  ShieldAlert,
+  Loader2,
+  Info,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-interface Tabulation {
+interface ResultCode {
   id: string
+  code: string
   name: string
   description: string
+  category: string
   color: string
   is_active: boolean
   created_at: string
@@ -21,89 +51,119 @@ interface Tabulation {
 }
 
 export function TabulationsTab() {
-  const { data: tabulations, loading, create, update, remove } = useTabulations()
-  const [editingItem, setEditingItem] = useState<Partial<Tabulation> | null>(null)
-  const [isCreating, setIsCreating] = useState(false)
+  const { data: resultCodes, loading, create, update, remove } = useResultCodes()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterPhase, setFilterPhase] = useState<"all" | "before" | "after">("all")
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [editingCode, setEditingCode] = useState<ResultCode | null>(null)
+  const [formName, setFormName] = useState("")
+  const [formDescription, setFormDescription] = useState("")
+  const [formPhase, setFormPhase] = useState<"before" | "after">("before")
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
 
-  const handleEdit = (item: Tabulation) => {
-    setEditingItem({ ...item })
-    setIsCreating(false)
+  const filteredCodes = useMemo(() => {
+    return resultCodes
+      .filter((c) => {
+        if (filterPhase !== "all" && c.category !== filterPhase) return false
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase()
+          return (
+            c.name.toLowerCase().includes(query) || 
+            c.code?.toLowerCase().includes(query) ||
+            c.description?.toLowerCase().includes(query)
+          )
+        }
+        return true
+      })
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }, [resultCodes, searchQuery, filterPhase])
+
+  const beforeCount = resultCodes.filter((c) => c.category === "before").length
+  const afterCount = resultCodes.filter((c) => c.category === "after").length
+
+  const resetForm = () => {
+    setFormName("")
+    setFormDescription("")
+    setFormPhase("before")
+    setEditingCode(null)
   }
 
-  const handleCreate = () => {
-    setEditingItem({
-      name: "",
-      description: "",
-      color: "#3b82f6",
-    })
-    setIsCreating(true)
-  }
-
-  const handleSave = async () => {
-    if (!editingItem || !editingItem.name) return
+  const handleCreate = async () => {
+    if (!formName.trim()) {
+      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      return
+    }
 
     setSaving(true)
-    try {
-      if (isCreating) {
-        const { error } = await create({
-          name: editingItem.name,
-          description: editingItem.description || "",
-          color: editingItem.color || "#3b82f6",
-          is_active: true,
-        })
-        if (error) throw new Error(error)
-        toast({
-          title: "Tabulacao criada",
-          description: "A nova tabulacao foi criada com sucesso.",
-        })
-      } else if (editingItem.id) {
-        const { error } = await update(editingItem.id, {
-          name: editingItem.name,
-          description: editingItem.description,
-          color: editingItem.color,
-        })
-        if (error) throw new Error(error)
-        toast({
-          title: "Tabulacao atualizada",
-          description: "As alteracoes foram salvas com sucesso.",
-        })
-      }
-    } catch (err: any) {
-      toast({
-        title: "Erro",
-        description: err.message || "Erro ao salvar tabulacao",
-        variant: "destructive",
-      })
-    } finally {
-      setSaving(false)
-      setEditingItem(null)
-      setIsCreating(false)
+    const { error } = await create({
+      code: `TAB-${Date.now()}`,
+      name: formName.trim(),
+      description: formDescription.trim(),
+      category: formPhase,
+      color: formPhase === "before" ? "#f59e0b" : "#22c55e",
+      is_active: true,
+    })
+
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao criada com sucesso." })
+      resetForm()
+      setShowCreateDialog(false)
     }
+    setSaving(false)
+  }
+
+  const handleUpdate = async () => {
+    if (!editingCode) return
+    if (!formName.trim()) {
+      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      return
+    }
+
+    setSaving(true)
+    const { error } = await update(editingCode.id, {
+      name: formName.trim(),
+      description: formDescription.trim(),
+      category: formPhase,
+      color: formPhase === "before" ? "#f59e0b" : "#22c55e",
+    })
+
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao atualizada." })
+      resetForm()
+      setEditingCode(null)
+    }
+    setSaving(false)
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta tabulacao?")) {
-      const { error } = await remove(id)
-      if (error) {
-        toast({
-          title: "Erro",
-          description: error,
-          variant: "destructive",
-        })
-        return
-      }
-      toast({
-        title: "Tabulacao excluida",
-        description: "A tabulacao foi removida com sucesso.",
-      })
+    if (!confirm("Tem certeza que deseja excluir esta tabulacao?")) return
+    
+    const { error } = await remove(id)
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao excluida." })
     }
   }
 
-  const handleCancel = () => {
-    setEditingItem(null)
-    setIsCreating(false)
+  const handleToggleActive = async (code: ResultCode) => {
+    await update(code.id, { is_active: !code.is_active })
+  }
+
+  const startEdit = (code: ResultCode) => {
+    setEditingCode(code)
+    setFormName(code.name)
+    setFormDescription(code.description || "")
+    setFormPhase(code.category === "after" ? "after" : "before")
+  }
+
+  const cancelEdit = () => {
+    resetForm()
   }
 
   if (loading) {
@@ -114,108 +174,314 @@ export function TabulationsTab() {
     )
   }
 
+  const formFields = (isEdit: boolean) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Nome da Tabulacao</Label>
+        <Input
+          placeholder="Ex: Sem Interesse"
+          value={formName}
+          onChange={(e) => setFormName(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Descricao</Label>
+        <Textarea
+          placeholder="Descricao da tabulacao..."
+          value={formDescription}
+          onChange={(e) => setFormDescription(e.target.value)}
+          rows={3}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Fase</Label>
+        <Select value={formPhase} onValueChange={(v: "before" | "after") => setFormPhase(v)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="before">
+              <span className="flex items-center gap-2">
+                <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
+                Antes de confirmar os dados (CPF)
+              </span>
+            </SelectItem>
+            <SelectItem value="after">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                Apos a confirmar os dados (CPF)
+              </span>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        {isEdit ? (
+          <>
+            <Button variant="outline" onClick={cancelEdit}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Salvar Alteracoes
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={handleCreate}
+            disabled={saving}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Criar Tabulacao
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Tabulações</h2>
-          <p className="text-muted-foreground mt-1">Gerencie as categorias de finalização de atendimento</p>
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <ListChecks className="h-6 w-6 text-orange-500" />
+            Tabulacoes
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gerencie as tabulacoes para uso antes e apos a confirmacao dos dados
+          </p>
         </div>
-        <Button
-          onClick={handleCreate}
-          disabled={!!editingItem}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Tabulação
-        </Button>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => {
+                resetForm()
+                setShowCreateDialog(true)
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Tabulacao
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Tabulacao</DialogTitle>
+              <DialogDescription>
+                Adicione uma nova tabulacao (sincronizado com Codigos de Resultado)
+              </DialogDescription>
+            </DialogHeader>
+            {formFields(false)}
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {editingItem ? (
+      {/* Info Card */}
+      <Card className="border-blue-500/30 bg-blue-500/5">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Dados sincronizados com Codigos de Resultado
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                As tabulacoes desta aba estao conectadas com a aba &quot;Codigos de Resultado&quot;. 
+                Qualquer alteracao aqui sera refletida automaticamente nos codigos de resultado e vice-versa.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>{isCreating ? "Criar Nova Tabulação" : "Editar Tabulação"}</CardTitle>
-            <CardDescription>Configure os detalhes da tabulação</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input
-                id="name"
-                value={editingItem.name}
-                onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                placeholder="Ex: Acordo Fechado"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={editingItem.description}
-                onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                placeholder="Descreva quando usar esta tabulação"
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="color">Cor</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="color"
-                  type="color"
-                  value={editingItem.color}
-                  onChange={(e) => setEditingItem({ ...editingItem, color: e.target.value })}
-                  className="w-20 h-10"
-                />
-                <Input
-                  value={editingItem.color}
-                  onChange={(e) => setEditingItem({ ...editingItem, color: e.target.value })}
-                  placeholder="#3b82f6"
-                />
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold text-foreground">{resultCodes.length}</p>
               </div>
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-              <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
-              </Button>
+              <ListChecks className="h-8 w-8 text-blue-500/30" />
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {tabulations.map((tab) => (
-            <Card key={tab.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: tab.color }} />
-                    <div>
-                      <CardTitle>{tab.name}</CardTitle>
-                      <CardDescription className="mt-1 whitespace-pre-wrap">{tab.description}</CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="icon" variant="ghost" onClick={() => handleEdit(tab)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(tab.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Antes da ID Positiva</p>
+                <p className="text-2xl font-bold text-amber-500">{beforeCount}</p>
+              </div>
+              <ShieldAlert className="h-8 w-8 text-amber-500/30" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Apos ID Positiva</p>
+                <p className="text-2xl font-bold text-green-500">{afterCount}</p>
+              </div>
+              <ShieldCheck className="h-8 w-8 text-green-500/30" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar tabulacao..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select
+              value={filterPhase}
+              onValueChange={(v: "all" | "before" | "after") => setFilterPhase(v)}
+            >
+              <SelectTrigger className="w-full sm:w-[260px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as fases</SelectItem>
+                <SelectItem value="before">Antes de confirmar os dados (CPF)</SelectItem>
+                <SelectItem value="after">Apos a confirmar os dados (CPF)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Edit Form (inline) */}
+      {editingCode && (
+        <Card className="border-orange-500/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Edit className="h-4 w-4 text-orange-500" />
+              Editando: {editingCode.name}
+            </CardTitle>
+            <CardDescription>Altere os dados da tabulacao abaixo</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {formFields(true)}
+          </CardContent>
+        </Card>
       )}
+
+      {/* Table */}
+      <Card>
+        <CardContent className="pt-6">
+          {filteredCodes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mb-4">
+                <ListChecks className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <p className="text-muted-foreground text-sm font-medium">
+                {resultCodes.length === 0
+                  ? "Nenhuma tabulacao cadastrada"
+                  : "Nenhum resultado para os filtros"}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="text-xs font-semibold min-w-[150px]">Nome</TableHead>
+                    <TableHead className="text-xs font-semibold min-w-[200px]">
+                      Descricao
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-center min-w-[200px]">
+                      Fase
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-center min-w-[80px]">
+                      Ativo
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-right min-w-[100px] pr-4">
+                      Acoes
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCodes.map((code) => (
+                    <TableRow key={code.id} className="hover:bg-muted/20">
+                      <TableCell className="py-3">
+                        <span className="text-sm font-medium text-foreground">{code.name}</span>
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <span className="text-sm text-muted-foreground line-clamp-2">
+                          {code.description || "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-3 text-center">
+                        {code.category === "before" ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                          >
+                            <ShieldAlert className="h-3 w-3 mr-1" />
+                            Antes da ID Positiva
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+                          >
+                            <ShieldCheck className="h-3 w-3 mr-1" />
+                            Apos ID Positiva
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="py-3 text-center">
+                        <Switch
+                          checked={code.is_active}
+                          onCheckedChange={() => handleToggleActive(code)}
+                        />
+                      </TableCell>
+                      <TableCell className="py-3 text-right pr-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEdit(code)}
+                            className="h-8 w-8 hover:text-orange-500"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(code.id)}
+                            className="h-8 w-8 hover:text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
