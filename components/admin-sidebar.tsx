@@ -46,6 +46,7 @@ const menuItems: {
 }[] = [
   { id: "operator-view", label: "Visualizar Roteiro", icon: FileText, permission: "scripts", onlyForSupervisaoOrMonitoria: true },
   { id: "scripts", label: "Roteiros", icon: FileText, permission: "scripts", hideForSupervisao: true },
+  { id: "script-library", label: "Biblioteca de Roteiros", icon: BookOpen, permission: "scripts", hideForSupervisao: true },
   { id: "products", label: "Produtos", icon: Package, permission: "products" },
   { id: "campaigns", label: "Campanhas", icon: Megaphone, permission: "products" },
   { id: "initial-guide", label: "Guia Inicial", icon: BookOpen, permission: "dashboard" },
