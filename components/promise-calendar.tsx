@@ -87,7 +87,7 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
   const productOptions = [
     {
       value: "cartao" as ProductType,
-      name: "Cartão",
+      name: "Cartao",
       deadline: "D+6 (6 dias corridos)",
       icon: CreditCard,
     },
@@ -107,22 +107,24 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
   if (productCategory === "boleto_pre_formatado") {
     return (
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-1 pt-3 px-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
-            <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-            Calendário de Promessas
+      <Card className="border border-zinc-700 bg-zinc-900">
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
+            <div className="p-1 rounded-md bg-orange-500/20">
+              <CalendarIcon className="h-3.5 w-3.5 text-orange-500" />
+            </div>
+            Calendario de Promessas
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
-          <div className="flex flex-col items-center justify-center py-4 text-center space-y-2">
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800 rounded-lg border border-dashed border-zinc-700">
             <AlertTriangle className="h-8 w-8 text-amber-500" />
-            <p className="text-xs font-medium text-muted-foreground">
-              De acordo com a data do boleto, não pode ser alterado em hipótese alguma.
+            <p className="text-xs font-medium text-zinc-400">
+              De acordo com a data do boleto, nao pode ser alterado em hipotese alguma.
             </p>
-            <p className="text-[10px] text-muted-foreground">
-              Categoria: <span className="font-semibold">Boleto Pré-Formatado</span>
-            </p>
+            <span className="text-[10px] px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">
+              Boleto Pre-Formatado
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -131,22 +133,24 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
   if (productCategory === "outros") {
     return (
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-1 pt-3 px-3">
-          <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
-            <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-            Calendário de Promessas
+      <Card className="border border-zinc-700 bg-zinc-900">
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
+            <div className="p-1 rounded-md bg-orange-500/20">
+              <CalendarIcon className="h-3.5 w-3.5 text-orange-500" />
+            </div>
+            Calendario de Promessas
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
-          <div className="flex flex-col items-center justify-center py-4 text-center space-y-2">
+          <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-zinc-800 rounded-lg border border-dashed border-zinc-700">
             <AlertTriangle className="h-8 w-8 text-amber-500" />
-            <p className="text-xs font-medium text-muted-foreground">
-              O produto selecionado não possui datas de promessa disponíveis.
+            <p className="text-xs font-medium text-zinc-400">
+              O produto selecionado nao possui datas de promessa disponiveis.
             </p>
-            <p className="text-[10px] text-muted-foreground">
-              Categoria: <span className="font-semibold">Outros</span>
-            </p>
+            <span className="text-[10px] px-2 py-1 rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700">
+              Outros
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -154,34 +158,36 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
   }
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="pb-1 pt-3 px-3">
-        <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
-          <CalendarIcon className="h-3.5 w-3.5 text-primary" />
-          Calendário de Promessas
+    <Card className="border border-zinc-700 bg-zinc-900">
+      <CardHeader className="pb-2 pt-3 px-3">
+        <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
+          <div className="p-1 rounded-md bg-orange-500/20">
+            <CalendarIcon className="h-3.5 w-3.5 text-orange-500" />
+          </div>
+          Calendario de Promessas
           {productCategory !== undefined && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default">
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-emerald-500/20 text-emerald-400 cursor-default ml-auto">
                     <Info className="h-3 w-3" />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">
+                <TooltipContent side="top" className="text-xs bg-zinc-800 border-zinc-700 text-white">
                   Tipo selecionado automaticamente:{" "}
                   {productCategory === "comercial"
                     ? "Comercial"
                     : productCategory === "habitacional"
                       ? "Habitacional"
-                      : "Cartão"}
+                      : "Cartao"}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
         </CardTitle>
         {!productCategory && (
-          <p className="text-[10px] text-muted-foreground mt-0.5">
-            Selecione o tipo de produto e escolha uma data disponível
+          <p className="text-[10px] text-zinc-500 mt-1">
+            Selecione o tipo de produto e escolha uma data disponivel
           </p>
         )}
       </CardHeader>
@@ -189,8 +195,8 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
       <CardContent className="space-y-3 px-3 pb-3">
         {!productCategory && (
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-              <CheckCircle2 className="h-3 w-3 text-primary" />
+            <label className="text-xs font-bold text-zinc-400 uppercase tracking-wide flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3 text-orange-500" />
               Tipo de Produto
             </label>
             <TooltipProvider delayDuration={200}>
@@ -203,22 +209,20 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => handleProductSelect(product.value)}
-                          className={`w-16 h-16 p-1.5 rounded-xl transition-all duration-200 flex flex-col items-center justify-center gap-1 ${
+                          className={`flex-1 p-3 rounded-lg transition-all duration-200 flex flex-col items-center justify-center gap-1.5 ${
                             isSelected
-                              ? "bg-orange-500 dark:bg-gradient-to-br dark:from-orange-500 dark:to-amber-500 shadow-lg scale-105"
-                              : "bg-muted/30 hover:bg-muted/50"
+                              ? "bg-orange-500 text-white shadow-md shadow-orange-500/25"
+                              : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-orange-500/50"
                           }`}
                         >
-                          <Icon className={`h-5 w-5 ${isSelected ? "text-white" : "text-muted-foreground"}`} />
-                          <p
-                            className={`font-semibold text-[9px] text-center leading-tight ${isSelected ? "text-white" : "text-foreground"}`}
-                          >
+                          <Icon className={`h-5 w-5 ${isSelected ? "text-white" : "text-zinc-400"}`} />
+                          <p className={`font-bold text-[10px] text-center leading-tight`}>
                             {product.name}
                           </p>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="bg-orange-500 text-white border-orange-600">
-                        <p className="text-xs font-semibold">Prazo: {product.deadline}</p>
+                        <p className="text-xs font-bold">Prazo: {product.deadline}</p>
                       </TooltipContent>
                     </Tooltip>
                   )
@@ -229,54 +233,54 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
         )}
 
         {!selectedProduct ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* Current Date Calendar */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/50 rounded-md">
-                <CalendarIcon className="h-3 w-3 text-primary" />
-                <p className="text-[10px] font-semibold text-foreground">Data Atual</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-2 py-1 bg-zinc-800 rounded-md">
+                <CalendarIcon className="h-3 w-3 text-orange-500" />
+                <p className="text-[10px] font-bold text-white uppercase tracking-wide">Data Atual</p>
               </div>
-              <div className="flex justify-center bg-card rounded-lg border border-border overflow-hidden p-2">
+              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={today}
                   disabled={(date) => date.getTime() !== today.getTime()}
                   className="mx-auto"
                   classNames={{
-                    day_today: "bg-primary text-primary-foreground font-bold ring-2 ring-primary/20",
+                    day_today: "bg-orange-500 text-white font-bold",
                     months: "flex flex-col",
                     month: "space-y-2",
-                    caption: "flex justify-center pt-1 relative items-center",
-                    caption_label: "text-xs font-semibold",
+                    caption: "flex justify-center pt-1 relative items-center text-white",
+                    caption_label: "text-xs font-bold",
                     nav: "space-x-1 flex items-center",
                     nav_button:
-                      "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
+                      "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-zinc-700 rounded-md transition-colors text-white",
                     table: "w-full border-collapse",
-                    head_cell: "text-muted-foreground rounded-md w-8 font-semibold text-[10px]",
+                    head_cell: "text-zinc-500 rounded-md w-8 font-bold text-[10px]",
                     cell: "h-8 w-8 text-center text-xs p-0 relative",
-                    day: "h-8 w-8 p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors",
+                    day: "h-8 w-8 p-0 font-medium text-xs text-zinc-300 hover:bg-zinc-700 rounded-md transition-colors",
                   }}
                 />
               </div>
             </div>
 
             {/* Info Message */}
-            <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 rounded-md">
-              <Info className="h-3 w-3 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <p className="text-[10px] text-blue-900 dark:text-blue-100 font-medium">
-                Selecione um tipo de produto acima para visualizar as datas disponíveis
+            <div className="flex items-start gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+              <Info className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-zinc-400">
+                Selecione um tipo de produto acima para visualizar as datas disponiveis
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* Available Dates Calendar */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/50 rounded-md">
-                <CalendarIcon className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-[10px] font-semibold text-foreground">Datas Disponíveis</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 rounded-md">
+                <CalendarIcon className="h-3 w-3 text-emerald-400" />
+                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Datas Disponiveis</p>
               </div>
-              <div className="flex justify-center bg-card rounded-lg border border-border overflow-hidden p-2">
+              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -288,24 +292,24 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                   }}
                   modifiersClassNames={{
                     available:
-                      "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-100 font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-800 border-2 border-emerald-400 dark:border-emerald-600",
+                      "bg-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500/30 border border-emerald-500/50",
                   }}
                   classNames={{
-                    day_today: "bg-primary text-primary-foreground font-bold ring-2 ring-primary/20",
+                    day_today: "bg-orange-500 text-white font-bold",
                     day_selected:
-                      "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-bold hover:bg-emerald-700 dark:hover:bg-emerald-600 ring-2 ring-emerald-400 dark:ring-emerald-600",
-                    day_disabled: "text-muted-foreground opacity-30 line-through cursor-not-allowed",
+                      "bg-emerald-500 text-white font-bold hover:bg-emerald-600",
+                    day_disabled: "text-zinc-600 opacity-30 line-through cursor-not-allowed",
                     months: "flex flex-col",
                     month: "space-y-2",
-                    caption: "flex justify-center pt-1 relative items-center",
-                    caption_label: "text-xs font-semibold",
+                    caption: "flex justify-center pt-1 relative items-center text-white",
+                    caption_label: "text-xs font-bold",
                     nav: "space-x-1 flex items-center",
                     nav_button:
-                      "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
+                      "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-zinc-700 rounded-md transition-colors text-white",
                     table: "w-full border-collapse",
-                    head_cell: "text-muted-foreground rounded-md w-8 font-semibold text-[10px]",
+                    head_cell: "text-zinc-500 rounded-md w-8 font-bold text-[10px]",
                     cell: "h-8 w-8 text-center text-xs p-0 relative",
-                    day: "h-8 w-8 p-0 font-medium text-xs hover:bg-accent rounded-md transition-colors",
+                    day: "h-8 w-8 p-0 font-medium text-xs text-zinc-300 hover:bg-zinc-700 rounded-md transition-colors",
                   }}
                 />
               </div>
@@ -313,19 +317,19 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
 
             {/* Selected Date Display */}
             {selectedDate && (
-              <div className="bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40 border-l-4 border-emerald-500 rounded-md p-2">
-                <div className="flex items-center gap-1 mb-0.5">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  <p className="text-[10px] font-bold text-emerald-900 dark:text-emerald-100">Data Selecionada</p>
+              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Data Selecionada</p>
+                  <p className="text-xs font-bold text-white">
+                    {selectedDate.toLocaleDateString("pt-BR", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
                 </div>
-                <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 ml-4">
-                  {selectedDate.toLocaleDateString("pt-BR", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
               </div>
             )}
 

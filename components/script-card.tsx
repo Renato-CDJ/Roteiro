@@ -5,7 +5,7 @@ import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { CheckCircle2, AlertCircle, ArrowLeft, Search, X } from "lucide-react"
+import { CheckCircle2, AlertCircle, ArrowLeft, Search } from "lucide-react"
 import type { ScriptStep, ContentSegment } from "@/lib/types"
 import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -305,36 +305,37 @@ export const ScriptCard = memo(function ScriptCard({
         const isPrimary = button.primary || button.variant === "primary" || button.variant === "default"
 
         return (
-          <Button
+          <button
             key={button.id}
-            size="lg"
             onClick={() => onButtonClick(button.nextStepId, button.label)}
-            className={`font-bold transition-colors shadow-lg border-0 rounded-xl max-w-full text-wrap ${
-              isPrimary
-                ? "bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
-                : "bg-amber-500 hover:bg-amber-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white"
-            }`}
+            className={`
+              group relative flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 max-w-full
+              ${isPrimary
+                ? "bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/30"
+                : "bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-orange-500/50"
+              }
+            `}
             style={{
-              fontSize: `clamp(12px, ${navButtonFontSize}px, 18px)`,
-              padding: `${Math.min(navButtonPadding, 16)}px ${Math.min(navButtonPadding * 1.5, 24)}px`,
-              minHeight: `${Math.min(navButtonPadding * 2.5, 48)}px`,
+              fontSize: `clamp(12px, ${navButtonFontSize}px, 16px)`,
+              padding: `${Math.min(navButtonPadding, 12)}px ${Math.min(navButtonPadding * 1.5, 20)}px`,
+              minHeight: `${Math.min(navButtonPadding * 2.5, 44)}px`,
             }}
           >
-            {button.label}
-          </Button>
+            <span className="text-wrap">{button.label}</span>
+          </button>
         )
       })
   }, [step.buttons, step.id, navButtonFontSize, navButtonPadding, onButtonClick])
 
   return (
-    <div className="space-y-4 w-full max-w-7xl mx-auto">
+    <div className="space-y-4 w-full max-w-5xl mx-auto px-2 md:px-4">
+      {/* Controles de acessibilidade */}
       {showControls && (
-        <div className="py-3 px-2 md:px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center max-w-4xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-              <label className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap min-w-fit flex items-center gap-2">
-                <span className="text-base md:text-lg">📝</span>
-                Texto:
+        <div className="py-3">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+            <div className="flex items-center gap-3 min-w-[200px]">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                Texto
               </label>
               <Slider
                 value={textSize}
@@ -342,16 +343,15 @@ export const ScriptCard = memo(function ScriptCard({
                 min={50}
                 max={120}
                 step={5}
-                className="flex-1 w-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-orange-500 [&_[role=slider]]:to-amber-500 dark:[&_[role=slider]]:from-orange-500 dark:[&_[role=slider]]:to-orange-600 [&_[role=slider]]:border-orange-600 dark:[&_[role=slider]]:border-orange-500 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-gradient-to-r [&_.bg-primary]:from-orange-400 [&_.bg-primary]:to-amber-400 dark:[&_.bg-primary]:from-orange-500 dark:[&_.bg-primary]:to-orange-600 dark:hover:from-orange-600 dark:hover:to-orange-700 dark:text-white"
+                className="flex-1 [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-orange-500"
               />
-              <span className="text-xs font-medium text-muted-foreground min-w-[2.5rem] text-right">
+              <span className="text-xs font-medium text-muted-foreground tabular-nums w-10 text-right">
                 {textSize[0]}%
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-              <label className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap min-w-fit flex items-center gap-2">
-                <span className="text-base md:text-lg">🔘</span>
-                Botões:
+            <div className="flex items-center gap-3 min-w-[200px]">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                Botoes
               </label>
               <Slider
                 value={buttonSize}
@@ -359,9 +359,9 @@ export const ScriptCard = memo(function ScriptCard({
                 min={50}
                 max={150}
                 step={5}
-                className="flex-1 w-full [&_[role=slider]]:bg-gradient-to-r [&_[role=slider]]:from-orange-500 [&_[role=slider]]:to-amber-500 dark:[&_[role=slider]]:from-orange-500 dark:[&_[role=slider]]:to-orange-600 [&_[role=slider]]:border-orange-600 dark:[&_[role=slider]]:border-orange-500 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-gradient-to-r [&_.bg-primary]:from-orange-400 [&_.bg-primary]:to-amber-400 dark:[&_.bg-primary]:from-orange-500 dark:[&_.bg-primary]:to-orange-600"
+                className="flex-1 [&_[role=slider]]:bg-orange-500 [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow-md [&_.bg-primary]:bg-orange-500"
               />
-              <span className="text-xs font-medium text-muted-foreground min-w-[2.5rem] text-right">
+              <span className="text-xs font-medium text-muted-foreground tabular-nums w-10 text-right">
                 {buttonSize[0]}%
               </span>
             </div>
@@ -369,89 +369,98 @@ export const ScriptCard = memo(function ScriptCard({
         </div>
       )}
 
+      {/* Badge do produto */}
       {productName && (
-        <div className="flex items-center justify-center py-2 px-2 md:px-4 border-t border-border/30">
-          <span className="inline-flex items-center px-4 py-1.5 bg-primary/10 text-primary rounded-md text-xs font-semibold border border-primary/20">
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-orange-500 text-white rounded-full text-xs font-semibold uppercase tracking-wide shadow-md shadow-orange-500/25">
             {productName}
           </span>
         </div>
       )}
 
+      {/* Botao voltar flutuante */}
       {canGoBack && onGoBack && (
         <Button
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon"
           onClick={onGoBack}
-          className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-50 shadow-lg bg-zinc-700 hover:bg-zinc-800 text-white border-0 h-10 w-10 md:h-12 md:w-12 p-0 rounded-full transition-colors"
+          className="fixed left-3 md:left-6 top-1/2 -translate-y-1/2 z-50 h-10 w-10 md:h-11 md:w-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 shadow-lg transition-all"
         >
-          <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
+          <ArrowLeft className="h-5 w-5" />
         </Button>
       )}
 
-      
+      {/* Card principal do script */}
+      <Card className="relative border border-orange-500/30 bg-card shadow-xl overflow-hidden">
+        {/* Gradiente sutil laranja no topo */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
 
-      <Card className="relative shadow-2xl border-2 border-orange-200/80 dark:border-orange-500/60 w-full overflow-hidden backdrop-blur-sm">
+        {/* Botao de busca */}
         <Popover open={showSearch} onOpenChange={setShowSearch}>
           <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSearchOpen}
-                className="absolute top-4 left-4 z-20 h-11 w-11 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border-2 border-blue-500/50 shadow-lg transition-colors"
-                title="Buscar tela do roteiro"
-              >
-                <Search className="h-5 w-5 text-blue-500 dark:text-cyan-400" />
-              </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSearchOpen}
+              className="absolute top-4 left-4 z-20 h-9 w-9 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 transition-colors"
+              title="Buscar tela do roteiro"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start" side="bottom">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <h4 className="font-semibold text-sm">Buscar Tela</h4>
+          <PopoverContent className="w-72 p-3 bg-zinc-900 border-zinc-700" align="start" side="bottom">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-white">
+                <Search className="h-4 w-4 text-orange-500" />
+                Buscar Tela
               </div>
               <Input
-                placeholder="Digite título ou conteúdo..."
+                placeholder="Digite titulo ou conteudo..."
                 value={searchText}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full"
+                className="h-9 text-sm bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
                 autoFocus
               />
-              <p className="text-xs text-muted-foreground">A tela será exibida conforme você digita</p>
+              <p className="text-[10px] text-zinc-500">A tela sera exibida conforme voce digita</p>
             </div>
           </PopoverContent>
         </Popover>
 
-        <Button
-          variant="outline"
-          size="sm"
+        {/* Botao de tabulacao */}
+        <button
           onClick={() => setShowTabulation(true)}
-          className={`absolute top-3 right-3 md:top-4 md:right-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-white dark:to-gray-100 dark:hover:from-gray-100 dark:hover:to-white text-white dark:text-black font-bold border-0 shadow-lg hover:shadow-xl transition-all duration-200 z-10 text-xs md:text-sm`}
+          className={`absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            hasTabulations
+              ? "bg-orange-500 text-white shadow-md shadow-orange-500/30"
+              : "bg-zinc-800/80 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-white"
+          }`}
         >
           {hasTabulations ? (
-            <AlertCircle className="h-4 w-4 md:h-5 md:w-5 md:mr-2" />
+            <AlertCircle className="h-3.5 w-3.5" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 md:mr-2" />
+            <CheckCircle2 className="h-3.5 w-3.5" />
           )}
-          <span className="hidden md:inline">Verificar Tabulação</span>
+          <span className="hidden md:inline">Tabulacao</span>
           {hasTabulations && showTabulationPulse && (
-            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" style={{ animation: "ping 2s cubic-bezier(0, 0, 0.2, 1) infinite" }}></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 shadow-md shadow-green-500/50"></span>
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
           )}
-        </Button>
+        </button>
 
-        <CardHeader className="pb-5 pt-7 px-4 md:px-8">
+        <CardHeader className="relative z-10 pb-4 pt-14 md:pt-12 px-4 md:px-8">
           <SafeHtml
             as="h2"
             html={highlightedTitle}
-            className="text-2xl md:text-3xl lg:text-4xl text-center font-bold text-balance leading-tight text-orange-900 dark:text-white drop-shadow-sm"
+            className="text-xl md:text-2xl lg:text-3xl text-center font-bold text-balance leading-tight text-foreground"
           />
         </CardHeader>
 
-        <CardContent className="space-y-6 pb-8 px-4 md:px-8">
+        <CardContent className="relative z-10 space-y-4 pb-6 px-4 md:px-8">
+          {/* Area de conteudo do script */}
           <div
-            className="bg-gradient-to-br from-orange-50/60 via-amber-50/40 to-orange-50/60 dark:from-gray-600/40 dark:via-gray-600/40 dark:to-gray-600/40 rounded-2xl p-6 md:p-10 leading-relaxed min-h-[280px] md:min-h-[320px] border-2 border-orange-200/60 dark:border-orange-500/40 shadow-inner backdrop-blur-sm"
+            className="bg-white dark:bg-zinc-800/50 rounded-xl p-5 md:p-8 leading-relaxed min-h-[200px] md:min-h-[280px] border-2 border-orange-500/50 text-zinc-900 dark:text-zinc-100"
             style={contentStyles}
           >
             {typeof renderedContent === "string" ? (
@@ -463,70 +472,65 @@ export const ScriptCard = memo(function ScriptCard({
         </CardContent>
       </Card>
 
-      <div className="flex justify-center items-center pt-6 px-4">
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 lg:gap-5 w-full max-w-full md:max-w-3xl">{renderedButtons}</div>
+      {/* Botoes de navegacao */}
+      <div className="flex justify-center items-center pt-2 pb-4">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3 w-full max-w-2xl">{renderedButtons}</div>
       </div>
 
       <Dialog open={showTabulation} onOpenChange={setShowTabulation}>
-        <DialogContent className="sm:max-w-2xl shadow-2xl max-h-[80vh] overflow-y-auto border-2 border-orange-200 dark:border-zinc-700">
-          <DialogHeader className="space-y-3 pb-4 border-b border-border">
-            <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-300">
-                <CheckCircle2 className="h-6 w-6 text-white" />
-              </div>
-              <span className="bg-gradient-to-r from-orange-600 to-orange-500 dark:from-orange-400 dark:to-orange-300 bg-clip-text text-transparent">
-                Tabulação Recomendada
-              </span>
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-              Se você encerrar o atendimento nesta tela, utilize a(s) seguinte(s) tabulação(ões):
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-4">
+        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto border border-zinc-700 bg-zinc-900 p-0 gap-0">
+          {/* Header com gradiente laranja */}
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-center gap-2 text-lg font-bold text-white">
+                <CheckCircle2 className="h-5 w-5" />
+                Tabulacao Recomendada
+              </DialogTitle>
+              <DialogDescription className="text-sm text-white/80 text-center">
+                Se voce encerrar o atendimento nesta tela, utilize a(s) seguinte(s) tabulacao(oes):
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          <div className="p-4 space-y-3">
             {step.tabulations && step.tabulations.length > 0 ? (
               step.tabulations.map((tabulation, index) => (
                 <div
                   key={tabulation.id || index}
-                  className="group relative rounded-xl border-2 border-slate-600 dark:border-slate-600 bg-white dark:bg-slate-700 p-5 md:p-6 leading-relaxed border-2 border-orange-200/60 dark:border-orange-500/40 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01] overflow-hidden"
+                  className="relative rounded-lg border border-zinc-700 bg-zinc-800/50 p-4 hover:bg-zinc-800 transition-colors"
                 >
-                  <div className="absolute top-3 right-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <CheckCircle2 className="h-12 w-12 text-orange-500 dark:text-orange-400" />
-                  </div>
-                  <div className="relative">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="p-1.5 rounded-lg bg-orange-500 dark:bg-orange-400 flex-shrink-0">
-                        <CheckCircle2 className="h-4 w-4 text-white" />
-                      </div>
-                      <h4 className="font-bold text-xl text-gray-900 dark:text-white leading-tight break-words">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-full bg-orange-500/20 flex-shrink-0">
+                      <CheckCircle2 className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-base text-white mb-1">
                         {tabulation.name}
                       </h4>
+                      <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
+                        {tabulation.description}
+                      </p>
                     </div>
-                    <p className="text-base text-gray-700 dark:text-gray-100 leading-relaxed whitespace-pre-wrap pl-9 break-words">
-                      {tabulation.description}
-                    </p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="rounded-xl border-2 border-muted bg-muted/30 p-6 text-center shadow-sm">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="p-3 rounded-full bg-muted">
-                    <CheckCircle2 className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-                    Nenhuma tabulação específica recomendada para esta tela. Continue o atendimento normalmente.
-                  </p>
-                </div>
+              <div className="rounded-lg border border-dashed border-zinc-700 bg-zinc-800/30 p-6 text-center">
+                <CheckCircle2 className="h-10 w-10 mx-auto text-zinc-600 mb-2" />
+                <p className="text-sm text-zinc-500">
+                  Nenhuma tabulacao especifica recomendada para esta tela. Continue o atendimento normalmente.
+                </p>
               </div>
             )}
           </div>
-          <div className="pt-4 border-t border-border">
-            <Button
+          
+          <div className="p-4 border-t border-zinc-700">
+            <button
               onClick={() => setShowTabulation(false)}
-              className="w-full h-11 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-500 dark:to-orange-600 dark:hover:from-orange-600 dark:hover:to-orange-700 text-white dark:text-white font-bold border-0 shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+              className="w-full py-2.5 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors"
             >
               Entendi
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
