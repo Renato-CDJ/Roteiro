@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useCachedTabulations } from "@/hooks/use-cached-data"
+import { useCachedResultCodes } from "@/hooks/use-cached-data"
 import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -14,12 +14,12 @@ interface OperatorResultCodesModalProps {
 }
 
 export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultCodesModalProps) {
-  const { tabulations: tabulationsData, loading } = useCachedTabulations()
+  const { resultCodes: resultCodesData, loading } = useCachedResultCodes()
   const [searchQuery, setSearchQuery] = useState("")
   const [globalZoom, setGlobalZoom] = useState(100)
 
   // Map Supabase data to component format
-  const tabulations = useMemo(() => tabulationsData
+  const tabulations = useMemo(() => resultCodesData
     .filter((t: any) => t.is_active)
     .map((t: any) => ({
       id: t.id,
@@ -28,7 +28,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
       color: t.color || "#3b82f6",
       category: t.category || "before",
       isActive: t.is_active,
-    })), [tabulationsData])
+    })), [resultCodesData])
 
   // Filter by search
   const filteredTabulations = useMemo(() => {
