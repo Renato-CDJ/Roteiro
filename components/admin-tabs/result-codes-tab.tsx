@@ -34,8 +34,170 @@ import {
   ShieldCheck,
   ShieldAlert,
   Loader2,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+// ---------------------------------------------------------------------------
+// Tabulações fixas — registradas diretamente no código para não precisar
+// ser recadastradas a cada deploy.
+// ---------------------------------------------------------------------------
+
+interface StaticTabulation {
+  name: string
+  description: string
+  phase: "before" | "after"
+}
+
+const STATIC_TABULATIONS: StaticTabulation[] = [
+  // ── Antes da IP ──────────────────────────────────────────────────────────
+  {
+    phase: "before",
+    name: "LIGAÇÃO CAIU",
+    description:
+      "Atendimento interrompido sem que seja possível continuar o diálogo entre operador e cliente e sem possibilidade de realização da confirmação do CPF. Exemplo de resposta por parte do cliente/terceiro: "Alô" / "Quem é" / "De onde fala" / "Sou eu" / "Do que se trata" / etc.",
+  },
+  {
+    phase: "before",
+    name: "LIGAÇÃO MUDA",
+    description:
+      "Utilizar se a ligação se iniciou muda, fica sem fala do cliente. Lembrando que se a pessoa atender e houver ruídos ou vozes que não se direcionar a você será considerada uma Ligação muda.",
+  },
+  {
+    phase: "before",
+    name: "RECADO COM TERCEIRO",
+    description:
+      "Terceiro atende e informa que a empresa entrou em falência ou terceiro informa que conhece o cliente, ou terceiro pede para ligar outro dia/horário ou em outro telefone.",
+  },
+  {
+    phase: "before",
+    name: "FALECIDO",
+    description: "Terceiro informa que o titular faleceu.",
+  },
+  {
+    phase: "before",
+    name: "DESCONHECIDO NO TELEFONE",
+    description:
+      "Terceiro informa que não conhece ninguém com o nome do cliente no telefone do cadastro. Exemplo de resposta por parte do cliente/terceiro: "Não conheço" / "Não é desse número" / "Não é daqui" / "Nunca ouvi falar" / etc.",
+  },
+  {
+    phase: "before",
+    name: "PESSOA NÃO CONFIRMA DADOS",
+    description:
+      "Cliente se recusa confirmar os dados para prosseguir com atendimento. Utilize quando: O cliente informa CPF/CNPJ, mas os dados não conferem, o cliente se recusa a informar CPF/CNPJ, o cliente não lembra os dados ou quando o cliente diz que não pode falar no momento. Exemplo de resposta por parte do cliente: "Não confirmo nada por telefone" / "Não, eu vou na agência" / "Não lembro meu CPF" / etc.",
+  },
+  {
+    phase: "before",
+    name: "FALÊNCIA OU CONCORDATA",
+    description:
+      "Utilizamos quando o sócio ou responsável financeiro informar que a empresa entrou em falência.",
+  },
+  {
+    phase: "before",
+    name: "SINAL DE FAX",
+    description: "Ligação direcionada: sinal de FAX.",
+  },
+  {
+    phase: "before",
+    name: "CAIXA POSTAL",
+    description: "Devemos utilizar quando a ligação é direcionada diretamente à caixa postal.",
+  },
+
+  // ── Após a IP ────────────────────────────────────────────────────────────
+  {
+    phase: "after",
+    name: "CONTATO INTERROMPIDO APÓS IP, MAS SEM RESULTADO DEFINIDO",
+    description:
+      "A ligação foi interrompida sem conseguir um posicionamento da parte do cliente sobre a dívida. Situação: Ao questionar se foi pago, o cliente responde apenas com um NÃO e desliga.",
+  },
+  {
+    phase: "after",
+    name: "PESSOA SOLICITA RETORNO EM OUTRO MOMENTO",
+    description: "Cliente pede para o operador retornar a ligação em outro dia/horário.",
+  },
+  {
+    phase: "after",
+    name: "PAGAMENTO JÁ EFETUADO",
+    description: "Cliente informa que já efetuou o pagamento.",
+  },
+  {
+    phase: "after",
+    name: "PROMESSA DE PAGAMENTO SEM EMISSÃO DE BOLETO",
+    description:
+      "Cliente informa que irá pagar ou depositar dentro do prazo estabelecido [10 dias corridos].",
+  },
+  {
+    phase: "after",
+    name: "CONTATO SEM NEGOCIAÇÃO",
+    description:
+      "Cliente informa que não consegue falar no momento e desliga, ou cliente informa que irá pagar ou depositar FORA do prazo estabelecido [10 dias corridos].",
+  },
+  {
+    phase: "after",
+    name: "SEM CAPACIDADE DE PAGAMENTO",
+    description:
+      "Cliente informa que não possui capacidade de efetuar o pagamento. Exemplo dos motivos: Informa que não tem recurso disponível, desemprego, mudanças econômicas ou não pode fazer o pagamento naquele momento.",
+  },
+  {
+    phase: "after",
+    name: "DÍVIDA NÃO RECONHECIDA",
+    description: "Cliente alega que desconhece a dívida.",
+  },
+  {
+    phase: "after",
+    name: "NEGOCIAÇÃO EM OUTRO CANAL",
+    description: "Cliente informa que já está negociando em outro canal.",
+  },
+  {
+    phase: "after",
+    name: "PROMESSA DE PAGAMENTO COM EMISSÃO DE BOLETO",
+    description:
+      "Cliente solicita boleto e informa data de pagamento dentro do período permitido [10 dias corridos].",
+  },
+  {
+    phase: "after",
+    name: "ACEITA AÇÃO/CAMPANHA SEM EMISSÃO DE BOLETO",
+    description: "Cliente aceita ação/campanha sem emissão de boleto.",
+  },
+  {
+    phase: "after",
+    name: "ACEITA AÇÃO/CAMPANHA COM EMISSÃO DE BOLETO",
+    description: "Cliente aceita ação/campanha com emissão de boleto.",
+  },
+  {
+    phase: "after",
+    name: "CLIENTE COM ACORDO ATIVO RETORNA NO RECEPTIVO",
+    description:
+      "Quando o cliente retorna no receptivo tendo acordo vigente para solicitar esclarecimentos ou solicitar o boleto.",
+  },
+  {
+    phase: "after",
+    name: "PROMESSA DE PAGAMENTO ACORDO DE PARCELAMENTO",
+    description: "Cliente confirma o pagamento parcelado do CARTÃO DE CRÉDITO.",
+  },
+  {
+    phase: "after",
+    name: "TRANSBORDO PARA ATENDIMENTO ENTRE CANAIS, COM IP",
+    description:
+      "Quando o atendimento é iniciado em um canal e precisa ser transbordado para resolução por outro canal após o cliente ter realizado a IP.",
+  },
+  {
+    phase: "after",
+    name: "TRANSBORDO PARA ATENDIMENTO ENTRE CANAIS, SEM IP",
+    description:
+      "Quando o atendimento é iniciado em um canal digital e precisa ser transbordado para resolução no atendimento humano antes do cliente ter realizado a IP.",
+  },
+  {
+    phase: "after",
+    name: "RECUSA AÇÃO/CAMPANHA",
+    description:
+      "Cliente não aceita a ação/campanha ofertada. Motivos possíveis: Sem capacidade de pagamento, Contato sem negociação/acordo, Negociação em outro canal, Pessoa solicita retorno em outro momento, Dívida não reconhecida, Promessa de pagamento sem emissão de boleto, Promessa de pagamento com emissão de boleto.",
+  },
+]
+
+// ---------------------------------------------------------------------------
 
 interface ResultCode {
   id: string
@@ -60,6 +222,8 @@ export function ResultCodesTab() {
   const [formDescription, setFormDescription] = useState("")
   const [formPhase, setFormPhase] = useState<"before" | "after">("before")
   const [saving, setSaving] = useState(false)
+  const [showReference, setShowReference] = useState(true)
+  const [referenceFilter, setReferenceFilter] = useState<"all" | "before" | "after">("all")
   const { toast } = useToast()
 
   const filteredCodes = useMemo(() => {
@@ -69,7 +233,7 @@ export function ResultCodesTab() {
         if (searchQuery) {
           const query = searchQuery.toLowerCase()
           return (
-            c.name.toLowerCase().includes(query) || 
+            c.name.toLowerCase().includes(query) ||
             c.code?.toLowerCase().includes(query) ||
             c.description?.toLowerCase().includes(query)
           )
@@ -78,6 +242,11 @@ export function ResultCodesTab() {
       })
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   }, [resultCodes, searchQuery, filterPhase])
+
+  const filteredStaticTabs = useMemo(() => {
+    if (referenceFilter === "all") return STATIC_TABULATIONS
+    return STATIC_TABULATIONS.filter((t) => t.phase === referenceFilter)
+  }, [referenceFilter])
 
   const beforeCount = resultCodes.filter((c) => c.category === "before").length
   const afterCount = resultCodes.filter((c) => c.category === "after").length
@@ -92,7 +261,7 @@ export function ResultCodesTab() {
 
   const handleCreate = async () => {
     if (!formName.trim()) {
-      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      toast({ title: "Erro", description: "O nome é obrigatório.", variant: "destructive" })
       return
     }
 
@@ -109,7 +278,7 @@ export function ResultCodesTab() {
     if (error) {
       toast({ title: "Erro", description: error, variant: "destructive" })
     } else {
-      toast({ title: "Sucesso", description: "Tabulacao criada com sucesso." })
+      toast({ title: "Sucesso", description: "Tabulação criada com sucesso." })
       resetForm()
       setShowCreateDialog(false)
     }
@@ -119,7 +288,7 @@ export function ResultCodesTab() {
   const handleUpdate = async () => {
     if (!editingCode) return
     if (!formName.trim()) {
-      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      toast({ title: "Erro", description: "O nome é obrigatório.", variant: "destructive" })
       return
     }
 
@@ -135,7 +304,7 @@ export function ResultCodesTab() {
     if (error) {
       toast({ title: "Erro", description: error, variant: "destructive" })
     } else {
-      toast({ title: "Sucesso", description: "Tabulacao atualizada." })
+      toast({ title: "Sucesso", description: "Tabulação atualizada." })
       resetForm()
       setEditingCode(null)
     }
@@ -143,13 +312,13 @@ export function ResultCodesTab() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir esta tabulacao?")) return
-    
+    if (!confirm("Tem certeza que deseja excluir esta tabulação?")) return
+
     const { error } = await remove(id)
     if (error) {
       toast({ title: "Erro", description: error, variant: "destructive" })
     } else {
-      toast({ title: "Sucesso", description: "Tabulacao excluida." })
+      toast({ title: "Sucesso", description: "Tabulação excluída." })
     }
   }
 
@@ -180,7 +349,7 @@ export function ResultCodesTab() {
   const formFields = (isEdit: boolean) => (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Nome da Tabulacao</Label>
+        <Label className="text-sm font-medium">Nome da Tabulação</Label>
         <Input
           placeholder="Ex: Sem Interesse"
           value={formName}
@@ -189,9 +358,9 @@ export function ResultCodesTab() {
         />
       </div>
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Descricao</Label>
+        <Label className="text-sm font-medium">Descrição</Label>
         <Textarea
-          placeholder="Descricao da tabulacao..."
+          placeholder="Descrição da tabulação..."
           value={formDescription}
           onChange={(e) => setFormDescription(e.target.value)}
           rows={3}
@@ -213,7 +382,7 @@ export function ResultCodesTab() {
             <SelectItem value="after">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
-                Após a confirmar os dados (CPF)
+                Após confirmar os dados (CPF)
               </span>
             </SelectItem>
           </SelectContent>
@@ -231,7 +400,7 @@ export function ResultCodesTab() {
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Salvar Alteracoes
+              Salvar Alterações
             </Button>
           </>
         ) : (
@@ -241,7 +410,7 @@ export function ResultCodesTab() {
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Criar Tabulacao
+            Criar Tabulação
           </Button>
         )}
       </div>
@@ -255,10 +424,10 @@ export function ResultCodesTab() {
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <ListChecks className="h-6 w-6 text-orange-500" />
-            Tabulações separadas para usar antes e depois da confirmação dos dados
+            Códigos de Resultado
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie as tabulacoes antes e apos a identificacao positiva
+            Tabulações separadas para usar antes e depois da confirmação dos dados
           </p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -271,14 +440,14 @@ export function ResultCodesTab() {
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Nova Tabulacao
+              Nova Tabulação
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nova Tabulacao</DialogTitle>
+              <DialogTitle>Nova Tabulação</DialogTitle>
               <DialogDescription>
-                Adicione uma nova tabulacao para codigos de resultado
+                Adicione uma nova tabulação para códigos de resultado
               </DialogDescription>
             </DialogHeader>
             {formFields(false)}
@@ -286,13 +455,148 @@ export function ResultCodesTab() {
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
+      {/* ── Referência Fixa ─────────────────────────────────────────────────── */}
+      <Card className="border-blue-500/30">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-base">Tabela de Referência de Tabulações</CardTitle>
+              <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">
+                {STATIC_TABULATIONS.length} tabulações
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={referenceFilter}
+                onValueChange={(v: "all" | "before" | "after") => setReferenceFilter(v)}
+              >
+                <SelectTrigger className="w-[220px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as fases</SelectItem>
+                  <SelectItem value="before">Antes da IP</SelectItem>
+                  <SelectItem value="after">Após a IP</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReference((v) => !v)}
+                className="h-8 px-2"
+              >
+                {showReference ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+          <CardDescription>
+            Lista oficial de tabulações registradas no sistema — não requer recadastro a cada deploy.
+          </CardDescription>
+        </CardHeader>
+
+        {showReference && (
+          <CardContent className="pt-0">
+            {/* Before IP */}
+            {(referenceFilter === "all" || referenceFilter === "before") && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <h3 className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                    Tabulações antes da IP
+                  </h3>
+                  <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                    {STATIC_TABULATIONS.filter((t) => t.phase === "before").length}
+                  </Badge>
+                </div>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-amber-500/5">
+                      <TableRow>
+                        <TableHead className="text-xs font-semibold w-[220px]">Tabulação</TableHead>
+                        <TableHead className="text-xs font-semibold">Descrição</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredStaticTabs
+                        .filter((t) => t.phase === "before")
+                        .map((tab) => (
+                          <TableRow key={tab.name} className="hover:bg-muted/20">
+                            <TableCell className="py-3 align-top">
+                              <span className="text-sm font-medium text-foreground leading-snug">
+                                {tab.name}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-3 align-top">
+                              <span className="text-sm text-muted-foreground leading-relaxed">
+                                {tab.description}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
+
+            {/* After IP */}
+            {(referenceFilter === "all" || referenceFilter === "after") && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  <h3 className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    Tabulações após a IP
+                  </h3>
+                  <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                    {STATIC_TABULATIONS.filter((t) => t.phase === "after").length}
+                  </Badge>
+                </div>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-green-500/5">
+                      <TableRow>
+                        <TableHead className="text-xs font-semibold w-[220px]">Tabulação</TableHead>
+                        <TableHead className="text-xs font-semibold">Descrição</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredStaticTabs
+                        .filter((t) => t.phase === "after")
+                        .map((tab) => (
+                          <TableRow key={tab.name} className="hover:bg-muted/20">
+                            <TableCell className="py-3 align-top">
+                              <span className="text-sm font-medium text-foreground leading-snug">
+                                {tab.name}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-3 align-top">
+                              <span className="text-sm text-muted-foreground leading-relaxed">
+                                {tab.description}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
+      {/* ── Stats ────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-sm font-medium text-muted-foreground">Total no Banco</p>
                 <p className="text-2xl font-bold text-foreground">{resultCodes.length}</p>
               </div>
               <ListChecks className="h-8 w-8 text-blue-500/30" />
@@ -314,7 +618,7 @@ export function ResultCodesTab() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Apos ID Positiva</p>
+                <p className="text-sm font-medium text-muted-foreground">Após ID Positiva</p>
                 <p className="text-2xl font-bold text-green-500">{afterCount}</p>
               </div>
               <ShieldCheck className="h-8 w-8 text-green-500/30" />
@@ -323,14 +627,20 @@ export function ResultCodesTab() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* ── Filters ──────────────────────────────────────────────────────────── */}
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Tabulações Cadastradas no Banco</CardTitle>
+          <CardDescription>
+            Gerencie as tabulações ativas no banco de dados utilizadas pelo sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Pesquisar tabulacao..."
+                placeholder="Pesquisar tabulação..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -346,7 +656,7 @@ export function ResultCodesTab() {
               <SelectContent>
                 <SelectItem value="all">Todas as fases</SelectItem>
                 <SelectItem value="before">Antes de confirmar os dados (CPF)</SelectItem>
-                <SelectItem value="after">Após a confirmar os dados (CPF)</SelectItem>
+                <SelectItem value="after">Após confirmar os dados (CPF)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -361,11 +671,9 @@ export function ResultCodesTab() {
               <Edit className="h-4 w-4 text-orange-500" />
               Editando: {editingCode.name}
             </CardTitle>
-            <CardDescription>Altere os dados da tabulacao abaixo</CardDescription>
+            <CardDescription>Altere os dados da tabulação abaixo</CardDescription>
           </CardHeader>
-          <CardContent>
-            {formFields(true)}
-          </CardContent>
+          <CardContent>{formFields(true)}</CardContent>
         </Card>
       )}
 
@@ -379,7 +687,7 @@ export function ResultCodesTab() {
               </div>
               <p className="text-muted-foreground text-sm font-medium">
                 {resultCodes.length === 0
-                  ? "Nenhuma tabulacao cadastrada"
+                  ? "Nenhuma tabulação cadastrada no banco"
                   : "Nenhum resultado para os filtros"}
               </p>
             </div>
@@ -389,9 +697,7 @@ export function ResultCodesTab() {
                 <TableHeader className="bg-muted/30">
                   <TableRow>
                     <TableHead className="text-xs font-semibold min-w-[150px]">Nome</TableHead>
-                    <TableHead className="text-xs font-semibold min-w-[200px]">
-                      Descricao
-                    </TableHead>
+                    <TableHead className="text-xs font-semibold min-w-[200px]">Descrição</TableHead>
                     <TableHead className="text-xs font-semibold text-center min-w-[200px]">
                       Fase
                     </TableHead>
@@ -399,7 +705,7 @@ export function ResultCodesTab() {
                       Ativo
                     </TableHead>
                     <TableHead className="text-xs font-semibold text-right min-w-[100px] pr-4">
-                      Acoes
+                      Ações
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -429,7 +735,7 @@ export function ResultCodesTab() {
                             className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
                           >
                             <ShieldCheck className="h-3 w-3 mr-1" />
-                            Apos ID Positiva
+                            Após ID Positiva
                           </Badge>
                         )}
                       </TableCell>
