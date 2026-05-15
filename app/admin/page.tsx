@@ -20,6 +20,9 @@ const OperatorsTab = lazy(() =>
 const TabulationsTab = lazy(() =>
   import("@/components/admin-tabs/tabulations-tab").then((m) => ({ default: m.TabulationsTab })),
 )
+const TabulationMappingTab = lazy(() =>
+  import("@/components/admin-tabs/tabulation-mapping-tab").then((m) => ({ default: m.TabulationMappingTab })),
+)
 const SituationsTab = lazy(() =>
   import("@/components/admin-tabs/situations-tab").then((m) => ({ default: m.SituationsTab })),
 )
@@ -111,6 +114,12 @@ const AdminContent = memo(function AdminContent() {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <TabulationsTab />
+          </Suspense>
+        )
+      case "tabulation-mapping":
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <TabulationMappingTab />
           </Suspense>
         )
       case "situations":
