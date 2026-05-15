@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { useCachedResultCodes } from "@/hooks/use-cached-data"
 import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface OperatorResultCodesModalProps {
   open: boolean
@@ -57,39 +56,38 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
   const renderTabulationCard = (tabulation: typeof tabulations[0]) => (
     <div
       key={tabulation.id}
-      className="p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group"
+      className="rounded-xl border border-border bg-card hover:shadow-md transition-all duration-200 group overflow-hidden"
     >
-      <div className="flex items-start gap-3">
+      {/* barra colorida lateral + cabeçalho */}
+      <div
+        className="flex items-center gap-3 px-4 py-3"
+        style={{ borderLeft: `4px solid ${tabulation.color}` }}
+      >
         <div
-          className="w-4 h-4 rounded-full flex-shrink-0 mt-1 ring-2 ring-offset-2 ring-offset-background"
-          style={{ 
-            backgroundColor: tabulation.color,
-            ringColor: tabulation.color 
-          }}
+          className="w-3 h-3 rounded-full flex-shrink-0"
+          style={{ backgroundColor: tabulation.color }}
         />
-        <div className="flex-1 min-w-0">
-          <h4 
-            className="font-semibold text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors"
-            style={{ fontSize: `${globalZoom}%` }}
-          >
-            {tabulation.name}
-          </h4>
-          {tabulation.description && (
-            <p 
-              className="text-muted-foreground mt-1 leading-relaxed"
-              style={{ fontSize: `${globalZoom * 0.875}%` }}
-            >
-              {tabulation.description}
-            </p>
-          )}
-        </div>
+        <h4
+          className="font-semibold text-foreground leading-tight"
+          style={{ fontSize: `${globalZoom}%` }}
+        >
+          {tabulation.name}
+        </h4>
       </div>
+      {tabulation.description && (
+        <p
+          className="text-muted-foreground leading-relaxed px-4 pb-3"
+          style={{ fontSize: `${Math.round(globalZoom * 0.85)}%` }}
+        >
+          {tabulation.description}
+        </p>
+      )}
     </div>
   )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-5xl w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
+      <DialogContent className="!max-w-5xl w-[95vw] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
         {/* Header com gradiente */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 p-6 text-white">
           <DialogHeader>
@@ -162,7 +160,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
 
         {/* Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
@@ -245,7 +243,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
