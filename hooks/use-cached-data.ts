@@ -268,13 +268,25 @@ export function useCachedChannels() {
  * Hook para acessar códigos de resultado do cache
  */
 export function useCachedResultCodes() {
-  const [resultCodes, setResultCodes] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [resultCodes, setResultCodes] = useState<any[]>(() => getCachedResultCodes())
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Carregar do cache inicial
     const cached = getCachedResultCodes()
-    setResultCodes(cached)
+    if (cached.length > 0) {
+      setResultCodes(cached)
+    }
     setLoading(false)
+
+    // Escutar atualizações do cache
+    const handleCacheUpdate = () => {
+      const updated = getCachedResultCodes()
+      setResultCodes(updated)
+    }
+
+    window.addEventListener("cache-updated", handleCacheUpdate)
+    return () => window.removeEventListener("cache-updated", handleCacheUpdate)
   }, [])
 
   return { resultCodes, loading }

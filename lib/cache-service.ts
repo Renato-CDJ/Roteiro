@@ -31,6 +31,12 @@ const MIN_SYNC_INTERVAL = 5 * 60 * 1000
 // Versão do cache - incrementar quando houver mudanças na estrutura
 const CACHE_SCHEMA_VERSION = "1.0"
 
+// Função para notificar componentes sobre atualização do cache
+function notifyCacheUpdate(): void {
+  if (typeof window === "undefined") return
+  window.dispatchEvent(new CustomEvent("cache-updated"))
+}
+
 interface CacheEntry<T> {
   data: T
   timestamp: number
@@ -387,6 +393,11 @@ export async function syncIfNeeded(): Promise<boolean> {
     setLocalDataVersion(remoteVersion)
     localStorage.setItem(CACHE_KEYS.LAST_SYNC, String(now))
     
+    // Notificar componentes sobre atualização do cache
+    if (synced) {
+      notifyCacheUpdate()
+    }
+    
     return synced
   } catch (e) {
     console.error("[Cache] Erro ao sincronizar:", e)
@@ -420,6 +431,9 @@ export async function syncAll(): Promise<void> {
     }
     
     localStorage.setItem(CACHE_KEYS.LAST_SYNC, String(Date.now()))
+    
+    // Notificar componentes sobre atualização do cache
+    notifyCacheUpdate()
   } catch (e) {
     console.error("[Cache] Erro ao sincronizar tudo:", e)
   }
