@@ -123,6 +123,7 @@ export interface Tabulation {
   name: string
   description: string
   color: string
+  category?: "before" | "after"
   createdAt: Date
 }
 
