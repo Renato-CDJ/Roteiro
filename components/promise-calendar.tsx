@@ -240,12 +240,12 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-orange-500" />
                 <p className="text-[10px] font-bold text-white uppercase tracking-wide">Data Atual</p>
               </div>
-              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
+              <div className="flex justify-center bg-zinc-800 dark:bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={today}
                   disabled={(date) => date.getTime() !== today.getTime()}
-                  className="mx-auto"
+                  className="mx-auto !bg-transparent"
                   classNames={{
                     day_today: "bg-orange-500 text-white font-bold",
                     months: "flex flex-col",
@@ -280,13 +280,13 @@ export function PromiseCalendarInline({ productCategory }: PromiseCalendarInline
                 <CalendarIcon className="h-3 w-3 text-emerald-400" />
                 <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Datas Disponiveis</p>
               </div>
-              <div className="flex justify-center bg-zinc-800 rounded-lg border border-zinc-700 p-2">
+              <div className="flex justify-center bg-zinc-800 dark:bg-zinc-800 rounded-lg border border-zinc-700 p-2">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={(date) => !isDateInRange(date)}
-                  className="mx-auto"
+                  className="mx-auto !bg-transparent"
                   modifiers={{
                     available: (date) => isDateInRange(date) && date.getTime() !== today.getTime(),
                   }}

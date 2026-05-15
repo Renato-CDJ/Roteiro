@@ -22,6 +22,7 @@ import {
   ListChecks,
   Award,
   Megaphone,
+  MapPin,
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
@@ -46,11 +47,13 @@ const menuItems: {
 }[] = [
   { id: "operator-view", label: "Visualizar Roteiro", icon: FileText, permission: "scripts", onlyForSupervisaoOrMonitoria: true },
   { id: "scripts", label: "Roteiros", icon: FileText, permission: "scripts", hideForSupervisao: true },
+  { id: "script-library", label: "Biblioteca de Roteiros", icon: BookOpen, permission: "scripts", hideForSupervisao: true },
   { id: "products", label: "Produtos", icon: Package, permission: "products" },
   { id: "campaigns", label: "Campanhas", icon: Megaphone, permission: "products" },
   { id: "initial-guide", label: "Guia Inicial", icon: BookOpen, permission: "dashboard" },
   { id: "attendance-config", label: "Configurar Atendimento", icon: Settings2, permission: "attendanceConfig" },
   { id: "tabulations", label: "Tabulacoes", icon: Tags, permission: "tabulations" },
+  { id: "tabulation-mapping", label: "Mapear Tabulacoes", icon: MapPin, permission: "tabulations" },
   { id: "situations", label: "Situacoes", icon: AlertCircle, permission: "situations" },
   { id: "channels", label: "Canais", icon: Radio, permission: "channels" },
   { id: "notes", label: "Bloco de Notas", icon: StickyNote, permission: "notes" },

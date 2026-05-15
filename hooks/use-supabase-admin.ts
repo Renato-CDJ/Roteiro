@@ -538,14 +538,16 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
     // Check if product already exists by name
     const { data: existingProducts } = await supabase
       .from(TABLES.PRODUCTS)
-      .select("id")
+      .select("id, details")
       .eq("name", productName)
       .limit(1)
 
     let productId: string
+    let existingDetails: any = null
 
     if (existingProducts && existingProducts.length > 0) {
       productId = existingProducts[0].id
+      existingDetails = existingProducts[0].details
       productCount++
 
       // Delete existing scripts for this product
@@ -571,6 +573,7 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
     // Create all steps and build ID mapping
     const idMapping: Record<string, string> = {}
     const stepsToInsert: any[] = []
+    let abordagemOriginalId: string | null = null
 
     if (typeof steps === "object" && steps !== null) {
       const stepsObj = steps as Record<string, any>
@@ -583,6 +586,19 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
         const originalId = step.id || stepKey
         const stepContent = step.body || step.conteudo || step.content || step.texto || ""
         const stepTitle = step.title || step.titulo || stepKey
+
+        // Identify the "Abordagem" step (first step or one containing "abordagem" in id/title)
+        if (!abordagemOriginalId) {
+          const isAbordagem = 
+            originalId.toLowerCase().includes("abordagem") || 
+            stepTitle.toLowerCase().includes("abordagem") ||
+            stepKey.toLowerCase().includes("abordagem") ||
+            order === 1 // First step is considered abordagem if none explicitly named
+          
+          if (isAbordagem) {
+            abordagemOriginalId = originalId
+          }
+        }
 
         stepsToInsert.push({
           originalId,
@@ -639,6 +655,22 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
 
         await supabase.from(TABLES.SCRIPTS).update({ buttons: updatedButtons }).eq("id", newId)
       }
+    }
+
+    // Auto-configure the product with the scriptId (Abordagem step)
+    if (abordagemOriginalId && idMapping[abordagemOriginalId]) {
+      const scriptId = idMapping[abordagemOriginalId]
+      
+      // Preserve existing details (attendanceTypes, personTypes) if they exist
+      const updatedDetails = {
+        ...(existingDetails || {}),
+        scriptId: scriptId,
+      }
+
+      await supabase
+        .from(TABLES.PRODUCTS)
+        .update({ details: updatedDetails })
+        .eq("id", productId)
     }
   }
 

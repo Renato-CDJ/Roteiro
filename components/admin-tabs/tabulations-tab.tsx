@@ -1,13 +1,32 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Edit, Trash2, Save, X, Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useTabulations } from "@/hooks/use-supabase-admin"
+import {
+  Tags,
+  Plus,
+  Trash2,
+  Edit,
+  Search,
+  Loader2,
+  Palette,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface Tabulation {
@@ -20,90 +39,124 @@ interface Tabulation {
   updated_at: string
 }
 
+const COLORS = [
+  { name: "Vermelho", value: "#ef4444" },
+  { name: "Laranja", value: "#f97316" },
+  { name: "Amarelo", value: "#eab308" },
+  { name: "Verde", value: "#22c55e" },
+  { name: "Azul", value: "#3b82f6" },
+  { name: "Roxo", value: "#8b5cf6" },
+  { name: "Rosa", value: "#ec4899" },
+  { name: "Cinza", value: "#6b7280" },
+]
+
 export function TabulationsTab() {
   const { data: tabulations, loading, create, update, remove } = useTabulations()
-  const [editingItem, setEditingItem] = useState<Partial<Tabulation> | null>(null)
-  const [isCreating, setIsCreating] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [editingTabulation, setEditingTabulation] = useState<Tabulation | null>(null)
+  const [formName, setFormName] = useState("")
+  const [formDescription, setFormDescription] = useState("")
+  const [formColor, setFormColor] = useState("#3b82f6")
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
 
-  const handleEdit = (item: Tabulation) => {
-    setEditingItem({ ...item })
-    setIsCreating(false)
+  const filteredTabulations = useMemo(() => {
+    return tabulations
+      .filter((t) => {
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase()
+          return (
+            t.name.toLowerCase().includes(query) ||
+            t.description?.toLowerCase().includes(query)
+          )
+        }
+        return true
+      })
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }, [tabulations, searchQuery])
+
+  const activeCount = tabulations.filter((t) => t.is_active).length
+
+  const resetForm = () => {
+    setFormName("")
+    setFormDescription("")
+    setFormColor("#3b82f6")
+    setEditingTabulation(null)
   }
 
-  const handleCreate = () => {
-    setEditingItem({
-      name: "",
-      description: "",
-      color: "#3b82f6",
-    })
-    setIsCreating(true)
-  }
-
-  const handleSave = async () => {
-    if (!editingItem || !editingItem.name) return
+  const handleCreate = async () => {
+    if (!formName.trim()) {
+      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      return
+    }
 
     setSaving(true)
-    try {
-      if (isCreating) {
-        const { error } = await create({
-          name: editingItem.name,
-          description: editingItem.description || "",
-          color: editingItem.color || "#3b82f6",
-          is_active: true,
-        })
-        if (error) throw new Error(error)
-        toast({
-          title: "Tabulacao criada",
-          description: "A nova tabulacao foi criada com sucesso.",
-        })
-      } else if (editingItem.id) {
-        const { error } = await update(editingItem.id, {
-          name: editingItem.name,
-          description: editingItem.description,
-          color: editingItem.color,
-        })
-        if (error) throw new Error(error)
-        toast({
-          title: "Tabulacao atualizada",
-          description: "As alteracoes foram salvas com sucesso.",
-        })
-      }
-    } catch (err: any) {
-      toast({
-        title: "Erro",
-        description: err.message || "Erro ao salvar tabulacao",
-        variant: "destructive",
-      })
-    } finally {
-      setSaving(false)
-      setEditingItem(null)
-      setIsCreating(false)
+    const { error } = await create({
+      name: formName.trim(),
+      description: formDescription.trim(),
+      color: formColor,
+      is_active: true,
+    })
+
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao criada com sucesso." })
+      resetForm()
+      setShowCreateDialog(false)
     }
+    setSaving(false)
+  }
+
+  const handleUpdate = async () => {
+    if (!editingTabulation) return
+    if (!formName.trim()) {
+      toast({ title: "Erro", description: "O nome e obrigatorio.", variant: "destructive" })
+      return
+    }
+
+    setSaving(true)
+    const { error } = await update(editingTabulation.id, {
+      name: formName.trim(),
+      description: formDescription.trim(),
+      color: formColor,
+    })
+
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao atualizada." })
+      resetForm()
+      setEditingTabulation(null)
+    }
+    setSaving(false)
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta tabulacao?")) {
-      const { error } = await remove(id)
-      if (error) {
-        toast({
-          title: "Erro",
-          description: error,
-          variant: "destructive",
-        })
-        return
-      }
-      toast({
-        title: "Tabulacao excluida",
-        description: "A tabulacao foi removida com sucesso.",
-      })
+    if (!confirm("Tem certeza que deseja excluir esta tabulacao?")) return
+
+    const { error } = await remove(id)
+    if (error) {
+      toast({ title: "Erro", description: error, variant: "destructive" })
+    } else {
+      toast({ title: "Sucesso", description: "Tabulacao excluida." })
     }
   }
 
-  const handleCancel = () => {
-    setEditingItem(null)
-    setIsCreating(false)
+  const handleToggleActive = async (tabulation: Tabulation) => {
+    await update(tabulation.id, { is_active: !tabulation.is_active })
+  }
+
+  const startEdit = (tabulation: Tabulation) => {
+    setEditingTabulation(tabulation)
+    setFormName(tabulation.name)
+    setFormDescription(tabulation.description || "")
+    setFormColor(tabulation.color || "#3b82f6")
+  }
+
+  const cancelEdit = () => {
+    resetForm()
   }
 
   if (loading) {
@@ -114,108 +167,255 @@ export function TabulationsTab() {
     )
   }
 
+  const formFields = (isEdit: boolean) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Nome da Tabulacao</Label>
+        <Input
+          placeholder="Ex: Sem Interesse"
+          value={formName}
+          onChange={(e) => setFormName(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Descricao</Label>
+        <Textarea
+          placeholder="Descricao da tabulacao..."
+          value={formDescription}
+          onChange={(e) => setFormDescription(e.target.value)}
+          rows={3}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium flex items-center gap-2">
+          <Palette className="h-4 w-4" />
+          Cor
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {COLORS.map((color) => (
+            <button
+              key={color.value}
+              type="button"
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                formColor === color.value
+                  ? "border-foreground scale-110"
+                  : "border-transparent hover:scale-105"
+              }`}
+              style={{ backgroundColor: color.value }}
+              onClick={() => setFormColor(color.value)}
+              title={color.name}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        {isEdit ? (
+          <>
+            <Button variant="outline" onClick={cancelEdit}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Salvar Alteracoes
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={handleCreate}
+            disabled={saving}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Criar Tabulacao
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Tabulações</h2>
-          <p className="text-muted-foreground mt-1">Gerencie as categorias de finalização de atendimento</p>
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Tags className="h-6 w-6 text-orange-500" />
+            Tabulacoes
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gerencie as tabulacoes disponiveis para classificacao de atendimentos
+          </p>
         </div>
-        <Button
-          onClick={handleCreate}
-          disabled={!!editingItem}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Tabulação
-        </Button>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => {
+                resetForm()
+                setShowCreateDialog(true)
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Tabulacao
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Tabulacao</DialogTitle>
+              <DialogDescription>
+                Adicione uma nova tabulacao para classificar atendimentos
+              </DialogDescription>
+            </DialogHeader>
+            {formFields(false)}
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {editingItem ? (
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>{isCreating ? "Criar Nova Tabulação" : "Editar Tabulação"}</CardTitle>
-            <CardDescription>Configure os detalhes da tabulação</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input
-                id="name"
-                value={editingItem.name}
-                onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                placeholder="Ex: Acordo Fechado"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={editingItem.description}
-                onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                placeholder="Descreva quando usar esta tabulação"
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="color">Cor</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="color"
-                  type="color"
-                  value={editingItem.color}
-                  onChange={(e) => setEditingItem({ ...editingItem, color: e.target.value })}
-                  className="w-20 h-10"
-                />
-                <Input
-                  value={editingItem.color}
-                  onChange={(e) => setEditingItem({ ...editingItem, color: e.target.value })}
-                  placeholder="#3b82f6"
-                />
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold text-foreground">{tabulations.length}</p>
               </div>
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-              <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
-              </Button>
+              <Tags className="h-8 w-8 text-blue-500/30" />
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {tabulations.map((tab) => (
-            <Card key={tab.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: tab.color }} />
-                    <div>
-                      <CardTitle>{tab.name}</CardTitle>
-                      <CardDescription className="mt-1 whitespace-pre-wrap">{tab.description}</CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="icon" variant="ghost" onClick={() => handleEdit(tab)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(tab.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Ativas</p>
+                <p className="text-2xl font-bold text-green-500">{activeCount}</p>
+              </div>
+              <Tags className="h-8 w-8 text-green-500/30" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar tabulacao..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Edit Form (inline) */}
+      {editingTabulation && (
+        <Card className="border-orange-500/50">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Edit className="h-4 w-4 text-orange-500" />
+              Editando: {editingTabulation.name}
+            </CardTitle>
+            <CardDescription>Altere os dados da tabulacao abaixo</CardDescription>
+          </CardHeader>
+          <CardContent>{formFields(true)}</CardContent>
+        </Card>
       )}
+
+      {/* Table */}
+      <Card>
+        <CardContent className="pt-6">
+          {filteredTabulations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mb-4">
+                <Tags className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <p className="text-muted-foreground text-sm font-medium">
+                {tabulations.length === 0
+                  ? "Nenhuma tabulacao cadastrada"
+                  : "Nenhum resultado para a pesquisa"}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="text-xs font-semibold w-[50px]">Cor</TableHead>
+                    <TableHead className="text-xs font-semibold min-w-[150px]">Nome</TableHead>
+                    <TableHead className="text-xs font-semibold min-w-[200px]">
+                      Descricao
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-center min-w-[80px]">
+                      Ativo
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-right min-w-[100px] pr-4">
+                      Acoes
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTabulations.map((tabulation) => (
+                    <TableRow key={tabulation.id} className="hover:bg-muted/20">
+                      <TableCell className="py-3">
+                        <div
+                          className="w-6 h-6 rounded-full border border-border"
+                          style={{ backgroundColor: tabulation.color || "#3b82f6" }}
+                        />
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <span className="text-sm font-medium text-foreground">
+                          {tabulation.name}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <span className="text-sm text-muted-foreground line-clamp-2">
+                          {tabulation.description || "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-3 text-center">
+                        <Switch
+                          checked={tabulation.is_active}
+                          onCheckedChange={() => handleToggleActive(tabulation)}
+                        />
+                      </TableCell>
+                      <TableCell className="py-3 text-right pr-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEdit(tabulation)}
+                            className="h-8 w-8 hover:text-orange-500"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(tabulation.id)}
+                            className="h-8 w-8 hover:text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

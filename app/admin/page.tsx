@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context"
 import { Loader2 } from "lucide-react"
 
 const ScriptsTab = lazy(() => import("@/components/admin-tabs/scripts-tab").then((m) => ({ default: m.ScriptsTab })))
+const ScriptLibraryTab = lazy(() => import("@/components/admin-tabs/script-library-tab").then((m) => ({ default: m.ScriptLibraryTab })))
 const ProductsTab = lazy(() => import("@/components/admin-tabs/products-tab").then((m) => ({ default: m.ProductsTab })))
 const AttendanceTypesTab = lazy(() =>
   import("@/components/admin-tabs/attendance-types-tab").then((m) => ({ default: m.AttendanceTypesTab })),
@@ -18,6 +19,9 @@ const OperatorsTab = lazy(() =>
 )
 const TabulationsTab = lazy(() =>
   import("@/components/admin-tabs/tabulations-tab").then((m) => ({ default: m.TabulationsTab })),
+)
+const TabulationMappingTab = lazy(() =>
+  import("@/components/admin-tabs/tabulation-mapping-tab").then((m) => ({ default: m.TabulationMappingTab })),
 )
 const SituationsTab = lazy(() =>
   import("@/components/admin-tabs/situations-tab").then((m) => ({ default: m.SituationsTab })),
@@ -76,6 +80,12 @@ const AdminContent = memo(function AdminContent() {
             <ScriptsTab />
           </Suspense>
         )
+      case "script-library":
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ScriptLibraryTab />
+          </Suspense>
+        )
       case "products":
         return (
           <Suspense fallback={<LoadingFallback />}>
@@ -104,6 +114,12 @@ const AdminContent = memo(function AdminContent() {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <TabulationsTab />
+          </Suspense>
+        )
+      case "tabulation-mapping":
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <TabulationMappingTab />
           </Suspense>
         )
       case "situations":
