@@ -73,10 +73,11 @@
       "cdes1_abordagem_desenrola": {
         "id": "cdes1_abordagem_desenrola",
         "title": "Novo Desenrola Brasil",
-        "body": "A CAIXA está entrando em contato para informar sobre o Novo Desenrola Brasil, criado para apoiar clientes que precisam organizar suas dívidas, com condições especiais e por tempo limitado.<br><br>Posso te explicar como funciona?",
+        "body": "Aqui em nosso sistema consta o seu [nome do contrato] em aberto há aproximadamente XX dias, no valor de R$XX,XX.<br>Já houve o pagamento?",
         "buttons": [
           { "label": "CLIENTE ELEGÍVEL", "next": "cdes1_cliente_elegivel", "primary": true },
-          { "label": "CLIENTE NÃO ELEGÍVEL", "next": "cdes1_cliente_nao_elegivel" }
+          { "label": "CLIENTE NÃO ELEGÍVEL", "next": "cdes1_cliente_nao_elegivel" },
+          { "label": "JÁ PAGOU", "next": "cdes1_pagamento_efetuado" }
         ]
       },
       "cdes1_cliente_elegivel": {
@@ -90,7 +91,24 @@
       "cdes1_cliente_nao_elegivel": {
         "id": "cdes1_cliente_nao_elegivel",
         "title": "Cliente Não Elegível",
-        "body": "[Primeiro nome do cliente], nesse momento específico o Novo Desenrola Brasil não está disponível para esse contrato, mas consigo verificar as melhores condições vigentes no sistema para regularização.",
+        "body": "Nesse momento específico, o Novo Desenrola Brasil, não está disponível para esse contrato, mas eu já consigo verificar as melhores condições vigentes no nosso sistema para você regularizar agora.",
+        "buttons": [
+          { "label": "OFERTA COMUM - Cliente NÂO Elegível", "next": "cdes1_oferta_comum", "primary": true },
+          { "label": "RECUSOU", "next": "cdes1_cliente_recusou_oferta_comum", "primary": true }
+        ]
+      },
+      "cdes1_cliente_recusou_oferta_comum": {
+        "id": "cdes1_cliente_recusou_oferta_comum",
+        "title": "Cliente NÂO Elegível",
+        "body": "Sem problemas!<br>Fica registrado que hoje você optou por não seguir com a regularização. Sempre que quiser, a CAIXA permanece à disposição para te apoiar na reorganização financeira.<br><br>Peço que você aguarde em linha para avaliar a qualidade do nosso atendimento. A CAIXA agradece a sua atenção edeseja um ótimo(a) dia/tarde/noite.",
+        "buttons": [
+          { "label": "FINALIZAR", "next": "cdes1_fim", "primary": true }
+        ]
+      },
+      "cdes1_oferta_comum": {
+        "id": "cdes1_oferta_comum",
+        "title": "OFERTA COMUM - Cliente NÂO Elegível",
+        "body": "Peça um momento ao Cliente e utilize o script [RECEPTIVO] para apresentar as condições disponíveis para o cliente",
         "buttons": [
           { "label": "FINALIZAR", "next": "cdes1_fim", "primary": true }
         ]
@@ -98,7 +116,7 @@
       "cdes1_apresentacao_oferta": {
         "id": "cdes1_apresentacao_oferta",
         "title": "Apresentação da Oferta",
-        "body": "Neste momento, a regularização está disponível somente para pagamento à vista, com condições diferenciadas.<br><br>Aqui em nosso sistema consta um vencimento em aberto há aproximadamente XX dias, no valor de R$ XX,XX.",
+        "body": "Você faz parte de um grupo de clientes elegíveis que pode aproveitar o Novo Desenrola Brasil,, criada para ajudar na regularização de dívidas com condições especiais e temporárias. Você precisa fazer o pagamento à vista no valor R$ XX,XX.",
         "buttons": [
           { "label": "ACEITOU", "next": "cdes1_aceite_boleto", "primary": true },
           { "label": "BOLETO INDISPONÍVEL", "next": "cdes1_aceite_sem_boleto" },
