@@ -115,7 +115,7 @@ const SituationItem = memo(function SituationItem({
 
   return (
     <div 
-      className="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-orange-200 hover:bg-orange-50/50 dark:hover:border-orange-800 dark:hover:bg-orange-950/20 transition-all"
+      className="group cursor-pointer p-4 rounded-lg border border-border hover:border-orange-300 hover:bg-orange-50/50 dark:hover:border-orange-700 dark:hover:bg-orange-950/20 transition-all bg-card"
       onClick={() => onViewDetails(situation)}
     >
       {/* Titulo da situacao */}

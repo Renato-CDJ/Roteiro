@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { useCachedChannels } from "@/hooks/use-cached-data"
-import { Search, X, Phone, Globe, ExternalLink } from "lucide-react"
+import { Search, X, Phone, ExternalLink } from "lucide-react"
 
 interface OperatorChannelsModalProps {
   open: boolean
@@ -75,11 +75,6 @@ export const OperatorChannelsModal = memo(function OperatorChannelsModal({
       
       return (
         <div key={idx} className="flex items-start gap-2">
-          {isLink ? (
-            <Globe className="h-3.5 w-3.5 text-orange-500 flex-shrink-0 mt-0.5" />
-          ) : (
-            <Phone className="h-3.5 w-3.5 text-orange-500 flex-shrink-0 mt-0.5" />
-          )}
           {isLink ? (
             <a 
               href={trimmedLine.startsWith("http") ? trimmedLine : `https://${trimmedLine}`}
