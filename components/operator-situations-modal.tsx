@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { useCachedSituations } from "@/hooks/use-cached-data"
-import { Search, AlertCircle, ZoomIn, ZoomOut, Eye, ExternalLink } from "lucide-react"
+import { Search, AlertCircle, ZoomIn, ZoomOut, Eye } from "lucide-react"
 
 interface OperatorSituationsModalProps {
   open: boolean
@@ -104,62 +104,42 @@ const SituationItem = memo(function SituationItem({
   globalZoom: number
   onViewDetails: (situation: SituationData) => void
 }) {
-  // Detectar URLs no texto
-  const renderTextWithLinks = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = text.split(urlRegex)
-    
-    return parts.map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-orange-500 hover:text-orange-600 hover:underline inline-flex items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {part}
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        )
-      }
-      return part
-    })
-  }
+  // Truncar descricao para preview
+  const truncatedDescription = useMemo(() => {
+    if (!situation.description) return ""
+    const maxLength = 100
+    const text = situation.description.replace(/\n/g, " ").trim()
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength).trim() + "..."
+  }, [situation.description])
 
   return (
     <div 
-      className="group cursor-pointer"
+      className="group cursor-pointer p-3 rounded-lg border border-transparent hover:border-orange-200 hover:bg-orange-50/50 dark:hover:border-orange-800 dark:hover:bg-orange-950/20 transition-all"
       onClick={() => onViewDetails(situation)}
     >
       {/* Titulo da situacao */}
       <h3 
-        className="font-bold text-orange-500 group-hover:text-orange-600 transition-colors mb-1"
+        className="font-bold text-orange-500 group-hover:text-orange-600 transition-colors"
         style={{ fontSize: `${globalZoom * 0.95}%` }}
       >
         {situation.name}
       </h3>
       
-      {/* Descricao */}
-      {situation.description && (
-        <div 
-          className="text-foreground leading-relaxed space-y-1"
-          style={{ fontSize: `${globalZoom * 0.85}%` }}
+      {/* Preview da descricao */}
+      {truncatedDescription && (
+        <p 
+          className="text-muted-foreground mt-1 line-clamp-2"
+          style={{ fontSize: `${globalZoom * 0.8}%` }}
         >
-          {situation.description.split('\n').map((line, idx) => (
-            <p key={idx} className="break-words">
-              {renderTextWithLinks(line)}
-            </p>
-          ))}
-        </div>
+          {truncatedDescription}
+        </p>
       )}
       
       {/* Indicador de clique */}
       <div className="mt-2 flex items-center gap-1 text-xs text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity">
         <Eye className="h-3 w-3" />
-        <span>Clique para ver em tela cheia</span>
+        <span>Clique para ver detalhes</span>
       </div>
     </div>
   )
