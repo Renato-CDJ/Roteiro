@@ -1,19 +1,18 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback, memo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { useCachedContracts } from "@/hooks/use-cached-data"
 import { 
   FileText, 
   ZoomIn, 
-  ZoomOut,
-  Loader2, 
+  ZoomOut, 
   Search,
+  Eye,
+  Loader2,
   CreditCard,
   Home,
   GraduationCap,
@@ -22,8 +21,6 @@ import {
   Wallet,
   HandCoins,
   PiggyBank,
-  ChevronDown,
-  ChevronUp
 } from "lucide-react"
 
 // Mapeamento de icones por tipo de contrato
@@ -134,6 +131,141 @@ const DEFAULT_CONTRACTS = [
   },
 ]
 
+interface ContractData {
+  id: string
+  name: string
+  description: string
+  isDefault: boolean
+}
+
+// Modal de detalhes do contrato individual
+const ContractDetailModal = memo(function ContractDetailModal({
+  contract,
+  open,
+  onClose,
+}: {
+  contract: ContractData | null
+  open: boolean
+  onClose: () => void
+}) {
+  if (!contract) return null
+
+  const IconComponent = CONTRACT_ICONS[contract.id] || FileText
+  const category = CONTRACT_CATEGORIES[contract.id] || "Outros"
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl w-[90vw] h-auto max-h-[80vh] p-0 gap-0 flex flex-col overflow-hidden border-border bg-card">
+        {/* Header com gradiente laranja */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-5 text-white shrink-0">
+          <DialogHeader>
+            <div className="flex items-start gap-4 min-w-0">
+              <div className="p-2.5 bg-white/20 rounded-xl shrink-0">
+                <IconComponent className="h-7 w-7" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-lg font-bold text-white break-words leading-tight">
+                  {contract.name}
+                </DialogTitle>
+                <DialogDescription className="text-orange-100 mt-1 text-sm">
+                  {category}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        {/* Conteudo com scroll nativo */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="p-5">
+            {contract.description ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Eye className="h-4 w-4" />
+                  Descricao / Orientacoes
+                </div>
+                <div className="bg-orange-50 dark:bg-orange-950/20 rounded-xl p-4 border border-orange-200 dark:border-orange-800">
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm break-words">
+                    {contract.description}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <FileText className="h-7 w-7 text-orange-500" />
+                </div>
+                <p className="font-medium text-muted-foreground">Nenhuma descricao disponivel</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">
+                  Este contrato nao possui orientacoes detalhadas
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer fixo */}
+        <div className="p-4 border-t border-border bg-muted/50 flex justify-end shrink-0">
+          <Button onClick={onClose} className="bg-orange-500 hover:bg-orange-600 text-white">
+            Fechar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+})
+
+// Componente individual de contrato
+const ContractItem = memo(function ContractItem({
+  contract,
+  globalZoom,
+  onViewDetails,
+}: {
+  contract: ContractData
+  globalZoom: number
+  onViewDetails: (contract: ContractData) => void
+}) {
+  // Truncar descricao para preview
+  const truncatedDescription = useMemo(() => {
+    if (!contract.description) return ""
+    const maxLength = 100
+    const text = contract.description.replace(/\n/g, " ").trim()
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength).trim() + "..."
+  }, [contract.description])
+
+  return (
+    <div 
+      className="group cursor-pointer p-4 rounded-lg border border-border hover:border-orange-300 hover:bg-orange-50/50 dark:hover:border-orange-700 dark:hover:bg-orange-950/20 transition-all bg-card"
+      onClick={() => onViewDetails(contract)}
+    >
+      {/* Titulo do contrato */}
+      <h3 
+        className="font-bold text-orange-500 group-hover:text-orange-600 transition-colors"
+        style={{ fontSize: `${globalZoom * 0.95}%` }}
+      >
+        {contract.name}
+      </h3>
+      
+      {/* Preview da descricao */}
+      {truncatedDescription && (
+        <p 
+          className="text-muted-foreground mt-1 line-clamp-2"
+          style={{ fontSize: `${globalZoom * 0.8}%` }}
+        >
+          {truncatedDescription}
+        </p>
+      )}
+      
+      {/* Indicador de clique */}
+      <div className="mt-2 flex items-center gap-1 text-xs text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Eye className="h-3 w-3" />
+        <span>Clique para ver detalhes</span>
+      </div>
+    </div>
+  )
+})
+
 interface OperatorInitialGuideModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -142,8 +274,9 @@ interface OperatorInitialGuideModalProps {
 export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitialGuideModalProps) {
   const { data: contractsData, loading } = useCachedContracts()
   const [searchQuery, setSearchQuery] = useState("")
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({})
   const [globalZoom, setGlobalZoom] = useState(100)
+  const [selectedContract, setSelectedContract] = useState<ContractData | null>(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
 
   // Combina contratos padrao com contratos do banco de dados e filtra ativos
   const allContracts = useMemo(() => {
@@ -179,26 +312,34 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
     )
   }, [allContracts, searchQuery])
 
-  const toggleExpand = (contractId: string) => {
-    setExpandedCards((prev) => ({
-      ...prev,
-      [contractId]: !prev[contractId],
-    }))
-  }
+  // Dividir em duas colunas
+  const { leftColumn, rightColumn } = useMemo(() => {
+    const mid = Math.ceil(filteredContracts.length / 2)
+    return {
+      leftColumn: filteredContracts.slice(0, mid),
+      rightColumn: filteredContracts.slice(mid),
+    }
+  }, [filteredContracts])
 
-  const getIcon = (contractId: string) => {
-    const IconComponent = CONTRACT_ICONS[contractId] || FileText
-    return IconComponent
-  }
+  const handleClose = useCallback(() => {
+    onOpenChange(false)
+    setSearchQuery("")
+  }, [onOpenChange])
 
-  const getCategory = (contractId: string) => {
-    return CONTRACT_CATEGORIES[contractId] || "Outros"
-  }
+  const handleContractClick = useCallback((contract: ContractData) => {
+    setSelectedContract(contract)
+    setShowDetailModal(true)
+  }, [])
+
+  const handleCloseDetailModal = useCallback(() => {
+    setShowDetailModal(false)
+    setSelectedContract(null)
+  }, [])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col overflow-hidden">
-        {/* Header com gradiente */}
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="!max-w-5xl w-[95vw] h-[90vh] p-0 gap-0 flex flex-col border-border bg-card overflow-hidden [&>button]:z-50">
+        {/* Header com gradiente laranja */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white flex-shrink-0">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-white">
@@ -248,7 +389,7 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
         </div>
 
         {/* Contador de resultados */}
-        <div className="px-6 py-3 bg-muted/50 border-b flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-3 bg-muted/50 border-b border-border flex items-center justify-between flex-shrink-0">
           <span className="text-sm text-muted-foreground">
             {filteredContracts.length} {filteredContracts.length === 1 ? "contrato encontrado" : "contratos encontrados"}
           </span>
@@ -264,9 +405,9 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
           )}
         </div>
 
-        {/* Lista de contratos */}
+        {/* Conteudo em duas colunas */}
         <ScrollArea className="flex-1 min-h-0">
-          <div className="p-6 space-y-3">
+          <div className="p-6">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
@@ -277,90 +418,48 @@ export function OperatorInitialGuideModal({ open, onOpenChange }: OperatorInitia
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                   <FileText className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="font-medium">Nenhum contrato encontrado</p>
+                <p className="font-medium text-foreground">Nenhum contrato encontrado</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {searchQuery ? "Tente buscar por outro termo" : "Nenhum contrato disponivel no momento"}
                 </p>
               </div>
             ) : (
-              filteredContracts.map((contract) => {
-                const Icon = getIcon(contract.id)
-                const category = getCategory(contract.id)
-                const isExpanded = expandedCards[contract.id] ?? false
-                const shouldTruncate = contract.description.length > 200
-
-                return (
-                  <Card
-                    key={contract.id}
-                    className="group border hover:border-orange-500/50 transition-all duration-200 hover:shadow-md"
-                  >
-                    <CardContent className="p-0 overflow-hidden">
-                      <div 
-                        className="flex items-start gap-4 p-4 cursor-pointer w-full"
-                        onClick={() => shouldTruncate && toggleExpand(contract.id)}
-                      >
-                        {/* Icone do contrato */}
-                        <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        
-                        {/* Conteudo */}
-                        <div className="flex-1 min-w-0 overflow-hidden">
-                          <div className="flex items-center gap-2 flex-wrap mb-2">
-                            <h3 
-                              className="font-semibold text-foreground group-hover:text-orange-500 transition-colors break-words"
-                              style={{ fontSize: `${globalZoom}%` }}
-                            >
-                              {contract.name}
-                            </h3>
-                            <Badge 
-                              variant="secondary" 
-                              className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 flex-shrink-0"
-                            >
-                              {category}
-                            </Badge>
-                          </div>
-                          <p
-                            className={`text-muted-foreground leading-relaxed transition-all break-words ${!isExpanded && shouldTruncate ? "line-clamp-2" : ""}`}
-                            style={{ fontSize: `${globalZoom * 0.875}%` }}
-                          >
-                            {contract.description}
-                          </p>
-                          
-                          {/* Botao expandir/recolher */}
-                          {shouldTruncate && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2 h-7 text-xs text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 p-0"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleExpand(contract.id)
-                              }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Mostrar menos
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Ler mais
-                                </>
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                {/* Coluna Esquerda */}
+                <div className="space-y-6">
+                  {leftColumn.map((contract) => (
+                    <ContractItem
+                      key={contract.id}
+                      contract={contract}
+                      globalZoom={globalZoom}
+                      onViewDetails={handleContractClick}
+                    />
+                  ))}
+                </div>
+                
+                {/* Coluna Direita */}
+                <div className="space-y-6">
+                  {rightColumn.map((contract) => (
+                    <ContractItem
+                      key={contract.id}
+                      contract={contract}
+                      globalZoom={globalZoom}
+                      onViewDetails={handleContractClick}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </ScrollArea>
       </DialogContent>
+
+      {/* Modal de detalhes do contrato */}
+      <ContractDetailModal
+        contract={selectedContract}
+        open={showDetailModal}
+        onClose={handleCloseDetailModal}
+      />
     </Dialog>
   )
 }

@@ -172,7 +172,7 @@
         "body": "Aqui em nosso sistema consta o seu [nome do contrato] em aberto há aproximadamente XX dias, no valor de R$XX,XX.<br>Já houve o pagamento?",
         "buttons": [
           { "label": "CLIENTE ELEGÍVEL", "next": "cdes1_cliente_elegivel", "primary": true },
-          { "label": "CLIENTE NÃO ELEGÍVEL - Perguntou do Desenrola", "next": "cdes1_cliente_nao_elegivel", "primary": true },
+          { "label": "CLIENTE NÃO ELEGÍVEL - Perguntou do Desenrola", "next": "cdes1_cliente_nao_elegivel" },
           { "label": "JÁ PAGOU", "next": "cdes1_pagamento_efetuado" }
         ]
       },
@@ -182,7 +182,7 @@
         "body": "Nesse momento específico, o Novo Desenrola Brasil, não está disponível para esse contrato, mas eu já consigo verificar as melhores condições vigentes no nosso sistema para você regularizar agora.",
         "buttons": [
           { "label": "OFERTA COMUM - Cliente NÂO Elegível", "next": "cdes1_oferta_comum", "primary": true },
-          { "label": "RECUSOU", "next": "cdes1_cliente_recusou_oferta_comum", "primary": true }
+          { "label": "RECUSOU", "next": "cdes1_cliente_recusou_oferta_comum" }
         ]
       },
       "cdes1_cliente_recusou_oferta_comum": {
@@ -224,7 +224,7 @@
       "cdes1_apresentacao_cartao": {
         "id": "cdes1_apresentacao_cartao",
         "title": "Apresentação da Oferta",
-        "body": "A CAIXA está oferecendo uma oportunidade de renegociação pensada para quem precisa de mais fôlego financeiro, chamado Novo Desenrola Brasil. Você regulariza sua situação fazendo o pagamento a vista com um desconto especial no valor de RS XX,XX.<br><br>Você aceita a proposta?<br><b>IMPORTANTE<b><br>* Abordar utilizando o desconto apenas para os cartões com a marca Desenrola, informando os dados apresentados no SIATC [valor total para pagamento à vista de todos os contratos];<br>* Caso o cliente possua mais de um cartão, informar os dados apresentados por conta, haja vista que o sistema não permite a aglutinação de contratos, ou seja, deve ser feito um acordo para cada cartão;<br>* Os cartões sem a marca devem ser abordados como de costume.<br>* O SIATC apresenta o desconto como DESENROLA2",
+        "body": "A CAIXA está oferecendo uma oportunidade de renegociação pensada para quem precisa de mais fôlego financeiro, chamado Novo Desenrola Brasil. Você regulariza sua situação fazendo o pagamento a vista com um desconto especial no valor de RS XX,XX.<br><br>Você aceita a proposta?<br><b>IMPORTANTE<b><br>Abordar utilizando o desconto apenas para os cartões com a marca Desenrola, informando os dados apresentados no SIATC [valor total para pagamento à vista de todos os contratos];<br>Caso o cliente possua mais de um cartão, informar os dados apresentados por conta, haja vista que o sistema não permite a aglutinação de contratos, ou seja, deve ser feito um acordo para cada cartão;<br>Os cartões sem a marca devem ser abordados como de costume.<br>O SIATC apresenta o desconto como DESENROLA2",
         "buttons": [
           { "label": "ACEITOU", "next": "cdes1_aceite_boleto", "primary": true },
           { "label": "BOLETO INDISPONÍVEL", "next": "cdes1_aceite_sem_boleto" },
