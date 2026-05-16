@@ -125,7 +125,7 @@ export const OperatorChannelsModal = memo(function OperatorChannelsModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 gap-0 flex flex-col border-border bg-card overflow-hidden">
+      <DialogContent className="!max-w-5xl w-[95vw] h-[90vh] p-0 gap-0 flex flex-col border-border bg-card overflow-hidden [&>button]:z-50">
         {/* Header com gradiente laranja */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex-shrink-0">
           <DialogHeader>
