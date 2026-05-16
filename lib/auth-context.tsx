@@ -124,8 +124,6 @@ async function validateUserCredentials(
     const supabase = createClient()
     const normalizedEmail = normalizeEmail(email)
     
-    console.log("[v0] Attempting login with email:", normalizedEmail)
-    
     // Buscar usuario por email (case insensitive)
     const { data: users, error } = await supabase
       .from("users")
@@ -133,16 +131,13 @@ async function validateUserCredentials(
       .ilike("email", normalizedEmail)
       .limit(1)
 
-    console.log("[v0] Supabase response:", { error: error?.message, usersCount: users?.length })
-
     if (error) {
-      console.error("[v0] Supabase query error:", error.message, error.code, error.hint, error.details)
-      return { success: false, error: `Query error: ${error.message}` }
+      console.error("[Supabase] Query error:", error)
+      return { success: false, error: "Erro ao buscar usuario" }
     }
 
     // Se nao encontrou usuario, retornar erro
     if (!users || users.length === 0) {
-      console.log("[v0] No users found with email:", normalizedEmail)
       return { success: false, error: "Usuario nao encontrado. Contate o administrador." }
     }
 
