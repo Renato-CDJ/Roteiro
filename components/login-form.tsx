@@ -4,11 +4,9 @@ import type React from "react"
 import { useState, useCallback, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
-import { AlertCircle, Mail, Lock, Sun, Moon } from "lucide-react"
+import { AlertCircle, Mail, Lock, Sun, Moon, ArrowRight } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-
 import { useTheme } from "next-themes"
 import Image from "next/image"
 
@@ -20,7 +18,6 @@ export const LoginForm = memo(function LoginForm() {
   const { theme, setTheme } = useTheme()
   const { login } = useAuth()
 
-  // Verificar se e um usuario admin baseado no email
   const isAdminUser = useCallback((inputEmail: string) => {
     const adminPatterns = ["admin", "monitoria", "supervisor", "qualidade"]
     const lowerEmail = inputEmail.toLowerCase()
@@ -36,32 +33,29 @@ export const LoginForm = memo(function LoginForm() {
       setIsLoading(true)
 
       try {
-        // Validar email
         if (!email.trim()) {
-          setError("Email e obrigatorio")
+          setError("Email é obrigatório")
           setIsLoading(false)
           return
         }
 
-        // Para admins, senha e obrigatoria
         if (showPasswordField && !password) {
-          setError("Senha obrigatoria para administradores")
+          setError("Senha obrigatória para administradores")
           setIsLoading(false)
           return
         }
-        
+
         const result = await login(email.trim(), showPasswordField ? password : "")
-        
+
         if (!result.success) {
           setError(result.error || "Erro ao fazer login")
           setIsLoading(false)
           return
         }
-        
-        // Login bem sucedido - redirecionar baseado no role
+
         const isAdmin = isAdminUser(email.trim())
         window.location.href = isAdmin ? "/admin" : "/operator"
-      } catch (err) {
+      } catch {
         setError("Erro ao fazer login")
         setIsLoading(false)
       }
@@ -74,15 +68,15 @@ export const LoginForm = memo(function LoginForm() {
   }, [theme, setTheme])
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
-      {/* Botao tema */}
-      <div className="absolute top-4 right-4 z-20">
+    <div className="relative w-full">
+      {/* Botão de tema */}
+      <div className="absolute -top-12 right-0 z-20">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
           title="Alternar tema"
-          className="h-9 w-9 rounded-full text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          className="h-8 w-8 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />
@@ -92,33 +86,40 @@ export const LoginForm = memo(function LoginForm() {
         </Button>
       </div>
 
-      <CardContent className="pt-8 pb-8 px-8">
+      {/* Card do formulário */}
+      <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-8 shadow-2xl">
         {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-xl overflow-hidden ring-2 ring-zinc-100 dark:ring-zinc-800">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-zinc-700 shrink-0">
             <Image
               src="/images/grupo_roveri_logo.jpg"
               alt="Grupo Roveri"
-              width={64}
-              height={64}
+              width={40}
+              height={40}
               className="w-full h-full object-cover"
               priority
             />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white leading-tight">Grupo Roveri</p>
+            <p className="text-xs text-zinc-500">Acesse sua conta</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="sr-only">
-              Email
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+              Login
             </label>
             <div className="relative flex items-stretch">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+                <Mail className="h-4 w-4 text-zinc-500" />
+              </div>
               <Input
                 id="email"
                 type="text"
-                placeholder="Login"
+                placeholder="seu.login"
                 value={email}
                 onChange={(e) => {
                   const value = e.target.value.split("@")[0]
@@ -128,36 +129,33 @@ export const LoginForm = memo(function LoginForm() {
                 required
                 autoComplete="username"
                 disabled={isLoading}
-                className="h-12 pl-10 pr-4 flex-1 min-w-0 text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 rounded-r-none border-r-0"
+                className="h-11 pl-9 pr-2 flex-1 min-w-0 text-sm rounded-r-none border-r-0 bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
               />
-              <div className="h-12 px-2 sm:px-3 flex items-center bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-200 dark:border-zinc-700 rounded-r-md shrink-0">
-                <span className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">@gruporoveri.com</span>
+              <div className="h-11 px-3 flex items-center bg-zinc-800 border border-l-0 border-zinc-700 rounded-r-lg shrink-0">
+                <span className="text-xs text-zinc-500 whitespace-nowrap">@gruporoveri.com</span>
               </div>
             </div>
-            {/* Dica */}
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">
-              Digite o login do CRM
-            </p>
+            <p className="text-xs text-zinc-600">Digite o login do CRM</p>
           </div>
 
-          {/* Senha - apenas para admins */}
+          {/* Senha — apenas para admins */}
           {showPasswordField && (
-            <div className="space-y-2 animate-fade-in">
-              <label htmlFor="password" className="sr-only">
+            <div className="space-y-1.5 animate-fade-in">
+              <label htmlFor="password" className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
                 Senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 z-10" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Senha"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
                   disabled={isLoading}
-                  className="h-12 pl-10 text-sm bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
+                  className="h-11 pl-9 text-sm bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
                 />
               </div>
             </div>
@@ -165,34 +163,32 @@ export const LoginForm = memo(function LoginForm() {
 
           {/* Erro */}
           {error && (
-            <Alert
-              variant="destructive"
-              className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-sm">{error}</AlertDescription>
+            <Alert className="bg-red-950/40 border border-red-800/60 text-red-300 py-3">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertDescription className="text-sm text-red-300">{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Botao */}
+          {/* Botão de entrar */}
           <Button
             type="submit"
-            className="w-full h-12 text-sm font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-white transition-all duration-200 shadow-sm hover:shadow-md"
+            className="w-full h-11 text-sm font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all duration-200 shadow-lg shadow-orange-900/30 hover:shadow-orange-800/40 rounded-lg flex items-center justify-center gap-2 group mt-2"
             disabled={isLoading}
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
-                <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Entrando...
               </span>
             ) : (
-              "Entrar"
+              <>
+                Entrar
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </>
             )}
           </Button>
         </form>
-
-
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 })
