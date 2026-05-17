@@ -62,7 +62,7 @@ export const LoginForm = memo(function LoginForm() {
   )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Campo de Email */}
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium text-zinc-300">
