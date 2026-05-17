@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useCachedResultCodes } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff } from "lucide-react"
+import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff, Info, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -19,6 +19,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
   const [globalZoom, setGlobalZoom] = useState(100)
   const [activeCategory, setActiveCategory] = useState<"all" | "before" | "after">("all")
   const [showDescriptions, setShowDescriptions] = useState(true)
+  const [selectedTabulation, setSelectedTabulation] = useState<typeof tabulations[0] | null>(null)
 
   // Map Supabase data to component format
   const tabulations = useMemo(() => resultCodesData
@@ -126,6 +127,17 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
               </p>
             )}
           </div>
+          {tabulation.description && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 flex-shrink-0 opacity-60 hover:opacity-100"
+              onClick={() => setSelectedTabulation(tabulation)}
+              title="Ver descricao"
+            >
+              <Info className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     )
@@ -399,6 +411,33 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
           </div>
         </div>
       </DialogContent>
+
+      {/* Modal de descricao da tabulacao */}
+      {selectedTabulation && (
+        <Dialog open={!!selectedTabulation} onOpenChange={() => setSelectedTabulation(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: selectedTabulation.color }}
+                />
+                {selectedTabulation.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-2">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {selectedTabulation.description || "Esta tabulacao nao possui descricao."}
+              </p>
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" size="sm" onClick={() => setSelectedTabulation(null)}>
+                Fechar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   )
 }
