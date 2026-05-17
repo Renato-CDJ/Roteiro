@@ -27,7 +27,7 @@ const SituationsTab = lazy(() =>
   import("@/components/admin-tabs/situations-tab").then((m) => ({ default: m.SituationsTab })),
 )
 const ChannelsTab = lazy(() => import("@/components/admin-tabs/channels-tab").then((m) => ({ default: m.ChannelsTab })))
-const WordCloudTab = lazy(() => import("@/components/admin-tabs/word-cloud-tab").then((m) => ({ default: m.WordCloudTab })))
+const NotesTab = lazy(() => import("@/components/admin-tabs/notes-tab").then((m) => ({ default: m.NotesTab })))
 const MessagesQuizTab = lazy(() =>
   import("@/components/admin-tabs/messages-quiz-tab").then((m) => ({ default: m.MessagesQuizTab })),
 )
@@ -134,10 +134,10 @@ const AdminContent = memo(function AdminContent() {
             <ChannelsTab />
           </Suspense>
         )
-      case "word-cloud":
+      case "notes":
         return (
           <Suspense fallback={<LoadingFallback />}>
-            <WordCloudTab />
+            <NotesTab />
           </Suspense>
         )
       case "messages-quiz":

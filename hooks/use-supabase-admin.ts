@@ -31,7 +31,6 @@ const TABLES = {
   PHRASEOLOGY: "phraseology",
   SUPERVISOR_TEAMS: "supervisor_teams",
   CAMPAIGNS: "campaigns",
-  WORD_CLOUD: "word_cloud",
 } as const
 
 // Mapeamento de table para chave de versão
@@ -343,17 +342,6 @@ export function useChannels() {
     created_at: string
     updated_at: string
   }>(TABLES.CHANNELS)
-}
-
-export function useWordCloud() {
-  return useSupabaseTable<{
-    id: string
-    word: string
-    description: string
-    is_active: boolean
-    created_at: string
-    updated_at: string
-  }>(TABLES.WORD_CLOUD)
 }
 
 export function useResultCodes() {

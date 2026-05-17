@@ -3,7 +3,7 @@
 -- SETUP COMPLETO DO BANCO DE DADOS
 -- 
 -- Copie e cole este script INTEIRO no SQL Editor do Supabase
--- Versao: 5.1 - Adicionada Nuvem de Palavras
+-- Versao: 5.0 - Consolidado com Usuarios Admin
 -- Data: 2025
 -- ============================================================
 
@@ -393,22 +393,6 @@ CREATE TABLE IF NOT EXISTS campaigns (
 -- Indice para busca por nome
 CREATE INDEX IF NOT EXISTS idx_campaigns_name ON campaigns(name);
 CREATE INDEX IF NOT EXISTS idx_campaigns_active ON campaigns(is_active);
-
--- ============================================================
--- 23. TABELA DE NUVEM DE PALAVRAS
--- ============================================================
-CREATE TABLE IF NOT EXISTS word_cloud (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  word TEXT NOT NULL,
-  description TEXT DEFAULT '',
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Indice para busca
-CREATE INDEX IF NOT EXISTS idx_word_cloud_word ON word_cloud(word);
-CREATE INDEX IF NOT EXISTS idx_word_cloud_active ON word_cloud(is_active);
 
 -- ============================================================
 -- INDICES ADICIONAIS PARA PERFORMANCE

@@ -23,7 +23,6 @@ import {
   AlertCircle,
   Radio,
   Megaphone,
-  Cloud,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCachedProducts, useCachedMessages } from "@/hooks/use-cached-data"
@@ -39,7 +38,6 @@ import { OperatorResultCodesModal } from "@/components/operator-result-codes-mod
 import { OperatorSituationsModal } from "@/components/operator-situations-modal"
 import { OperatorChannelsModal } from "@/components/operator-channels-modal"
 import { OperatorCampaignsModal } from "@/components/operator-campaigns-modal"
-import { OperatorWordCloudModal } from "@/components/operator-word-cloud-modal"
 
 interface OperatorHeaderProps {
   searchQuery?: string
@@ -82,7 +80,6 @@ export const OperatorHeader = memo(function OperatorHeader({
   const [showSituationsModal, setShowSituationsModal] = useState(false)
   const [showChannelsModal, setShowChannelsModal] = useState(false)
   const [showCampaignsModal, setShowCampaignsModal] = useState(false)
-  const [showWordCloudModal, setShowWordCloudModal] = useState(false)
 
   // Map products from Supabase
   const products = useMemo(() => productsData
@@ -371,17 +368,6 @@ export const OperatorHeader = memo(function OperatorHeader({
               </button>
 
               <button
-                onClick={() => setShowWordCloudModal(true)}
-                className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
-                title="Nuvem de Palavras"
-              >
-                <div className="h-9 w-9 bg-sky-500 hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
-                  <Cloud className="h-4 w-4" />
-                </div>
-                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Palavras</span>
-              </button>
-
-              <button
                 onClick={() => setShowResultCodesModal(true)}
                 className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
                 title="Codigos de Resultado"
@@ -488,7 +474,6 @@ export const OperatorHeader = memo(function OperatorHeader({
       <OperatorSituationsModal open={showSituationsModal} onOpenChange={setShowSituationsModal} />
       <OperatorChannelsModal open={showChannelsModal} onOpenChange={setShowChannelsModal} />
       <OperatorCampaignsModal isOpen={showCampaignsModal} onClose={() => setShowCampaignsModal(false)} />
-      <OperatorWordCloudModal open={showWordCloudModal} onOpenChange={setShowWordCloudModal} />
     </>
   )
 })
