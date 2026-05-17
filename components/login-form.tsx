@@ -62,7 +62,7 @@ export const LoginForm = memo(function LoginForm() {
   )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Campo de Email */}
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium text-zinc-300">
@@ -70,7 +70,7 @@ export const LoginForm = memo(function LoginForm() {
         </label>
         <div className="relative group">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-            <Mail className="h-5 w-5 text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
+            <Mail className="h-5 w-5 text-zinc-600 group-focus-within:text-orange-500 transition-colors duration-300" />
           </div>
           <Input
             id="email"
@@ -85,10 +85,10 @@ export const LoginForm = memo(function LoginForm() {
             required
             autoComplete="username"
             disabled={isLoading}
-            className="h-14 pl-12 pr-[140px] text-base rounded-xl bg-white/[0.03] border-white/10 text-white placeholder:text-zinc-600 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:bg-white/[0.05] transition-all"
+            className="h-14 pl-12 pr-[140px] text-base rounded-2xl bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:bg-zinc-800 transition-all duration-300"
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <span className="text-sm text-zinc-500">@gruporoveri.com</span>
+            <span className="text-sm text-zinc-600">@gruporoveri.com</span>
           </div>
         </div>
         <p className="text-xs text-zinc-600 pl-1">Digite o login do CRM</p>
@@ -102,7 +102,7 @@ export const LoginForm = memo(function LoginForm() {
           </label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-              <Lock className="h-5 w-5 text-zinc-500 group-focus-within:text-orange-500 transition-colors" />
+              <Lock className="h-5 w-5 text-zinc-600 group-focus-within:text-orange-500 transition-colors duration-300" />
             </div>
             <Input
               id="password"
@@ -113,12 +113,12 @@ export const LoginForm = memo(function LoginForm() {
               required
               autoComplete="current-password"
               disabled={isLoading}
-              className="h-14 pl-12 pr-12 text-base rounded-xl bg-white/[0.03] border-white/10 text-white placeholder:text-zinc-600 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 focus:bg-white/[0.05] transition-all"
+              className="h-14 pl-12 pr-12 text-base rounded-2xl bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:bg-zinc-800 transition-all duration-300"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-300 transition-colors"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -128,7 +128,7 @@ export const LoginForm = memo(function LoginForm() {
 
       {/* Mensagem de Erro */}
       {error && (
-        <Alert className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
+        <Alert className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl animate-fade-in">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">{error}</AlertDescription>
         </Alert>
@@ -138,7 +138,7 @@ export const LoginForm = memo(function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="relative w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 group overflow-hidden"
+        className="relative w-full h-14 text-base font-semibold rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 group overflow-hidden"
       >
         {/* Efeito de brilho */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

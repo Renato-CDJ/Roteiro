@@ -34,84 +34,138 @@ export default function HomePage() {
   if (user) return null
 
   return (
-    <div className="relative min-h-screen min-h-dvh flex items-center justify-center overflow-hidden">
-      {/* Imagem de fundo */}
-      <Image
-        src="/images/login-bg.jpg"
-        alt=""
-        fill
-        className="object-cover"
-        priority
-        quality={90}
-      />
-      
-      {/* Overlay escuro com gradiente e padrão de grid */}
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-950/95 via-zinc-900/90 to-zinc-950/95" />
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: "linear-gradient(0deg, transparent 24%, rgba(249,115,22,.05) 25%, rgba(249,115,22,.05) 26%, transparent 27%, transparent 74%, rgba(249,115,22,.05) 75%, rgba(249,115,22,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(249,115,22,.05) 25%, rgba(249,115,22,.05) 26%, transparent 27%, transparent 74%, rgba(249,115,22,.05) 75%, rgba(249,115,22,.05) 76%, transparent 77%, transparent)",
-        backgroundSize: "50px 50px"
-      }} />
-      
-      {/* Efeito de luz laranja no canto */}
-      <div 
-        className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(249,115,22,0.8) 0%, transparent 70%)" }}
-      />
-      <div 
-        className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full opacity-15 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(234,88,12,0.6) 0%, transparent 70%)" }}
-      />
+    <div className="min-h-screen min-h-dvh flex bg-zinc-950">
+      {/* Lado Esquerdo - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        {/* Fundo com gradiente animado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black" />
+        
+        {/* Círculos de luz animados */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-600/15 rounded-full blur-3xl animate-pulse-slow-delay" />
+        
+        {/* Partículas flutuantes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="particle particle-1" />
+          <div className="particle particle-2" />
+          <div className="particle particle-3" />
+          <div className="particle particle-4" />
+          <div className="particle particle-5" />
+        </div>
 
-      {/* Conteúdo principal */}
-      <div className="relative z-10 w-full max-w-lg mx-4 sm:mx-6">
-        {/* Card com efeito glass */}
-        <div className="relative backdrop-blur-xl bg-white/[0.03] border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl">
-          {/* Brilho no topo do card */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          
-          {/* Header */}
-          <div className="text-center mb-10">
-            {/* Logo */}
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30 mb-6 ring-1 ring-white/10">
+        {/* Conteúdo central */}
+        <div className="relative z-10 flex flex-col items-center justify-center w-full px-12">
+          {/* Logo */}
+          <div className="mb-8 relative">
+            <div className="w-24 h-24 rounded-3xl overflow-hidden ring-2 ring-orange-500/30 shadow-2xl shadow-orange-500/20">
               <Image
                 src="/images/grupo_roveri_logo.jpg"
-                alt="Grupo Roveri"
-                width={64}
-                height={64}
-                className="w-full h-full object-cover rounded-2xl"
+                alt="Logo"
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
                 priority
               />
             </div>
-            
-            {/* Título com animação */}
-            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-6 animate-title-reveal">
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.1s'}}>R</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.2s'}}>o</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.3s'}}>t</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.4s'}}>e</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.5s'}}>i</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.6s'}}>r</span>
-              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.7s'}}>o</span>
-            </h1>
-            <p className="text-zinc-400 text-sm">
-              Sistema de Atendimento
-            </p>
+            <div className="absolute -inset-2 bg-orange-500/20 rounded-3xl blur-xl -z-10 animate-pulse-slow" />
           </div>
 
-          {/* Formulário */}
-          <LoginForm />
+          {/* Nome com efeito de digitação */}
+          <h1 className="text-7xl xl:text-8xl font-black tracking-tight mb-6">
+            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-200 to-orange-400 animate-gradient-x">
+              Roteiro
+            </span>
+          </h1>
 
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
-            <span className="text-xs text-zinc-500">Sistema operacional</span>
+          {/* Linha decorativa animada */}
+          <div className="relative w-48 h-1 mb-8 overflow-hidden rounded-full bg-zinc-800">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 animate-shimmer-bar" />
+          </div>
+
+          {/* Subtítulo */}
+          <p className="text-xl text-zinc-400 font-light tracking-wide text-center max-w-md">
+            Sistema Inteligente de<br />
+            <span className="text-orange-400 font-medium">Atendimento ao Cliente</span>
+          </p>
+
+          {/* Stats ou features */}
+          <div className="mt-16 grid grid-cols-3 gap-8 text-center">
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-white">24/7</div>
+              <div className="text-xs text-zinc-500 uppercase tracking-wider">Disponível</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-orange-400">100%</div>
+              <div className="text-xs text-zinc-500 uppercase tracking-wider">Seguro</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-3xl font-bold text-white">Rápido</div>
+              <div className="text-xs text-zinc-500 uppercase tracking-wider">Acesso</div>
+            </div>
           </div>
         </div>
 
-        {/* Texto abaixo do card */}
-        <p className="text-center text-xs text-zinc-600 mt-6">
-          Acesso restrito a colaboradores autorizados
-        </p>
+        {/* Borda direita com gradiente */}
+        <div className="absolute right-0 inset-y-0 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
+      </div>
+
+      {/* Lado Direito - Formulário */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+        {/* Fundo sutil */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950" />
+        
+        {/* Padrão de pontos */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+          backgroundSize: "24px 24px"
+        }} />
+
+        <div className="relative z-10 w-full max-w-md">
+          {/* Header mobile */}
+          <div className="lg:hidden text-center mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-orange-500/30 shadow-xl mb-4">
+              <Image
+                src="/images/grupo_roveri_logo.jpg"
+                alt="Logo"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+                priority
+              />
+            </div>
+            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-orange-400 mb-2">
+              Roteiro
+            </h1>
+            <p className="text-zinc-500 text-sm">Sistema de Atendimento</p>
+          </div>
+
+          {/* Card do formulário */}
+          <div className="bg-zinc-900/50 backdrop-blur-sm border border-zinc-800/50 rounded-3xl p-8 sm:p-10 shadow-2xl">
+            {/* Header do card */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Bem-vindo de volta
+              </h2>
+              <p className="text-zinc-500 text-sm">
+                Faça login para acessar o sistema
+              </p>
+            </div>
+
+            {/* Formulário */}
+            <LoginForm />
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+              <span className="text-xs text-zinc-600">Sistema operacional</span>
+            </div>
+            <p className="text-xs text-zinc-700">
+              Acesso restrito a colaboradores autorizados
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
