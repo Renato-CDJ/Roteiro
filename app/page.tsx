@@ -20,7 +20,6 @@ export default function HomePage() {
     }
   }, [user, isLoading, router])
 
-  // Animação das partículas
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -28,8 +27,8 @@ export default function HomePage() {
     if (!ctx) return
 
     let animationId: number
-    let mouseX = 0
-    let mouseY = 0
+    let mouseX = canvas.width / 2
+    let mouseY = canvas.height / 2
 
     const resize = () => {
       canvas.width = window.innerWidth
@@ -44,7 +43,8 @@ export default function HomePage() {
     }
     window.addEventListener("mousemove", handleMouseMove)
 
-    const PARTICLE_COUNT = 60
+    // Partículas menores para conectar com linhas
+    const PARTICLE_COUNT = 50
     const particles: {
       x: number
       y: number
@@ -52,71 +52,99 @@ export default function HomePage() {
       vx: number
       vy: number
       alpha: number
+      originalX: number
+      originalY: number
     }[] = []
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const x = Math.random() * canvas.width
+      const y = Math.random() * canvas.height
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 2 + 1,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        alpha: Math.random() * 0.5 + 0.3,
+        x,
+        y,
+        originalX: x,
+        originalY: y,
+        radius: Math.random() * 1.5 + 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.4 + 0.3,
       })
     }
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Limpar com cor muito escura
+      ctx.fillStyle = "rgba(2, 2, 5, 0.1)"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      // Atualizar partículas
       for (const p of particles) {
-        // Movimento suave em direção ao mouse
-        const dx = mouseX - p.x
-        const dy = mouseY - p.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 200) {
-          p.vx += dx * 0.00005
-          p.vy += dy * 0.00005
-        }
-
+        // Movimento suave em torno da posição original
         p.x += p.vx
         p.y += p.vy
 
-        // Desacelerar gradualmente
-        p.vx *= 0.99
-        p.vy *= 0.99
+        // Volta à posição original suavemente
+        const dx = p.originalX - p.x
+        const dy = p.originalY - p.y
+        p.vx += dx * 0.0002
+        p.vy += dy * 0.0002
 
+        p.vx *= 0.98
+        p.vy *= 0.98
+
+        // Wrap around
         if (p.x < 0) p.x = canvas.width
         if (p.x > canvas.width) p.x = 0
         if (p.y < 0) p.y = canvas.height
         if (p.y > canvas.height) p.y = 0
 
-        // Desenhar partícula com glow
+        // Desenhar partícula com glow laranja
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3)
-        gradient.addColorStop(0, `rgba(249, 115, 22, ${p.alpha})`)
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 4)
+        gradient.addColorStop(0, `rgba(249, 115, 22, ${p.alpha * 0.8})`)
         gradient.addColorStop(1, "rgba(249, 115, 22, 0)")
         ctx.fillStyle = gradient
         ctx.fill()
 
+        // Centro mais brilhante
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.radius * 0.5, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.8})`
+        ctx.arc(p.x, p.y, p.radius * 0.4, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.9})`
         ctx.fill()
       }
 
-      // Linhas entre partículas próximas
+      // Linhas conectando partículas próximas
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x
           const dy = particles[i].y - particles[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 120) {
+          const maxDist = 150
+
+          if (dist < maxDist) {
+            const opacity = 0.3 * (1 - dist / maxDist)
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.strokeStyle = `rgba(249, 115, 22, ${0.15 * (1 - dist / 120)})`
-            ctx.lineWidth = 1
+
+            // Gradiente na linha
+            const gradient = ctx.createLinearGradient(
+              particles[i].x,
+              particles[i].y,
+              particles[j].x,
+              particles[j].y,
+            )
+            gradient.addColorStop(0, `rgba(249, 115, 22, ${opacity})`)
+            gradient.addColorStop(0.5, `rgba(249, 115, 22, ${opacity * 0.7})`)
+            gradient.addColorStop(1, `rgba(249, 115, 22, ${opacity})`)
+
+            ctx.strokeStyle = gradient
+            ctx.lineWidth = 1.2
+            ctx.stroke()
+
+            // Glow nas linhas
+            ctx.strokeStyle = `rgba(249, 115, 22, ${opacity * 0.3})`
+            ctx.lineWidth = 4
             ctx.stroke()
           }
         }
@@ -136,7 +164,7 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="h-8 w-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -145,31 +173,32 @@ export default function HomePage() {
   if (user) return null
 
   return (
-    <main className="relative min-h-screen min-h-dvh flex items-center justify-center bg-zinc-950 overflow-hidden">
-      {/* Canvas com partículas */}
+    <main className="relative min-h-screen min-h-dvh flex flex-col items-center justify-center bg-black overflow-hidden">
+      {/* Canvas com partículas e linhas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
       {/* Conteúdo centralizado */}
       <div className="relative z-10 w-full max-w-md px-6">
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-black text-white tracking-tight mb-3 drop-shadow-2xl">
+        {/* Branding */}
+        <div className="text-center mb-16">
+          <h1 className="text-7xl font-black text-orange-500 tracking-tight mb-2 drop-shadow-2xl">
             Roteiro
           </h1>
-          <p className="text-zinc-500 text-sm tracking-widest uppercase">
+          <p className="text-zinc-400 text-sm tracking-widest uppercase font-medium">
             Sistema de Atendimento
           </p>
         </div>
 
-        {/* Card do formulário */}
-        <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 shadow-2xl shadow-black/50">
-          <LoginForm />
-        </div>
+        {/* Card do formulário com efeito glass */}
+        <div className="relative">
+          {/* Glow background */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/10 to-transparent rounded-2xl blur-xl" />
 
-        {/* Rodapé discreto */}
-        <p className="text-center text-zinc-700 text-xs mt-8">
-          Grupo Roveri
-        </p>
+          {/* Card */}
+          <div className="relative bg-zinc-950/70 backdrop-blur-2xl border border-orange-500/20 rounded-2xl p-8 shadow-2xl">
+            <LoginForm />
+          </div>
+        </div>
       </div>
     </main>
   )

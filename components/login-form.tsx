@@ -5,7 +5,7 @@ import { useState, useCallback, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
-import { AlertCircle, Eye, EyeOff, ArrowRight } from "lucide-react"
+import { AlertCircle, Eye, EyeOff } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const LoginForm = memo(function LoginForm() {
@@ -62,38 +62,46 @@ export const LoginForm = memo(function LoginForm() {
   )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Campo de Login */}
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-400">
-          Login
-        </label>
-        <div className="relative">
-          <Input
-            id="email"
-            type="text"
-            placeholder="seu.login"
-            value={email}
-            onChange={(e) => {
-              const value = e.target.value.split("@")[0]
-              setEmail(value)
-              setError("")
-            }}
-            required
-            autoComplete="username"
-            disabled={isLoading}
-            className="h-12 px-4 pr-36 text-base rounded-xl bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-600">
-            @gruporoveri.com
-          </span>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Logo/Icon */}
+      <div className="flex justify-center mb-6">
+        <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+          <span className="text-white font-bold text-lg">R</span>
         </div>
+      </div>
+
+      {/* Título */}
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold text-white mb-2">Login</h2>
+      </div>
+
+      {/* Campo de Email/Login */}
+      <div className="space-y-2">
+        <label htmlFor="email" className="text-xs font-medium text-zinc-300 uppercase tracking-wider">
+          Usuário
+        </label>
+        <Input
+          id="email"
+          type="text"
+          placeholder="seu.login"
+          value={email}
+          onChange={(e) => {
+            const value = e.target.value.split("@")[0]
+            setEmail(value)
+            setError("")
+          }}
+          required
+          autoComplete="username"
+          disabled={isLoading}
+          className="h-12 px-4 text-base rounded-lg bg-zinc-900/60 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 transition-all"
+        />
+        <p className="text-xs text-zinc-500">@gruporoveri.com</p>
       </div>
 
       {/* Campo de Senha (condicional) */}
       {showPasswordField && (
         <div className="space-y-2 animate-fade-in">
-          <label htmlFor="password" className="text-sm font-medium text-zinc-400">
+          <label htmlFor="password" className="text-xs font-medium text-zinc-300 uppercase tracking-wider">
             Senha
           </label>
           <div className="relative">
@@ -106,7 +114,7 @@ export const LoginForm = memo(function LoginForm() {
               required
               autoComplete="current-password"
               disabled={isLoading}
-              className="h-12 px-4 pr-12 text-base rounded-xl bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
+              className="h-12 px-4 pr-12 text-base rounded-lg bg-zinc-900/60 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 transition-all"
             />
             <button
               type="button"
@@ -121,7 +129,7 @@ export const LoginForm = memo(function LoginForm() {
 
       {/* Erro */}
       {error && (
-        <Alert className="bg-red-500/10 border-red-500/20 text-red-400 rounded-xl">
+        <Alert className="bg-red-500/10 border-red-500/30 text-red-400 rounded-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -131,7 +139,7 @@ export const LoginForm = memo(function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full h-12 text-base font-semibold rounded-xl bg-orange-500 hover:bg-orange-600 text-white transition-all group"
+        className="w-full h-12 text-base font-semibold rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white transition-all shadow-lg shadow-orange-500/20 mt-8"
       >
         {isLoading ? (
           <span className="flex items-center gap-2">
@@ -139,10 +147,7 @@ export const LoginForm = memo(function LoginForm() {
             Entrando...
           </span>
         ) : (
-          <span className="flex items-center gap-2">
-            Entrar
-            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </span>
+          "Entrar"
         )}
       </Button>
     </form>
