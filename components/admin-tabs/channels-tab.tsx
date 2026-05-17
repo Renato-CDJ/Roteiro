@@ -7,7 +7,22 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Edit, Trash2, Save, X, ExternalLink, Copy, Loader2 } from "lucide-react"
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Save, 
+  X, 
+  ExternalLink, 
+  Copy, 
+  Loader2,
+  Phone,
+  Mail,
+  MessageCircle,
+  Globe,
+  Headphones,
+  CheckCircle2
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useChannels } from "@/hooks/use-supabase-admin"
 import { useToast } from "@/hooks/use-toast"
@@ -22,6 +37,26 @@ interface Channel {
   is_active?: boolean
   created_at: string
   updated_at: string
+}
+
+// Mapa de icones para tipos de canal
+const channelIcons: Record<string, React.ElementType> = {
+  phone: Phone,
+  email: Mail,
+  whatsapp: MessageCircle,
+  chat: MessageCircle,
+  web: Globe,
+  support: Headphones,
+}
+
+function getChannelIcon(contact: string | undefined): React.ElementType {
+  if (!contact) return Headphones
+  const lower = contact.toLowerCase()
+  if (lower.includes("wa.me") || lower.includes("whatsapp")) return MessageCircle
+  if (lower.includes("@") || lower.includes("mail")) return Mail
+  if (lower.includes("http") || lower.includes("www")) return Globe
+  if (/^\+?\d/.test(contact) || lower.includes("tel")) return Phone
+  return Headphones
 }
 
 export function ChannelsTab() {
@@ -43,6 +78,11 @@ export function ChannelsTab() {
       updated_at: c.updated_at,
     })),
     [channels],
+  )
+
+  const activeCount = useMemo(
+    () => mappedChannels.filter(c => c.isActive).length,
+    [mappedChannels]
   )
 
   const handleEdit = (item: Channel) => {
@@ -126,14 +166,6 @@ export function ChannelsTab() {
     setIsCreating(false)
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-      </div>
-    )
-  }
-
   const isUrl = (text: string | undefined) => {
     if (!text) return false
     return text.startsWith("http://") || text.startsWith("https://")
@@ -144,78 +176,157 @@ export function ChannelsTab() {
       navigator.clipboard.writeText(text)
       toast({
         title: "Copiado!",
-        description: "Contato copiado para a área de transferência.",
+        description: "Contato copiado para a area de transferencia.",
       })
     }
   }
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <div className="relative">
+          <div className="w-12 h-12 rounded-full border-4 border-muted" />
+          <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        </div>
+        <p className="text-sm text-muted-foreground">Carregando canais...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Canais de Atendimento</h2>
-          <p className="text-muted-foreground mt-1">Gerencie os canais disponíveis para contato</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight">Canais de Atendimento</h2>
+          <p className="text-sm text-muted-foreground">
+            Gerencie os canais disponiveis para os operadores
+          </p>
         </div>
         <Button
           onClick={handleCreate}
           disabled={!!editingItem}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Canal
         </Button>
       </div>
 
-      {editingItem ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{isCreating ? "Criar Novo Canal" : "Editar Canal"}</CardTitle>
-            <CardDescription>Configure os detalhes do canal</CardDescription>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <Card className="border-border/50">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                <Headphones className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{mappedChannels.length}</p>
+                <p className="text-xs text-muted-foreground">Total de Canais</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-border/50">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-500/10">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+                <p className="text-xs text-muted-foreground">Canais Ativos</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 col-span-2 sm:col-span-1">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-muted-foreground">{mappedChannels.length - activeCount}</p>
+                <p className="text-xs text-muted-foreground">Canais Inativos</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Form de Edicao/Criacao */}
+      {editingItem && (
+        <Card className="border-primary/30 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                {isCreating ? (
+                  <Plus className="h-5 w-5 text-primary" />
+                ) : (
+                  <Edit className="h-5 w-5 text-primary" />
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-lg">{isCreating ? "Criar Novo Canal" : "Editar Canal"}</CardTitle>
+                <CardDescription>Configure os detalhes do canal de atendimento</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome do Canal</Label>
-              <Textarea
+              <Label htmlFor="name" className="text-sm font-medium">Nome do Canal</Label>
+              <Input
                 id="name"
                 value={editingItem.name}
                 onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                placeholder="Ex: WhatsApp Suporte"
-                rows={2}
-                className="resize-none"
+                placeholder="Ex: WhatsApp Suporte, Central de Atendimento"
+                className="h-10"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contact">Número ou Link</Label>
+              <Label htmlFor="contact" className="text-sm font-medium">Numero ou Link</Label>
               <Textarea
                 id="contact"
                 value={editingItem.contact || ""}
                 onChange={(e) => setEditingItem({ ...editingItem, contact: e.target.value })}
                 placeholder="Ex: (11) 98765-4321 ou https://wa.me/5511987654321"
                 rows={3}
-                className="resize-none"
+                className="resize-none text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Pode ser um número de telefone, link do WhatsApp, e-mail ou URL. Use Enter para quebrar linha.
+                Pode ser um numero de telefone, link do WhatsApp, e-mail ou URL.
               </p>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border/50">
               <div className="space-y-0.5">
-                <Label htmlFor="active">Canal Ativo</Label>
-                <p className="text-sm text-muted-foreground">Permitir uso deste canal</p>
+                <Label htmlFor="active" className="text-sm font-medium">Canal Ativo</Label>
+                <p className="text-xs text-muted-foreground">Exibir este canal para os operadores</p>
               </div>
               <Switch
                 id="active"
-                checked={editingItem.isActive}
-                onCheckedChange={(checked) => setEditingItem({ ...editingItem, isActive: checked })}
+                checked={editingItem.isActive ?? editingItem.is_active ?? true}
+                onCheckedChange={(checked) => setEditingItem({ ...editingItem, isActive: checked, is_active: checked })}
               />
             </div>
 
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
+            <div className="flex items-center gap-2 pt-2">
+              <Button 
+                onClick={handleSave} 
+                disabled={saving || !editingItem.name}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {saving ? "Salvando..." : "Salvar Canal"}
               </Button>
               <Button variant="outline" onClick={handleCancel}>
                 <X className="h-4 w-4 mr-2" />
@@ -224,66 +335,142 @@ export function ChannelsTab() {
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {mappedChannels.map((channel) => (
-            <Card key={channel.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <CardTitle className="text-lg text-balance break-words">{channel.name}</CardTitle>
-                      {channel.isActive ? (
-                        <Badge variant="outline" className="text-green-600 border-green-600 shrink-0">
-                          Ativo
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-gray-600 border-gray-600 shrink-0">
-                          Inativo
-                        </Badge>
-                      )}
-                    </div>
-                    {channel.contact && (
-                      <div className="flex items-start gap-2 mt-3">
-                        <code className="text-sm bg-muted px-2 py-1 rounded flex-1 break-all whitespace-pre-wrap">
-                          {channel.contact}
-                        </code>
-                        <div className="flex gap-1 shrink-0">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() => handleCopy(channel.contact || "")}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                          {isUrl(channel.contact) && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8"
-                              onClick={() => window.open(channel.contact, "_blank")}
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
+      )}
+
+      {/* Lista de Canais */}
+      {!editingItem && (
+        <>
+          {mappedChannels.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                  <Headphones className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">Nenhum canal cadastrado</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Comece adicionando um canal de atendimento
+                </p>
+                <Button onClick={handleCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Canal
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {mappedChannels.map((channel) => {
+                const IconComponent = getChannelIcon(channel.contact)
+                
+                return (
+                  <Card 
+                    key={channel.id} 
+                    className={`group relative overflow-hidden transition-all duration-200 hover:shadow-md ${
+                      channel.isActive 
+                        ? "border-border hover:border-primary/30" 
+                        : "border-border/50 bg-muted/30"
+                    }`}
+                  >
+                    {/* Status indicator */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${
+                      channel.isActive ? "bg-green-500" : "bg-muted-foreground/30"
+                    }`} />
+                    
+                    <CardContent className="pt-5">
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className={`flex items-center justify-center w-12 h-12 rounded-xl shrink-0 ${
+                          channel.isActive 
+                            ? "bg-primary/10" 
+                            : "bg-muted"
+                        }`}>
+                          <IconComponent className={`h-6 w-6 ${
+                            channel.isActive ? "text-primary" : "text-muted-foreground"
+                          }`} />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h3 className={`font-medium text-sm leading-tight line-clamp-2 ${
+                                !channel.isActive && "text-muted-foreground"
+                              }`}>
+                                {channel.name}
+                              </h3>
+                              <Badge 
+                                variant="outline" 
+                                className={`mt-1.5 text-[10px] px-1.5 py-0 h-5 ${
+                                  channel.isActive 
+                                    ? "text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-800" 
+                                    : "text-muted-foreground border-muted"
+                                }`}
+                              >
+                                {channel.isActive ? "Ativo" : "Inativo"}
+                              </Badge>
+                            </div>
+                            
+                            {/* Actions */}
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                                onClick={() => handleEdit(channel)}
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => handleDelete(channel.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Contact Info */}
+                          {channel.contact && (
+                            <div className="mt-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                              <div className="flex items-start justify-between gap-2">
+                                <code className={`text-xs break-all whitespace-pre-wrap leading-relaxed ${
+                                  !channel.isActive && "text-muted-foreground"
+                                }`}>
+                                  {channel.contact}
+                                </code>
+                                <div className="flex gap-0.5 shrink-0">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7 hover:bg-background"
+                                    onClick={() => handleCopy(channel.contact || "")}
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                  {isUrl(channel.contact) && (
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-7 w-7 hover:bg-background"
+                                      onClick={() => window.open(channel.contact, "_blank")}
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" onClick={() => handleEdit(channel)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(channel.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   )
