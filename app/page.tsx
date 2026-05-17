@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
+import Image from "next/image"
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()
@@ -23,8 +24,8 @@ export default function HomePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent mx-auto mb-3" />
-          <p className="text-zinc-400 text-sm">Carregando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-orange-500 border-t-transparent mx-auto mb-4" />
+          <p className="text-zinc-400 text-sm tracking-wide">Carregando...</p>
         </div>
       </div>
     )
@@ -33,91 +34,81 @@ export default function HomePage() {
   if (user) return null
 
   return (
-    <div className="min-h-screen min-h-dvh flex flex-col lg:flex-row bg-zinc-950 login-cursor">
-      {/* Painel esquerdo — branding */}
-      <div className="relative hidden lg:flex lg:w-1/2 xl:w-3/5 flex-col items-start justify-between p-12 xl:p-16 overflow-hidden">
-        {/* Fundo com linhas de luz */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 60% at 20% 50%, rgba(234,88,12,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 80% at 80% 80%, rgba(251,146,60,0.10) 0%, transparent 70%)",
-          }}
-        />
+    <div className="relative min-h-screen min-h-dvh flex items-center justify-center overflow-hidden">
+      {/* Imagem de fundo */}
+      <Image
+        src="/images/login-bg.jpg"
+        alt=""
+        fill
+        className="object-cover"
+        priority
+        quality={90}
+      />
+      
+      {/* Overlay escuro com gradiente */}
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-950/95 via-zinc-900/90 to-zinc-950/95" />
+      
+      {/* Efeito de luz laranja no canto */}
+      <div 
+        className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20 blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(249,115,22,0.8) 0%, transparent 70%)" }}
+      />
+      <div 
+        className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full opacity-15 blur-3xl"
+        style={{ background: "radial-gradient(circle, rgba(234,88,12,0.6) 0%, transparent 70%)" }}
+      />
 
-        {/* Grade sutil */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        {/* Linha vertical de destaque */}
-        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-transparent via-orange-500 to-transparent opacity-60" />
-
-        {/* Conteúdo */}
-        <div className="relative z-10 flex flex-col h-full justify-between">
-          {/* Topo — logo text */}
-          <div>
-            <span className="text-xs font-semibold tracking-[0.3em] text-orange-400 uppercase">
-              Grupo Roveri
-            </span>
-          </div>
-
-          {/* Centro — título grande */}
-          <div className="py-8">
-            <h1 className="text-[7rem] xl:text-[9rem] font-black leading-none tracking-tighter text-white select-none">
+      {/* Conteúdo principal */}
+      <div className="relative z-10 w-full max-w-lg mx-4 sm:mx-6">
+        {/* Card com efeito glass */}
+        <div className="relative backdrop-blur-xl bg-white/[0.03] border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl">
+          {/* Brilho no topo do card */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          
+          {/* Header */}
+          <div className="text-center mb-10">
+            {/* Logo */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30 mb-6 ring-1 ring-white/10">
+              <Image
+                src="/images/grupo_roveri_logo.jpg"
+                alt="Grupo Roveri"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover rounded-2xl"
+                priority
+              />
+            </div>
+            
+            {/* Título */}
+            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-2">
               Roteiro
             </h1>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="h-[2px] w-12 bg-orange-500" />
-              <p className="text-zinc-400 text-base font-medium tracking-wide">
-                Sistema de Atendimento
-              </p>
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-orange-500/50" />
+              <span className="text-xs font-semibold tracking-[0.2em] text-orange-400 uppercase">
+                Grupo Roveri
+              </span>
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-orange-500/50" />
             </div>
-
-            <p className="mt-8 text-zinc-500 text-sm leading-relaxed max-w-sm">
-              Plataforma centralizada para gerenciamento de roteiros, atendimento e monitoramento de equipes.
+            <p className="text-zinc-400 text-sm">
+              Sistema de Atendimento
             </p>
           </div>
 
-          {/* Rodapé */}
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
-            <span className="text-xs text-zinc-600 font-medium">Sistema ativo</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Divisor */}
-      <div className="hidden lg:block w-px bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
-
-      {/* Painel direito — formulário */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 lg:p-12 bg-zinc-950">
-        {/* Header mobile */}
-        <div className="lg:hidden text-center mb-8">
-          <span className="text-xs font-semibold tracking-[0.3em] text-orange-400 uppercase block mb-2">
-            Grupo Roveri
-          </span>
-          <h1 className="text-5xl font-black text-white tracking-tighter">Roteiro</h1>
-          <div className="mt-2 flex items-center justify-center gap-2">
-            <div className="h-[2px] w-8 bg-orange-500" />
-            <p className="text-zinc-400 text-sm">Sistema de Atendimento</p>
-            <div className="h-[2px] w-8 bg-orange-500" />
-          </div>
-        </div>
-
-        {/* Formulário */}
-        <div className="w-full max-w-sm">
-          <div className="mb-6 hidden lg:block">
-            <h2 className="text-2xl font-bold text-white">Bem-vindo</h2>
-            <p className="text-zinc-500 text-sm mt-1">Acesse sua conta para continuar</p>
-          </div>
+          {/* Formulário */}
           <LoginForm />
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+            <span className="text-xs text-zinc-500">Sistema operacional</span>
+          </div>
         </div>
+
+        {/* Texto abaixo do card */}
+        <p className="text-center text-xs text-zinc-600 mt-6">
+          Acesso restrito a colaboradores autorizados
+        </p>
       </div>
     </div>
   )
