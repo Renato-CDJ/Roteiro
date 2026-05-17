@@ -526,6 +526,34 @@ export function useCampaigns() {
   }>(TABLES.CAMPAIGNS)
 }
 
+// Helper function to resolve tabulation IDs to full tabulation objects
+async function resolveTabulationIds(
+  supabase: any,
+  tabulationIds: string[] | undefined
+): Promise<Array<{ id: string; name: string; description: string }>> {
+  if (!tabulationIds || tabulationIds.length === 0) {
+    return []
+  }
+
+  // Fetch tabulations from database by their IDs
+  const { data: tabulations } = await supabase
+    .from(TABLES.TABULATIONS)
+    .select("id, name, description")
+    .in("id", tabulationIds)
+
+  if (!tabulations || tabulations.length === 0) {
+    return []
+  }
+
+  // Return tabulations in the order specified in tabulationIds
+  return tabulationIds
+    .map((id) => {
+      const tab = tabulations.find((t: any) => t.id === id)
+      return tab ? { id: tab.id, name: tab.name, description: tab.description || "" } : null
+    })
+    .filter((t): t is { id: string; name: string; description: string } => t !== null)
+}
+
 // Import scripts from JSON file
 export async function importScriptsFromJson(jsonData: any): Promise<{ productCount: number; stepCount: number }> {
   const supabase = createClient()
@@ -600,6 +628,38 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
           }
         }
 
+        // Get tabulation IDs from JSON (supports multiple field names)
+        // Can be: tabulacao, tabulacoes, tabulations, or tabulation_ids
+        const rawTabulationIds = 
+          step.tabulacao || 
+          step.tabulacoes || 
+          step.tabulations || 
+          step.tabulation_ids || 
+          []
+        
+        // Normalize to array of IDs
+        const tabulationIds: string[] = Array.isArray(rawTabulationIds) 
+          ? rawTabulationIds 
+          : (rawTabulationIds ? [rawTabulationIds] : [])
+
+        // If tabulations is already an array of objects with id/name/description, use it directly
+        // Otherwise, resolve IDs to full objects
+        let resolvedTabulations: Array<{ id: string; name: string; description: string }> = []
+        
+        if (step.tabulations && Array.isArray(step.tabulations) && step.tabulations.length > 0) {
+          // Check if it's already in the full format (has name property)
+          if (step.tabulations[0].name) {
+            resolvedTabulations = step.tabulations
+          } else if (step.tabulations[0].id) {
+            // Array of objects with just ID, resolve them
+            const ids = step.tabulations.map((t: any) => t.id)
+            resolvedTabulations = await resolveTabulationIds(supabase, ids)
+          }
+        } else if (tabulationIds.length > 0) {
+          // Array of string IDs, resolve them
+          resolvedTabulations = await resolveTabulationIds(supabase, tabulationIds)
+        }
+
         stepsToInsert.push({
           originalId,
           title: stepTitle,
@@ -608,7 +668,7 @@ export async function importScriptsFromJson(jsonData: any): Promise<{ productCou
           product_name: productName,
           step_order: order,
           buttons: step.botoes || step.buttons || [],
-          tabulations: step.tabulacoes || step.tabulations || [],
+          tabulations: resolvedTabulations,
           alert: step.alerta || step.alert || null,
           is_active: true,
         })
