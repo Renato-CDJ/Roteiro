@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useCachedResultCodes } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut, Info } from "lucide-react"
+import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, AlertCircle, CheckCircle2, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -88,79 +88,120 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     return result.length
   }, [tabulations, searchQuery])
 
-  const renderTabulationCard = (tabulation: typeof tabulations[0]) => (
-    <div
-      key={tabulation.id}
-      className="rounded-md border border-border bg-card hover:bg-muted/50 transition-colors duration-150"
-      style={{ borderLeftWidth: "3px", borderLeftColor: tabulation.color }}
-    >
-      <div className="flex items-start gap-3 p-3">
+  const renderTabulationCard = (tabulation: typeof tabulations[0], category: "before" | "after") => {
+    const isBefore = category === "before"
+    return (
+      <div
+        key={tabulation.id}
+        className={cn(
+          "rounded-lg border bg-card hover:shadow-md transition-all duration-200 group overflow-hidden",
+          isBefore ? "border-amber-200 dark:border-amber-900/50" : "border-emerald-200 dark:border-emerald-900/50"
+        )}
+      >
         <div
-          className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5"
-          style={{ backgroundColor: tabulation.color }}
-        />
-        <div className="flex-1 min-w-0">
-          <h4
-            className="font-medium text-foreground leading-tight"
-            style={{ fontSize: `${globalZoom}%` }}
-          >
-            {tabulation.name}
-          </h4>
-          {tabulation.description && (
-            <p
-              className="text-muted-foreground leading-relaxed mt-0.5"
-              style={{ fontSize: `${Math.round(globalZoom * 0.85)}%` }}
-            >
-              {tabulation.description}
-            </p>
+          className={cn(
+            "flex items-start gap-3 p-3",
+            isBefore ? "bg-amber-50/50 dark:bg-amber-950/20" : "bg-emerald-50/50 dark:bg-emerald-950/20"
           )}
+          style={{ borderLeft: `4px solid ${tabulation.color}` }}
+        >
+          <div
+            className="w-3 h-3 rounded-full flex-shrink-0 mt-1 ring-2 ring-white dark:ring-gray-800"
+            style={{ backgroundColor: tabulation.color }}
+          />
+          <div className="flex-1 min-w-0">
+            <h4
+              className="font-semibold text-foreground leading-tight"
+              style={{ fontSize: `${globalZoom}%` }}
+            >
+              {tabulation.name}
+            </h4>
+            {tabulation.description && (
+              <p
+                className="text-muted-foreground leading-relaxed mt-1"
+                style={{ fontSize: `${Math.round(globalZoom * 0.85)}%` }}
+              >
+                {tabulation.description}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const CategorySection = ({ 
     type, 
     tabulations, 
+    icon: Icon, 
     title, 
-    subtitle
+    subtitle, 
+    accentColor,
+    borderColor,
+    bgColor,
+    iconBg
   }: { 
     type: "before" | "after"
     tabulations: typeof beforeTabulations
+    icon: typeof ShieldQuestion
     title: string
     subtitle: string
+    accentColor: string
+    borderColor: string
+    bgColor: string
+    iconBg: string
   }) => (
-    <div className="rounded-lg border border-border overflow-hidden">
-      {/* Header da secao */}
-      <div className={cn(
-        "px-4 py-3 border-b",
-        type === "before" ? "bg-amber-50/50 dark:bg-amber-950/20" : "bg-emerald-50/50 dark:bg-emerald-950/20"
-      )}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-foreground">{title}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+    <div className={cn("rounded-xl border-2 overflow-hidden", borderColor)}>
+      {/* Header da seção */}
+      <div className={cn("p-4", bgColor)}>
+        <div className="flex items-start gap-3">
+          <div className={cn("p-2.5 rounded-xl", iconBg)}>
+            <Icon className={cn("h-6 w-6", accentColor)} />
           </div>
-          <span className={cn(
-            "text-xs font-medium px-2 py-1 rounded",
-            type === "before" 
-              ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300" 
-              : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"
-          )}>
-            {tabulations.length} {tabulations.length === 1 ? "opcao" : "opcoes"}
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className={cn("font-bold text-lg", accentColor)}>{title}</h3>
+              <span className={cn(
+                "text-sm font-bold px-2.5 py-0.5 rounded-full",
+                type === "before" 
+                  ? "bg-amber-500 text-white" 
+                  : "bg-emerald-500 text-white"
+              )}>
+                {tabulations.length}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+          </div>
+        </div>
+        
+        {/* Dica visual */}
+        <div className={cn(
+          "flex items-center gap-2 mt-3 p-2 rounded-lg text-xs",
+          type === "before" 
+            ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300" 
+            : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
+        )}>
+          <Info className="h-3.5 w-3.5 flex-shrink-0" />
+          <span>
+            {type === "before" 
+              ? "Use estas opcoes quando o cliente NAO confirmou CPF ou dados pessoais"
+              : "Use estas opcoes somente APOS o cliente confirmar CPF e dados pessoais"
+            }
           </span>
         </div>
       </div>
       
-      {/* Lista de tabulacoes */}
-      <div className="p-3 bg-card">
+      {/* Lista de tabulações */}
+      <div className="p-4 bg-card">
         {tabulations.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <p className="text-sm">Nenhuma tabulacao encontrada</p>
+          <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
+            <Search className="h-6 w-6 mx-auto mb-2 opacity-50" />
+            <p className="text-sm font-medium">Nenhuma tabulacao encontrada</p>
+            <p className="text-xs mt-1">Tente ajustar sua busca</p>
           </div>
         ) : (
           <div className="grid gap-2">
-            {tabulations.map((t) => renderTabulationCard(t))}
+            {tabulations.map((t) => renderTabulationCard(t, type))}
           </div>
         )}
       </div>
@@ -169,15 +210,17 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-5xl w-[95vw] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
-        {/* Header */}
-        <div className="p-5 border-b bg-card">
+      <DialogContent className="!max-w-6xl w-[95vw] h-[92vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
+        {/* Header compacto */}
+        <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 p-5 text-white">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
-              <Tags className="h-5 w-5 text-muted-foreground" />
+            <DialogTitle className="text-xl font-bold flex items-center gap-3 text-white">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Tags className="h-5 w-5" />
+              </div>
               Tabulacoes Disponiveis
             </DialogTitle>
-            <DialogDescription className="text-sm">
+            <DialogDescription className="text-orange-100 mt-1 text-sm">
               Selecione a tabulacao correta de acordo com o momento do atendimento
             </DialogDescription>
           </DialogHeader>
@@ -185,98 +228,116 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
           {/* Barra de busca e controles */}
           <div className="flex items-center gap-3 mt-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-orange-200" />
               <Input
-                placeholder="Buscar tabulacao..."
+                placeholder="Buscar tabulacao por nome ou descricao..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-9"
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-orange-200 focus-visible:ring-white/30 h-10"
               />
             </div>
-            <div className="flex items-center gap-1 border rounded-md p-0.5">
+            <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1 backdrop-blur-sm">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setGlobalZoom(Math.max(80, globalZoom - 10))}
-                className="h-7 w-7"
+                className="h-8 w-8 text-white hover:bg-white/20"
                 title="Diminuir texto"
               >
-                <ZoomOut className="h-3.5 w-3.5" />
+                <ZoomOut className="h-4 w-4" />
               </Button>
-              <span className="text-xs font-medium w-10 text-center text-muted-foreground">{globalZoom}%</span>
+              <span className="text-sm font-medium w-12 text-center">{globalZoom}%</span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setGlobalZoom(Math.min(150, globalZoom + 10))}
-                className="h-7 w-7"
+                className="h-8 w-8 text-white hover:bg-white/20"
                 title="Aumentar texto"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
             </div>
           </div>
+        </div>
 
-          {/* Filtros por categoria */}
-          <div className="flex items-center gap-2 mt-3">
+        {/* Filtros por categoria */}
+        <div className="px-5 py-3 bg-muted/50 border-b flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-medium text-muted-foreground">Filtrar:</span>
+          <div className="flex gap-2">
             <Button
-              variant={activeCategory === "all" ? "secondary" : "ghost"}
+              variant={activeCategory === "all" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveCategory("all")}
-              className="h-7 text-xs"
+              className={cn(
+                "h-8 text-xs font-medium",
+                activeCategory === "all" && "bg-orange-500 hover:bg-orange-600"
+              )}
             >
               Todas ({totalBefore + totalAfter})
             </Button>
             <Button
-              variant={activeCategory === "before" ? "secondary" : "ghost"}
+              variant={activeCategory === "before" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveCategory("before")}
-              className="h-7 text-xs"
+              className={cn(
+                "h-8 text-xs font-medium gap-1.5",
+                activeCategory === "before" && "bg-amber-500 hover:bg-amber-600"
+              )}
             >
+              <ShieldQuestion className="h-3.5 w-3.5" />
               Antes do CPF ({totalBefore})
             </Button>
             <Button
-              variant={activeCategory === "after" ? "secondary" : "ghost"}
+              variant={activeCategory === "after" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveCategory("after")}
-              className="h-7 text-xs"
+              className={cn(
+                "h-8 text-xs font-medium gap-1.5",
+                activeCategory === "after" && "bg-emerald-500 hover:bg-emerald-600"
+              )}
             >
+              <ShieldCheck className="h-3.5 w-3.5" />
               Depois do CPF ({totalAfter})
             </Button>
-            {searchQuery && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setSearchQuery("")}
-                className="text-xs h-7 ml-auto"
-              >
-                Limpar busca
-              </Button>
-            )}
           </div>
+          
+          {searchQuery && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSearchQuery("")}
+              className="text-xs h-8 ml-auto"
+            >
+              Limpar busca
+            </Button>
+          )}
         </div>
 
-        {/* Dica informativa */}
-        <div className="px-5 py-2 bg-muted/50 border-b">
-          <div className="flex items-start gap-2 text-muted-foreground">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+        {/* Alerta informativo */}
+        <div className="px-5 py-2 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-200 dark:border-blue-900">
+          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <p className="text-xs">
-              <span className="font-medium">Antes do CPF:</span> Use quando o cliente ainda nao confirmou os dados. 
-              <span className="font-medium ml-2">Depois do CPF:</span> Use apos o cliente confirmar CPF e dados pessoais.
+              <strong>Importante:</strong> Escolha a tabulacao correta baseado no momento do atendimento. 
+              Tabulacoes <strong className="text-amber-600 dark:text-amber-400">ANTES do CPF</strong> sao para quando o cliente ainda nao confirmou seus dados. 
+              Tabulacoes <strong className="text-emerald-600 dark:text-emerald-400">DEPOIS do CPF</strong> sao para apos a confirmacao.
             </p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-muted/30">
           <div className="p-5">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">Carregando tabulacoes...</p>
+                <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
+                <p className="text-muted-foreground">Carregando tabulacoes...</p>
               </div>
             ) : tabulations.length === 0 ? (
               <div className="text-center py-20">
-                <Tags className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Tags className="h-8 w-8 text-muted-foreground" />
+                </div>
                 <p className="font-medium">Nenhuma tabulacao cadastrada</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Entre em contato com o administrador
@@ -286,30 +347,40 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
               <div className="text-center py-12 text-muted-foreground">
                 <Search className="h-8 w-8 mx-auto mb-3 opacity-50" />
                 <p className="font-medium">Nenhum resultado encontrado</p>
-                <p className="text-sm mt-1">Tente buscar por outro termo</p>
+                <p className="text-sm mt-1">Tente buscar por outro termo ou limpar os filtros</p>
               </div>
             ) : (
               <div className={cn(
                 "grid gap-5",
-                activeCategory === "all" ? "lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto"
+                activeCategory === "all" ? "lg:grid-cols-2" : "grid-cols-1 max-w-3xl mx-auto"
               )}>
-                {/* Coluna: Antes da confirmacao de CPF */}
+                {/* Coluna: Antes da confirmação de CPF */}
                 {(activeCategory === "all" || activeCategory === "before") && (
                   <CategorySection
                     type="before"
                     tabulations={beforeTabulations}
-                    title="Antes da confirmacao de dados"
+                    icon={ShieldQuestion}
+                    title="ANTES da Confirmacao"
                     subtitle="Cliente NAO confirmou CPF/dados"
+                    accentColor="text-amber-600 dark:text-amber-400"
+                    borderColor="border-amber-300 dark:border-amber-800"
+                    bgColor="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40"
+                    iconBg="bg-amber-100 dark:bg-amber-900/50"
                   />
                 )}
 
-                {/* Coluna: Depois da confirmacao de CPF */}
+                {/* Coluna: Depois da confirmação de CPF */}
                 {(activeCategory === "all" || activeCategory === "after") && (
                   <CategorySection
                     type="after"
                     tabulations={afterTabulations}
-                    title="Depois da confirmacao de dados"
+                    icon={ShieldCheck}
+                    title="DEPOIS da Confirmacao"
                     subtitle="Cliente JA confirmou CPF/dados"
+                    accentColor="text-emerald-600 dark:text-emerald-400"
+                    borderColor="border-emerald-300 dark:border-emerald-800"
+                    bgColor="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40"
+                    iconBg="bg-emerald-100 dark:bg-emerald-900/50"
                   />
                 )}
               </div>
@@ -317,20 +388,21 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-5 py-2.5 border-t bg-card">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Antes do CPF</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Depois do CPF</span>
-              </div>
+        {/* Footer com legenda */}
+        <div className="px-5 py-3 border-t bg-card flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-amber-500" />
+              <span>Antes do CPF</span>
             </div>
-            <span>{filteredTabulations.length} tabulacoes</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-emerald-500" />
+              <span>Depois do CPF</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+            <span>{filteredTabulations.length} tabulacoes disponiveis</span>
           </div>
         </div>
       </DialogContent>
