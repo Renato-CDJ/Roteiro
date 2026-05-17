@@ -1599,6 +1599,27 @@ export function importScriptFromJson(jsonData: JsonData): { productCount: number
               order: btn.order || index,
             })),
             contentSegments: stepData.contentSegments || [],
+            // Support tabulation IDs in JSON - can be: tabulacao, tabulacoes, tabulations
+            // If provided as array of IDs, they will be resolved later when displayed
+            tabulations: (() => {
+              const rawTabs = stepData.tabulacao || stepData.tabulacoes || stepData.tabulations || []
+              if (Array.isArray(rawTabs)) {
+                // If already full objects with name, use them
+                if (rawTabs.length > 0 && rawTabs[0].name) {
+                  return rawTabs
+                }
+                // If array of IDs or objects with just id, convert to placeholder objects
+                return rawTabs.map((t: any) => {
+                  const id = typeof t === "string" ? t : t.id
+                  return { id, name: "", description: "" }
+                })
+              }
+              // Single ID
+              if (rawTabs) {
+                return [{ id: rawTabs, name: "", description: "" }]
+              }
+              return []
+            })(),
             createdAt: new Date(),
             updatedAt: new Date(),
           }
