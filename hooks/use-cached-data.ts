@@ -34,10 +34,13 @@ export function useCacheSync() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSync, setLastSync] = useState<Date | null>(null)
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isSyncingRef = useRef(false)
 
   const doSync = useCallback(async (force = false) => {
-    if (isSyncing) return
+    // Usar ref para evitar dependencia circular
+    if (isSyncingRef.current) return
     
+    isSyncingRef.current = true
     setIsSyncing(true)
     try {
       if (force || !hasCachedData()) {
@@ -49,25 +52,37 @@ export function useCacheSync() {
     } catch (e) {
       console.error("[Cache] Erro na sincronização:", e)
     } finally {
+      isSyncingRef.current = false
       setIsSyncing(false)
     }
-  }, [isSyncing])
+  }, [])
 
   useEffect(() => {
+    let mounted = true
+    
     // Sincronização inicial
     const initialize = async () => {
-      await doSync(!hasCachedData())
-      setIsInitialized(true)
+      if (!mounted) return
+      try {
+        await doSync(!hasCachedData())
+      } finally {
+        if (mounted) {
+          setIsInitialized(true)
+        }
+      }
     }
     
     initialize()
 
     // Configurar verificação periódica
     syncIntervalRef.current = setInterval(() => {
-      doSync(false)
+      if (mounted) {
+        doSync(false)
+      }
     }, SYNC_CHECK_INTERVAL)
 
     return () => {
+      mounted = false
       if (syncIntervalRef.current) {
         clearInterval(syncIntervalRef.current)
       }
