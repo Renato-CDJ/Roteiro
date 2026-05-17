@@ -20,6 +20,7 @@ export default function HomePage() {
     }
   }, [user, isLoading, router])
 
+  // Animação das partículas
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -27,6 +28,8 @@ export default function HomePage() {
     if (!ctx) return
 
     let animationId: number
+    let mouseX = 0
+    let mouseY = 0
 
     const resize = () => {
       canvas.width = window.innerWidth
@@ -35,7 +38,13 @@ export default function HomePage() {
     resize()
     window.addEventListener("resize", resize)
 
-    const PARTICLE_COUNT = 80
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX
+      mouseY = e.clientY
+    }
+    window.addEventListener("mousemove", handleMouseMove)
+
+    const PARTICLE_COUNT = 60
     const particles: {
       x: number
       y: number
@@ -49,10 +58,10 @@ export default function HomePage() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5 + 0.5,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        alpha: Math.random() * 0.5 + 0.2,
+        radius: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        alpha: Math.random() * 0.5 + 0.3,
       })
     }
 
@@ -60,17 +69,39 @@ export default function HomePage() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       for (const p of particles) {
+        // Movimento suave em direção ao mouse
+        const dx = mouseX - p.x
+        const dy = mouseY - p.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < 200) {
+          p.vx += dx * 0.00005
+          p.vy += dy * 0.00005
+        }
+
         p.x += p.vx
         p.y += p.vy
+
+        // Desacelerar gradualmente
+        p.vx *= 0.99
+        p.vy *= 0.99
 
         if (p.x < 0) p.x = canvas.width
         if (p.x > canvas.width) p.x = 0
         if (p.y < 0) p.y = canvas.height
         if (p.y > canvas.height) p.y = 0
 
+        // Desenhar partícula com glow
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(249, 115, 22, ${p.alpha})`
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3)
+        gradient.addColorStop(0, `rgba(249, 115, 22, ${p.alpha})`)
+        gradient.addColorStop(1, "rgba(249, 115, 22, 0)")
+        ctx.fillStyle = gradient
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.radius * 0.5, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.8})`
         ctx.fill()
       }
 
@@ -80,12 +111,12 @@ export default function HomePage() {
           const dx = particles[i].x - particles[j].x
           const dy = particles[i].y - particles[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 100) {
+          if (dist < 120) {
             ctx.beginPath()
             ctx.moveTo(particles[i].x, particles[i].y)
             ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.strokeStyle = `rgba(249, 115, 22, ${0.08 * (1 - dist / 100)})`
-            ctx.lineWidth = 0.5
+            ctx.strokeStyle = `rgba(249, 115, 22, ${0.15 * (1 - dist / 120)})`
+            ctx.lineWidth = 1
             ctx.stroke()
           }
         }
@@ -99,6 +130,7 @@ export default function HomePage() {
     return () => {
       cancelAnimationFrame(animationId)
       window.removeEventListener("resize", resize)
+      window.removeEventListener("mousemove", handleMouseMove)
     }
   }, [])
 
@@ -117,25 +149,27 @@ export default function HomePage() {
       {/* Canvas com partículas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Brilho central suave */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* Card de login */}
-      <div className="relative z-10 w-full max-w-sm px-6">
-        {/* Logo / Nome */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-black text-white tracking-tight mb-1">
+      {/* Conteúdo centralizado */}
+      <div className="relative z-10 w-full max-w-md px-6">
+        {/* Logo */}
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-black text-white tracking-tight mb-3 drop-shadow-2xl">
             Roteiro
           </h1>
-          <p className="text-zinc-500 text-sm tracking-wide">Sistema de Atendimento</p>
+          <p className="text-zinc-500 text-sm tracking-widest uppercase">
+            Sistema de Atendimento
+          </p>
         </div>
 
-        {/* Formulário */}
-        <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/60 rounded-2xl p-8 shadow-2xl">
+        {/* Card do formulário */}
+        <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 shadow-2xl shadow-black/50">
           <LoginForm />
         </div>
+
+        {/* Rodapé discreto */}
+        <p className="text-center text-zinc-700 text-xs mt-8">
+          Grupo Roveri
+        </p>
       </div>
     </main>
   )

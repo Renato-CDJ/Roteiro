@@ -5,7 +5,7 @@ import { useState, useCallback, memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
-import { AlertCircle, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { AlertCircle, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const LoginForm = memo(function LoginForm() {
@@ -62,16 +62,13 @@ export const LoginForm = memo(function LoginForm() {
   )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Campo de Email */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Campo de Login */}
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-300">
+        <label htmlFor="email" className="text-sm font-medium text-zinc-400">
           Login
         </label>
-        <div className="relative group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-            <Mail className="h-5 w-5 text-zinc-600 group-focus-within:text-orange-500 transition-colors duration-300" />
-          </div>
+        <div className="relative">
           <Input
             id="email"
             type="text"
@@ -85,25 +82,21 @@ export const LoginForm = memo(function LoginForm() {
             required
             autoComplete="username"
             disabled={isLoading}
-            className="h-14 pl-12 pr-[140px] text-base rounded-2xl bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:bg-zinc-800 transition-all duration-300"
+            className="h-12 px-4 pr-36 text-base rounded-xl bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
           />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <span className="text-sm text-zinc-600">@gruporoveri.com</span>
-          </div>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-600">
+            @gruporoveri.com
+          </span>
         </div>
-        <p className="text-xs text-zinc-600 pl-1">Digite o login do CRM</p>
       </div>
 
-      {/* Campo de Senha */}
+      {/* Campo de Senha (condicional) */}
       {showPasswordField && (
         <div className="space-y-2 animate-fade-in">
-          <label htmlFor="password" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="password" className="text-sm font-medium text-zinc-400">
             Senha
           </label>
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-              <Lock className="h-5 w-5 text-zinc-600 group-focus-within:text-orange-500 transition-colors duration-300" />
-            </div>
+          <div className="relative">
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -113,12 +106,12 @@ export const LoginForm = memo(function LoginForm() {
               required
               autoComplete="current-password"
               disabled={isLoading}
-              className="h-14 pl-12 pr-12 text-base rounded-2xl bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:bg-zinc-800 transition-all duration-300"
+              className="h-12 px-4 pr-12 text-base rounded-xl bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 transition-all"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-300 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -126,25 +119,22 @@ export const LoginForm = memo(function LoginForm() {
         </div>
       )}
 
-      {/* Mensagem de Erro */}
+      {/* Erro */}
       {error && (
-        <Alert className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl animate-fade-in">
+        <Alert className="bg-red-500/10 border-red-500/20 text-red-400 rounded-xl">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-sm">{error}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {/* Botão de Submit */}
+      {/* Botão */}
       <Button
         type="submit"
         disabled={isLoading}
-        className="relative w-full h-14 text-base font-semibold rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 transition-all duration-300 group overflow-hidden"
+        className="w-full h-12 text-base font-semibold rounded-xl bg-orange-500 hover:bg-orange-600 text-white transition-all group"
       >
-        {/* Efeito de brilho */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-        
         {isLoading ? (
-          <span className="flex items-center gap-3">
+          <span className="flex items-center gap-2">
             <span className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Entrando...
           </span>
