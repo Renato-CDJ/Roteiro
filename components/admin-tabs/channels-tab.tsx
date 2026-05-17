@@ -39,16 +39,6 @@ interface Channel {
   updated_at: string
 }
 
-// Mapa de icones para tipos de canal
-const channelIcons: Record<string, React.ElementType> = {
-  phone: Phone,
-  email: Mail,
-  whatsapp: MessageCircle,
-  chat: MessageCircle,
-  web: Globe,
-  support: Headphones,
-}
-
 function getChannelIcon(contact: string | undefined): React.ElementType {
   if (!contact) return Headphones
   const lower = contact.toLowerCase()
