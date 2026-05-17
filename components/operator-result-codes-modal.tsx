@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { useCachedResultCodes } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, AlertCircle, CheckCircle2, Info } from "lucide-react"
+import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +18,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
   const [searchQuery, setSearchQuery] = useState("")
   const [globalZoom, setGlobalZoom] = useState(100)
   const [activeCategory, setActiveCategory] = useState<"all" | "before" | "after">("all")
+  const [showDescriptions, setShowDescriptions] = useState(true)
 
   // Map Supabase data to component format
   const tabulations = useMemo(() => resultCodesData
@@ -116,7 +117,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
             >
               {tabulation.name}
             </h4>
-            {tabulation.description && (
+            {showDescriptions && tabulation.description && (
               <p
                 className="text-muted-foreground leading-relaxed mt-1"
                 style={{ fontSize: `${Math.round(globalZoom * 0.85)}%` }}
@@ -172,22 +173,6 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
           </div>
-        </div>
-        
-        {/* Dica visual */}
-        <div className={cn(
-          "flex items-center gap-2 mt-3 p-2 rounded-lg text-xs",
-          type === "before" 
-            ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300" 
-            : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-        )}>
-          <Info className="h-3.5 w-3.5 flex-shrink-0" />
-          <span>
-            {type === "before" 
-              ? "Use estas opcoes quando o cliente NAO confirmou CPF ou dados pessoais"
-              : "Use estas opcoes somente APOS o cliente confirmar CPF e dados pessoais"
-            }
-          </span>
         </div>
       </div>
       
@@ -301,27 +286,35 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
             </Button>
           </div>
           
-          {searchQuery && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSearchQuery("")}
-              className="text-xs h-8 ml-auto"
+          <div className="flex items-center gap-2 ml-auto">
+            {searchQuery && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSearchQuery("")}
+                className="text-xs h-8"
+              >
+                Limpar busca
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDescriptions(!showDescriptions)}
+              className="h-8 text-xs font-medium gap-1.5"
             >
-              Limpar busca
+              {showDescriptions ? (
+                <>
+                  <EyeOff className="h-3.5 w-3.5" />
+                  Ocultar Descricoes
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3.5 w-3.5" />
+                  Mostrar Descricoes
+                </>
+              )}
             </Button>
-          )}
-        </div>
-
-        {/* Alerta informativo */}
-        <div className="px-5 py-2 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-200 dark:border-blue-900">
-          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <p className="text-xs">
-              <strong>Importante:</strong> Escolha a tabulacao correta baseado no momento do atendimento. 
-              Tabulacoes <strong className="text-amber-600 dark:text-amber-400">ANTES do CPF</strong> sao para quando o cliente ainda nao confirmou seus dados. 
-              Tabulacoes <strong className="text-emerald-600 dark:text-emerald-400">DEPOIS do CPF</strong> sao para apos a confirmacao.
-            </p>
           </div>
         </div>
 
