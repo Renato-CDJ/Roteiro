@@ -3,7 +3,7 @@
 -- POLITICAS DE ROW LEVEL SECURITY (RLS)
 -- 
 -- Execute este script APOS o DATABASE_SETUP.sql
--- Versao: 1.0
+-- Versao: 1.1 - Adicionada Nuvem de Palavras
 -- ============================================================
 
 -- ============================================================
@@ -28,6 +28,7 @@ ALTER TABLE admin_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supervisor_chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quality_chat_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE word_cloud ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- 2. POLITICAS PARA TABELA USERS
@@ -316,6 +317,21 @@ CREATE POLICY "quality_chat_update_policy" ON quality_chat_messages
   FOR UPDATE USING (true);
 
 CREATE POLICY "quality_chat_delete_policy" ON quality_chat_messages
+  FOR DELETE USING (true);
+
+-- ============================================================
+-- 16. POLITICAS PARA WORD_CLOUD
+-- ============================================================
+CREATE POLICY "word_cloud_select_policy" ON word_cloud
+  FOR SELECT USING (true);
+
+CREATE POLICY "word_cloud_insert_policy" ON word_cloud
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "word_cloud_update_policy" ON word_cloud
+  FOR UPDATE USING (true);
+
+CREATE POLICY "word_cloud_delete_policy" ON word_cloud
   FOR DELETE USING (true);
 
 -- ============================================================
