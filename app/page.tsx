@@ -45,8 +45,12 @@ export default function HomePage() {
         quality={90}
       />
       
-      {/* Overlay escuro com gradiente */}
+      {/* Overlay escuro com gradiente e padrão de grid */}
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950/95 via-zinc-900/90 to-zinc-950/95" />
+      <div className="absolute inset-0 opacity-5" style={{
+        backgroundImage: "linear-gradient(0deg, transparent 24%, rgba(249,115,22,.05) 25%, rgba(249,115,22,.05) 26%, transparent 27%, transparent 74%, rgba(249,115,22,.05) 75%, rgba(249,115,22,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(249,115,22,.05) 25%, rgba(249,115,22,.05) 26%, transparent 27%, transparent 74%, rgba(249,115,22,.05) 75%, rgba(249,115,22,.05) 76%, transparent 77%, transparent)",
+        backgroundSize: "50px 50px"
+      }} />
       
       {/* Efeito de luz laranja no canto */}
       <div 
@@ -79,17 +83,16 @@ export default function HomePage() {
               />
             </div>
             
-            {/* Título */}
-            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-2">
-              Roteiro
+            {/* Título com animação */}
+            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-6 animate-title-reveal">
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.1s'}}>R</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.2s'}}>o</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.3s'}}>t</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.4s'}}>e</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.5s'}}>i</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.6s'}}>r</span>
+              <span className="inline-block animate-reveal-char" style={{animationDelay: '0.7s'}}>o</span>
             </h1>
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="h-px w-12 bg-gradient-to-r from-transparent to-orange-500/50" />
-              <span className="text-xs font-semibold tracking-[0.2em] text-orange-400 uppercase">
-                Grupo Roveri
-              </span>
-              <div className="h-px w-12 bg-gradient-to-l from-transparent to-orange-500/50" />
-            </div>
             <p className="text-zinc-400 text-sm">
               Sistema de Atendimento
             </p>
