@@ -538,30 +538,92 @@ export function useCampaigns() {
   }>(TABLES.CAMPAIGNS)
 }
 
-// Helper function to resolve tabulation IDs to full tabulation objects
+// Helper function to resolve tabulation IDs or names to full tabulation objects
 async function resolveTabulationIds(
   supabase: any,
-  tabulationIds: string[] | undefined
+  tabulationIdsOrNames: string[] | undefined
 ): Promise<Array<{ id: string; name: string; description: string }>> {
-  if (!tabulationIds || tabulationIds.length === 0) {
+  console.log("[v0] resolveTabulationIds called with:", tabulationIdsOrNames)
+  
+  if (!tabulationIdsOrNames || tabulationIdsOrNames.length === 0) {
     return []
   }
 
-  // Fetch tabulations from database by their IDs
-  const { data: tabulations } = await supabase
-    .from(TABLES.TABULATIONS)
-    .select("id, name, description")
-    .in("id", tabulationIds)
+  // Separate IDs from names
+  // IDs typically have format like "tab-1", UUIDs, or contain hyphens/underscores with alphanumeric patterns
+  // Names are usually human-readable text with spaces and special characters
+  const potentialIds: string[] = []
+  const potentialNames: string[] = []
 
-  if (!tabulations || tabulations.length === 0) {
-    return []
+  for (const value of tabulationIdsOrNames) {
+    // Check if it looks like an ID (contains only alphanumeric, hyphens, underscores, or is a UUID)
+    const isLikelyId = /^[a-zA-Z0-9_-]+$/.test(value) && !value.includes(" ")
+    if (isLikelyId) {
+      potentialIds.push(value)
+    } else {
+      potentialNames.push(value)
+    }
   }
 
-  // Return tabulations in the order specified in tabulationIds
-  return tabulationIds
-    .map((id) => {
-      const tab = tabulations.find((t: any) => t.id === id)
-      return tab ? { id: tab.id, name: tab.name, description: tab.description || "" } : null
+  console.log("[v0] potentialIds:", potentialIds, "potentialNames:", potentialNames)
+
+  const results: Array<{ id: string; name: string; description: string }> = []
+
+  // First, try to fetch by ID
+  if (potentialIds.length > 0) {
+    const { data: tabulationsById } = await supabase
+      .from(TABLES.TABULATIONS)
+      .select("id, name, description")
+      .in("id", potentialIds)
+
+    console.log("[v0] tabulationsById result:", tabulationsById)
+
+    if (tabulationsById && tabulationsById.length > 0) {
+      for (const tab of tabulationsById) {
+        results.push({ id: tab.id, name: tab.name, description: tab.description || "" })
+      }
+    }
+
+    // For IDs that weren't found, try searching by name (in case user passed a name that looks like an ID)
+    const foundIds = new Set(tabulationsById?.map((t: any) => t.id) || [])
+    const notFoundAsIds = potentialIds.filter((id) => !foundIds.has(id))
+    if (notFoundAsIds.length > 0) {
+      potentialNames.push(...notFoundAsIds)
+    }
+  }
+
+  // Then, fetch by name (case-insensitive)
+  if (potentialNames.length > 0) {
+    // Use ilike for case-insensitive matching
+    const { data: tabulationsByName } = await supabase
+      .from(TABLES.TABULATIONS)
+      .select("id, name, description")
+
+    console.log("[v0] All tabulations from DB:", tabulationsByName)
+
+    if (tabulationsByName && tabulationsByName.length > 0) {
+      for (const name of potentialNames) {
+        // Find by exact name match (case-insensitive)
+        const tab = tabulationsByName.find(
+          (t: any) => t.name.toLowerCase() === name.toLowerCase()
+        )
+        console.log("[v0] Looking for name:", name, "Found:", tab)
+        if (tab && !results.find((r) => r.id === tab.id)) {
+          results.push({ id: tab.id, name: tab.name, description: tab.description || "" })
+        }
+      }
+    }
+  }
+
+  console.log("[v0] Final results:", results)
+
+  // Return results in the original order
+  return tabulationIdsOrNames
+    .map((idOrName) => {
+      const tab = results.find(
+        (t) => t.id === idOrName || t.name.toLowerCase() === idOrName.toLowerCase()
+      )
+      return tab || null
     })
     .filter((t): t is { id: string; name: string; description: string } => t !== null)
 }
