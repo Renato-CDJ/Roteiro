@@ -247,6 +247,8 @@ export function useProductScripts(productId: string | null) {
 
     setLoading(true)
     const data = await getScriptsByProductId(productId)
+    
+    console.log("[v0] Raw scripts data from Supabase:", data.map((s: any) => ({ id: s.id, title: s.title, tabulations: s.tabulations })))
 
     const mappedScripts = data.map((s: any) => ({
       id: s.id,

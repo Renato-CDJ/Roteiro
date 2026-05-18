@@ -25,8 +25,8 @@ const CACHE_KEYS = {
   LAST_SYNC: "cache_last_sync",
 } as const
 
-// Tempo mínimo entre sincronizações (5 minutos)
-const MIN_SYNC_INTERVAL = 5 * 60 * 1000
+// Tempo mínimo entre sincronizações (3 minutos)
+const MIN_SYNC_INTERVAL = 3 * 60 * 1000
 
 // Versão do cache - incrementar quando houver mudanças na estrutura
 const CACHE_SCHEMA_VERSION = "1.0"
@@ -200,6 +200,7 @@ async function fetchAndCacheScripts(): Promise<any[]> {
     .eq("is_active", true)
   
   const scripts = data || []
+  console.log("[v0] fetchAndCacheScripts - scripts with tabulations:", scripts.map(s => ({ id: s.id, title: s.title, tabulations: s.tabulations })))
   setToCache(CACHE_KEYS.SCRIPTS, scripts)
   return scripts
 }
