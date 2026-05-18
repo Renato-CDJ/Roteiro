@@ -200,6 +200,7 @@ async function fetchAndCacheScripts(): Promise<any[]> {
     .eq("is_active", true)
   
   const scripts = data || []
+  console.log("[v0] fetchAndCacheScripts - scripts with tabulations:", scripts.map(s => ({ id: s.id, title: s.title, tabulations: s.tabulations })))
   setToCache(CACHE_KEYS.SCRIPTS, scripts)
   return scripts
 }
