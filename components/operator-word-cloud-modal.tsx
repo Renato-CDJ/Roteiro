@@ -47,16 +47,14 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
 
   // Generate random but consistent sizes and positions for words
   const getWordStyle = useCallback((word: string, index: number) => {
-    const sizes = ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl"]
+    const sizes = ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl", "text-3xl"]
     const colors = [
-      "text-primary",
-      "text-blue-500 dark:text-blue-400",
-      "text-green-500 dark:text-green-400",
-      "text-purple-500 dark:text-purple-400",
-      "text-amber-500 dark:text-amber-400",
-      "text-rose-500 dark:text-rose-400",
-      "text-cyan-500 dark:text-cyan-400",
-      "text-indigo-500 dark:text-indigo-400",
+      "text-blue-400",
+      "text-cyan-400",
+      "text-blue-500",
+      "text-sky-400",
+      "text-cyan-500",
+      "text-blue-300",
     ]
     
     // Use word length and index for pseudo-random but consistent selection
@@ -163,9 +161,8 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                   </p>
                 </div>
               ) : (
-                <Card className="border-dashed bg-gradient-to-br from-muted/30 to-muted/10">
-                  <CardContent className="p-6">
-                    <div className="flex flex-wrap items-center justify-center gap-3 min-h-[200px]">
+                              <div className="rounded-xl bg-slate-800 p-6 md:p-8">
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 min-h-[250px]">
                       {filteredWords.map((word: any, index: number) => {
                         const style = getWordStyle(word.word, index)
                         return (
@@ -174,10 +171,10 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                             onClick={() => handleWordClick(word)}
                             className={`
                               ${style.size} ${style.color}
-                              font-semibold px-3 py-1.5 rounded-lg
+                              font-bold
                               transition-all duration-200
-                              hover:scale-110 hover:bg-primary/10
-                              focus:outline-none focus:ring-2 focus:ring-primary/50
+                              hover:scale-110 hover:brightness-125
+                              focus:outline-none focus:ring-2 focus:ring-cyan-400/50
                               cursor-pointer
                             `}
                           >
@@ -186,8 +183,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                         )
                       })}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
               )}
             </div>
 
