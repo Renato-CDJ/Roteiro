@@ -495,8 +495,8 @@ ON CONFLICT (email) DO NOTHING;
 -- INSERIR DADOS INICIAIS - CANAIS DE ATENDIMENTO CAIXA
 -- ============================================================
 INSERT INTO channels (name, description, icon, is_active) VALUES
-('Alo CAIXA', '4004 0 104 (Capitais) / 0800 104 0 104 (Demais regioes) - PF, PJ, Ente Publico - Conta corrente, poupanca, emprestimos, cartao, habitacao, negocios, loterias', 'phone', true),
-('CAIXA Cidadao', '0800 726 0207 - PIS, Beneficios Sociais, FGTS e Cartao Social - Eletronico 24h / Humano seg-sex 8h-21h, sab 10h-16h', 'phone', true),
+('Alô CAIXA', '4004 0 104 (Capitais) / 0800 104 0 104 (Demais regioes) - PF, PJ, Ente Publico - Conta corrente, poupanca, emprestimos, cartao, habitacao, negocios, loterias', 'phone', true),
+('CAIXA Cidadão', '0800 726 0207 - PIS, Beneficios Sociais, FGTS e Cartao Social - Eletronico 24h / Humano seg-sex 8h-21h, sab 10h-16h', 'phone', true),
 ('Agencia Digital', '4004 0 104 (Capitais) / 0800 104 0 104 (Demais) - Servicos e consultoria financeira - 8h as 18h (exceto fds e feriados)', 'building', true),
 ('Atendimento Surdos', 'Atendimento 24h com Interprete de Libras via ICOM - https://icom.app/8AG8Z - www.caixa.gov.br/libras', 'ear', true),
 ('SAC CAIXA', '0800 726 0101 - Reclamacoes, sugestoes, elogios, cancelamentos - Atendimento 24h', 'headphones', true),
@@ -530,36 +530,36 @@ ON CONFLICT DO NOTHING;
 
 -- TABULACOES ANTES DA IP (Identificacao Positiva)
 INSERT INTO tabulations (name, description, color, is_active) VALUES
-('Ligacao Caiu', 'Atendimento interrompido sem que seja possível continuar o diálogo entre operador e cliente e sem possibilidade de realização da confirmação do CPF. Exemplo de resposta por parte do cliente/terceiro: "Alô" / "Quem é" / "De onde fala" / "Sou eu" / "Do que se trata" / etc.', '#ef4444', true),
-('Ligacao Muda', 'Utilizar se a ligação se iniciou muda, fica sem fala do cliente. Lembrando que se a pessoa atender e houver ruídos ou vozes que não se direcionar a você será considerada uma Ligação muda.', '#6b7280', true),
-('Recado com Terceiro', 'Terceiro atende e informa que a empresa entrou em falência ou terceiro informa que conhece o cliente, ou terceiro pede para ligar outro dia/horário ou em outro telefone.', '#2563eb', true),
-('Falecido', 'Terceiro informa que o titular faleceu', '#2563eb', true),
-('Desconhecido no Telefone', 'Terceiro informa que não conhece ninguém com o nome do cliente no telefone do cadastro. Exemplo de resposta por parte do cliente/terceiro: "Não conheço" / "Não é desse número" / "Não é daqui" / "Nunca ouvi falar" / etc.', '#2563eb', true),
-('Pessoa Nao Confirma Dados', 'Cliente se recusa confirmar os dados para prosseguir com atendimento. Utilize quando: O cliente informa CPF/CNPJ, mas os dados não conferem, o cliente se recusa a informar CPF/CNPJ, o cliente não lembra os dados ou quando o cliente diz que não pode falar no momento. Exemplo de resposta por parte do cliente: "Não confirmo nada por telefone" / "Não, eu vou na agência" / "Não lembro meu CPF" / etc.', '#2563eb', true),
-('Falência/Concordata', 'Utilizamos quando o sócio ou responsável financeiro informar que a empresa entrou em falência.', '#2563eb', true),
-('Sinal de Fax', 'Ligacao direcionada para sinal de FAX', '#8b5cf6', true),
-('Gravação de Operadora', 'Mensagem automática da companhia telefônica foi reproduzida na chamada', '#8b5cf6', true),
-('Transbordo Entre Canais, sem IP', 'Quando o atendimento é iniciado em um canal digital e precisa ser transbordado para resolução no atendimento humano antes do cliente ter realizado a confirmação do CPF.', '#2563eb', true),
-('Caixa Postal', 'Ligacao direcionada diretamente a caixa postal', '#a855f7', true)
+('LIGAÇÃO CAIU', 'Atendimento interrompido sem que seja possível continuar o diálogo entre operador e cliente e sem possibilidade de realização da confirmação do CPF. Exemplo de resposta por parte do cliente/terceiro: "Alô" / "Quem é" / "De onde fala" / "Sou eu" / "Do que se trata" / etc.', '#ef4444', true),
+('LIGAÇÃO MUDA', 'Utilizar se a ligação se iniciou muda, fica sem fala do cliente. Lembrando que se a pessoa atender e houver ruídos ou vozes que não se direcionar a você será considerada uma Ligação muda.', '#6b7280', true),
+('RECADO COM TERCEIRO', 'Terceiro atende e informa que a empresa entrou em falência ou terceiro informa que conhece o cliente, ou terceiro pede para ligar outro dia/horário ou em outro telefone.', '#2563eb', true),
+('FALECIDO', 'Terceiro informa que o titular faleceu', '#2563eb', true),
+('DESCONHECIDO NO TELEFONE', 'Terceiro informa que não conhece ninguém com o nome do cliente no telefone do cadastro. Exemplo de resposta por parte do cliente/terceiro: "Não conheço" / "Não é desse número" / "Não é daqui" / "Nunca ouvi falar" / etc.', '#2563eb', true),
+('PESSOA NÃO CONFIRMA DADOS', 'Cliente se recusa confirmar os dados para prosseguir com atendimento. Utilize quando: O cliente informa CPF/CNPJ, mas os dados não conferem, o cliente se recusa a informar CPF/CNPJ, o cliente não lembra os dados ou quando o cliente diz que não pode falar no momento. Exemplo de resposta por parte do cliente: "Não confirmo nada por telefone" / "Não, eu vou na agência" / "Não lembro meu CPF" / etc.', '#2563eb', true),
+('FALÊNCIA/CONCORDATA', 'Utilizamos quando o sócio ou responsável financeiro informar que a empresa entrou em falência.', '#2563eb', true),
+('SINAL DE FAX', 'Ligação direcionada para sinal de FAX', '#8b5cf6', true),
+('GRAVAÇÃO DE OPERADORA', 'Mensagem automática da companhia telefônica foi reproduzida na chamada', '#8b5cf6', true),
+('TRANSBORDO PARA ATENDIMENTO ENTRE CANAIS, SEM IP', 'Quando o atendimento é iniciado em um canal digital e precisa ser transbordado para resolução no atendimento humano antes do cliente ter realizado a confirmação do CPF.', '#2563eb', true),
+('CAIXA POSTAL', 'Ligação direcionada diretamente a caixa postal', '#a855f7', true)
 ON CONFLICT DO NOTHING;
 
 -- TABULACOES APOS A IP (Identificacao Positiva)
 INSERT INTO tabulations (name, description, color, is_active) VALUES
-('Contato Interrompido Apos IP, Mas sem resultado definido', 'A ligação foi interrompida sem conseguir um posicionamento da parte do cliente sobre a dívida. Situação: Ao questionar se foi pago, o cliente responde apenas com um NÂO e desliga.', '#22c55e', true),
-('Pessoa Solicita Retorno', 'Cliente pede para o operador retornar a ligação em outro dia/horário.', '#22c55e', true),
-('Pagamento Ja Efetuado', 'Cliente informa que ja efetuou o pagamento', '#22c55e', true),
-('Promessa Pagamento Sem Boleto', 'Cliente informa que ira pagar/depositar dentro de 10 dias corridos', '#10b981', true),
-('Contato Sem Negociacao', 'Cliente informa que não consegue falar no momento e desliga, ou cliente informa que irá pagar ou depositar FORA do prazo estabelecido [10 dias corridos].', '#22c55e', true),
-('Sem Capacidade de Pagamento', 'Cliente informa que não possui capacidade de efetuar o pagamento. Exemplo dos motivos: Informa que não tem recurso disponível, desemprego, mudanças econômicas ou não pode fazer o pagamento naquele momento.', '#22c55e', true),
-('Divida Nao Reconhecida', 'Cliente alega que desconhece a dívida.', '#22c55e', true),
-('Negociacao em Outro Canal', 'Cliente informa que já está negociando em outro canal.', '#22c55e', true),
-('Promessa Pagamento Com Boleto', 'Cliente solicita boleto e informa data de pagamento dentro do período permitido [10 dias corridos].', '#22c55e', true),
-('Aceita Acao Sem Boleto', 'Cliente aceita a campanha sem emissao de boleto', '#22c55e', true),
-('Aceita Acao Com Boleto', 'Cliente aceita a campanha com emissao de boleto', '#22c55e', true),
-('Cliente Acordo Ativo Receptivo', 'Quando o cliente retorna no receptivo tendo acordo vigente para solicitar esclarecimentos ou solicitar o boleto.', '#22c55e', true),
-('Promessa de Pagamento Acordo de Parcelamento', 'Cliente confirma o pagamento parcelado do CARTÃO DE CRÉDITO.', '#22c55e', true),
-('Transbordo Entre Canais, com IP', 'Quando o atendimento é iniciado em um canal e precisa ser transbordado para resolução por outro canal após o cliente ter realizado a confirmação do CPF.', '#22c55e', true),
-('Recusa Acao/Campanha', 'Cliente nao aceita a campanha ofertada. Motivos da Recusa: Sem capacidade de pagamento | Contato sem negociacao/acordo | Negociacao em outro canal | Pessoa solicita retorno em outro momento | Divida nao reconhecida | Promessa de pagamento sem emissao de boleto | Promessa de pagamento com emissao de boleto', '#22c55e', true)
+('CONTATO INTERROMPIDO APÓS IP, MAS SEM RESULTADO DEFINIDO', 'A ligação foi interrompida sem conseguir um posicionamento da parte do cliente sobre a dívida. Situação: Ao questionar se foi pago, o cliente responde apenas com um NÂO e desliga.', '#22c55e', true),
+('PESSOA SOLICITA RETORNO EM OUTRO MOMENTO', 'Cliente pede para o operador retornar a ligação em outro dia/horário.', '#22c55e', true),
+('PAGAMENTO JÁ EFETUADO', 'Cliente informa que ja efetuou o pagamento', '#22c55e', true),
+('PROMESSA DE PAGAMENTO SEM EMISSÃO DE BOLETO', 'Cliente informa que ira pagar/depositar dentro de 10 dias corridos', '#10b981', true),
+('CONTATO SEM NEGOCIAÇÃO', 'Cliente informa que não consegue falar no momento e desliga, ou cliente informa que irá pagar ou depositar FORA do prazo estabelecido [10 dias corridos].', '#22c55e', true),
+('SEM CAPACIDADE DE PAGAMENTO', 'Cliente informa que não possui capacidade de efetuar o pagamento. Exemplo dos motivos: Informa que não tem recurso disponível, desemprego, mudanças econômicas ou não pode fazer o pagamento naquele momento.', '#22c55e', true),
+('DÍVIDA NÃO RECONHECIDA', 'Cliente alega que desconhece a dívida.', '#22c55e', true),
+('NEGOCIAÇÃO EM OUTRO CANAL', 'Cliente informa que já está negociando em outro canal.', '#22c55e', true),
+('PROMESSA DE PAGAMENTO COM EMISSÃO DE BOLETO', 'Cliente solicita boleto e informa data de pagamento dentro do período permitido [10 dias corridos].', '#22c55e', true),
+('ACEITA AÇÃO/CAMPANHA SEM EMISSÃO DE BOLETO', 'Cliente aceita a campanha sem emissao de boleto', '#22c55e', true),
+('ACEITA AÇÃO/CAMPANHA COM EMISSÃO DE BOLETO', 'Cliente aceita a campanha com emissao de boleto', '#22c55e', true),
+('CLIENTE COM ACORDO ATIVO RETORNA NO RECEPTIVO', 'Quando o cliente retorna no receptivo tendo acordo vigente para solicitar esclarecimentos ou solicitar o boleto.', '#22c55e', true),
+('PROMESSA DE PAGAMENTO ACORDO DE PARCELAMENTO', 'Cliente confirma o pagamento parcelado do CARTÃO DE CRÉDITO.', '#22c55e', true),
+('TRANSBORDO PARA ATENDIMENTO ENTRE CANAIS, COM IP', 'Quando o atendimento é iniciado em um canal e precisa ser transbordado para resolução por outro canal após o cliente ter realizado a confirmação do CPF.', '#22c55e', true),
+('RECUSA AÇÃO/CAMPANHA + RESULTADO COM MOTIVO DA RECUSA', 'Cliente não aceita a campanha ofertada. Motivos da Recusa: Sem capacidade de pagamento | Contato sem negociacao/acordo | Negociacao em outro canal | Pessoa solicita retorno em outro momento | Divida nao reconhecida | Promessa de pagamento sem emissao de boleto | Promessa de pagamento com emissao de boleto', '#22c55e', true)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
