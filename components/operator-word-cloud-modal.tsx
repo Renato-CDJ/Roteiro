@@ -45,21 +45,34 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
     onOpenChange(false)
   }, [onOpenChange])
 
-  // Generate random but consistent sizes and positions for words
+  // Generate random but consistent sizes and colors for words - matching the reference image style
   const getWordStyle = useCallback((word: string, index: number) => {
-    const sizes = ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl", "text-3xl"]
-    const colors = [
-      "text-blue-400",
-      "text-cyan-400",
-      "text-blue-500",
-      "text-sky-400",
-      "text-cyan-500",
-      "text-blue-300",
+    // Sizes varying from small to very large, like in the reference image
+    const sizes = [
+      "text-xs",      // pequeno
+      "text-sm",      // pequeno
+      "text-base",    // medio
+      "text-lg",      // medio
+      "text-xl",      // grande
+      "text-2xl",     // grande
+      "text-3xl",     // muito grande
+      "text-4xl",     // muito grande
     ]
     
-    // Use word length and index for pseudo-random but consistent selection
-    const sizeIndex = (word.length + index) % sizes.length
-    const colorIndex = (word.charCodeAt(0) + index) % colors.length
+    // Blue/cyan color palette matching the reference image
+    const colors = [
+      "text-blue-500",    // azul medio
+      "text-cyan-400",    // ciano claro
+      "text-blue-400",    // azul claro
+      "text-sky-500",     // sky medio
+      "text-cyan-500",    // ciano medio
+      "text-blue-300",    // azul bem claro
+    ]
+    
+    // Use word characteristics for pseudo-random but consistent selection
+    const charSum = word.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)
+    const sizeIndex = (charSum + index * 3) % sizes.length
+    const colorIndex = (word.charCodeAt(0) + word.length + index) % colors.length
     
     return {
       size: sizes[sizeIndex],
@@ -69,7 +82,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[95vw] w-full h-[90vh] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
@@ -161,12 +174,12 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                   </p>
                 </div>
               ) : (
-                              <div className="rounded-xl bg-slate-800 p-6 md:p-8">
-                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 min-h-[250px]">
+                              <div className="rounded-xl bg-slate-800 p-8 md:p-12 h-full">
+                    <div className="flex flex-wrap items-center justify-center content-center gap-x-8 gap-y-4 h-full">
                       {filteredWords.map((word: any, index: number) => {
                         const style = getWordStyle(word.word, index)
                         return (
-                          <button
+                          <span
                             key={word.id}
                             onClick={() => handleWordClick(word)}
                             className={`
@@ -174,12 +187,12 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                               font-bold
                               transition-all duration-200
                               hover:scale-110 hover:brightness-125
-                              focus:outline-none focus:ring-2 focus:ring-cyan-400/50
                               cursor-pointer
+                              select-none
                             `}
                           >
                             {word.word}
-                          </button>
+                          </span>
                         )
                       })}
                     </div>
