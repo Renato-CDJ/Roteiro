@@ -90,7 +90,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
               <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                 <Cloud className="h-5 w-5" />
               </div>
-              Nuvem de Palavras
+              Dúvidas
             </DialogTitle>
           </DialogHeader>
         </div>
