@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Cloud, Search, X, ArrowLeft } from "lucide-react"
+import { Cloud, Search, X, ArrowLeft, LayoutGrid, List } from "lucide-react"
 import { useWordCloud } from "@/hooks/use-supabase-admin"
 
 interface OperatorWordCloudModalProps {
@@ -17,6 +17,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
   const { data: words, loading } = useWordCloud()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedWord, setSelectedWord] = useState<{ word: string; description: string } | null>(null)
+  const [viewMode, setViewMode] = useState<"cloud" | "list">("cloud")
 
   const activeWords = useMemo(() => 
     (words || []).filter((w: any) => w.is_active !== false),
@@ -135,26 +136,50 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
         ) : (
           // Cloud View
           <div className="flex-1 overflow-hidden flex flex-col space-y-4 p-5">
-            {/* Search */}
-            <div className="relative flex-shrink-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Buscar palavras..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-              {searchTerm && (
+            {/* Search and View Toggle */}
+            <div className="flex gap-3 flex-shrink-0">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Buscar palavras..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+                {searchTerm && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setSearchTerm("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  onClick={() => setSearchTerm("")}
+                  variant={viewMode === "cloud" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cloud")}
+                  className="gap-2 h-8"
                 >
-                  <X className="h-4 w-4" />
+                  <LayoutGrid className="h-4 w-4" />
+                  <span className="hidden sm:inline">Nuvem</span>
                 </Button>
-              )}
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="gap-2 h-8"
+                >
+                  <List className="h-4 w-4" />
+                  <span className="hidden sm:inline">Lista</span>
+                </Button>
+              </div>
             </div>
 
             {/* Word Cloud */}
@@ -176,30 +201,52 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                     {searchTerm ? `Nenhuma palavra encontrada para "${searchTerm}"` : "Nenhuma palavra disponivel"}
                   </p>
                 </div>
-              ) : (
-                              <div className="rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-8 md:p-12 h-full">
-                    <div className="flex flex-wrap items-center justify-center content-center gap-x-8 gap-y-4 h-full">
-                      {filteredWords.map((word: any, index: number) => {
-                        const style = getWordStyle(word.word, index)
-                        return (
-                          <span
-                            key={word.id}
-                            onClick={() => handleWordClick(word)}
-                            className={`
-                              ${style.size} ${style.color}
-                              font-bold
-                              transition-all duration-200
-                              hover:scale-110 hover:brightness-125
-                              cursor-pointer
-                              select-none
-                            `}
-                          >
-                            {word.word}
-                          </span>
-                        )
-                      })}
-                    </div>
+              ) : viewMode === "cloud" ? (
+                <div className="rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-8 md:p-12 h-full">
+                  <div className="flex flex-wrap items-center justify-center content-center gap-x-8 gap-y-4 h-full">
+                    {filteredWords.map((word: any, index: number) => {
+                      const style = getWordStyle(word.word, index)
+                      return (
+                        <span
+                          key={word.id}
+                          onClick={() => handleWordClick(word)}
+                          className={`
+                            ${style.size} ${style.color}
+                            font-bold
+                            transition-all duration-200
+                            hover:scale-110 hover:brightness-125
+                            cursor-pointer
+                            select-none
+                          `}
+                        >
+                          {word.word}
+                        </span>
+                      )
+                    })}
                   </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border bg-card h-full overflow-auto">
+                  <div className="divide-y divide-border">
+                    {filteredWords.map((word: any, index: number) => (
+                      <div
+                        key={word.id}
+                        onClick={() => handleWordClick(word)}
+                        className="flex items-center gap-4 p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 text-white font-bold text-lg flex-shrink-0">
+                          {word.word.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate">{word.word}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {word.description || "Sem descrição disponível"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
