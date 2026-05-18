@@ -45,9 +45,9 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
     onOpenChange(false)
   }, [onOpenChange])
 
-  // Generate random but consistent sizes and colors for words - matching the reference image style
+  // Generate random but consistent sizes and colors for words - using Roteiro theme colors
   const getWordStyle = useCallback((word: string, index: number) => {
-    // Sizes varying from small to very large, like in the reference image
+    // Sizes varying from small to very large
     const sizes = [
       "text-xs",      // pequeno
       "text-sm",      // pequeno
@@ -59,14 +59,14 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
       "text-4xl",     // muito grande
     ]
     
-    // Blue/cyan color palette matching the reference image
+    // Orange/amber color palette matching Roteiro theme
     const colors = [
-      "text-blue-500",    // azul medio
-      "text-cyan-400",    // ciano claro
-      "text-blue-400",    // azul claro
-      "text-sky-500",     // sky medio
-      "text-cyan-500",    // ciano medio
-      "text-blue-300",    // azul bem claro
+      "text-orange-500",   // laranja medio
+      "text-amber-400",    // amber claro
+      "text-orange-400",   // laranja claro
+      "text-amber-500",    // amber medio
+      "text-orange-300",   // laranja bem claro
+      "text-amber-300",    // amber bem claro
     ]
     
     // Use word characteristics for pseudo-random but consistent selection
@@ -82,19 +82,22 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[95vw] w-full h-[90vh] max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
-              <Cloud className="h-4 w-4 text-primary" />
-            </div>
-            Nuvem de Palavras
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="!max-w-6xl w-[95vw] h-[92vh] flex flex-col p-0 gap-0 overflow-hidden [&>button]:z-50">
+        {/* Header com gradiente laranja */}
+        <div className="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 p-5 text-white flex-shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-3 text-white">
+              <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Cloud className="h-5 w-5" />
+              </div>
+              Nuvem de Palavras
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
         {selectedWord ? (
           // Detail View
-          <div className="flex-1 overflow-auto space-y-4">
+          <div className="flex-1 overflow-auto space-y-4 p-5">
             <Button
               variant="ghost"
               size="sm"
@@ -131,7 +134,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
           </div>
         ) : (
           // Cloud View
-          <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+          <div className="flex-1 overflow-hidden flex flex-col space-y-4 p-5">
             {/* Search */}
             <div className="relative flex-shrink-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -174,7 +177,7 @@ export function OperatorWordCloudModal({ open, onOpenChange }: OperatorWordCloud
                   </p>
                 </div>
               ) : (
-                              <div className="rounded-xl bg-slate-800 p-8 md:p-12 h-full">
+                              <div className="rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 p-8 md:p-12 h-full">
                     <div className="flex flex-wrap items-center justify-center content-center gap-x-8 gap-y-4 h-full">
                       {filteredWords.map((word: any, index: number) => {
                         const style = getWordStyle(word.word, index)
