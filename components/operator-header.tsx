@@ -373,12 +373,12 @@ export const OperatorHeader = memo(function OperatorHeader({
               <button
                 onClick={() => setShowWordCloudModal(true)}
                 className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-muted/50 transition-colors group"
-                title="Nuvem de Palavras"
+                title="Dúvidas"
               >
                 <div className="h-9 w-9 bg-sky-500 hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700 text-white rounded-lg shadow-md flex items-center justify-center transition-colors">
                   <Cloud className="h-4 w-4" />
                 </div>
-                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Palavras</span>
+                <span className="text-[9px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">Dúvidas</span>
               </button>
 
               <button
