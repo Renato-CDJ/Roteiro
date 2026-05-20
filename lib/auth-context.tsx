@@ -4,11 +4,25 @@ import { createContext, useContext, useState, useEffect, type ReactNode, useMemo
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "./types"
 
+// Usuario operador padrao registrado no codigo (sem necessidade de banco de dados)
+export const DEFAULT_OPERATOR_USER: User = {
+  id: "default-operator-001",
+  username: "operador",
+  fullName: "Operador",
+  email: "operador@gruporoveri.com",
+  password: "",
+  role: "operator",
+  isActive: true,
+  isOnline: true,
+  createdAt: new Date(),
+}
+
 interface AuthContextType {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  loginAsOperator: (operatorData: Partial<User>) => void
   logout: () => void
   refreshUser: () => void
 }
@@ -218,6 +232,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (sessionData) {
           const session = JSON.parse(sessionData)
 
+          // Verificar se e o operador padrao (registrado no codigo)
+          if (session.isDefaultOperator) {
+            if (mountedRef.current) {
+              setUser(DEFAULT_OPERATOR_USER)
+            }
+            return
+          }
+
           // Verify user still exists in Supabase
           const userData = await getUserById(session.userId)
 
@@ -293,16 +315,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user])
 
+  // Login como operador padrao (sem banco de dados)
+  const loginAsOperator = useCallback((operatorData: Partial<User>) => {
+    const operatorUser: User = {
+      ...DEFAULT_OPERATOR_USER,
+      ...operatorData,
+    }
+
+    // Salvar sessao do operador
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      userId: operatorUser.id,
+      email: operatorUser.email,
+      username: operatorUser.username,
+      role: operatorUser.role,
+      loginTime: new Date().toISOString(),
+      isDefaultOperator: true,
+    }))
+
+    setUser(operatorUser)
+  }, [])
+
   const value = useMemo(
     () => ({
       user,
       isLoading,
       isAuthenticated: !!user,
       login,
+      loginAsOperator,
       logout,
       refreshUser,
     }),
-    [user, isLoading, login, logout, refreshUser]
+    [user, isLoading, login, loginAsOperator, logout, refreshUser]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
