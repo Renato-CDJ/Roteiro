@@ -141,47 +141,34 @@ export const LoginForm = memo(function LoginForm() {
               Selecione o tipo de acesso
             </p>
             
-            {/* Botao ADM - Visual melhorado */}
-            <button
+            {/* Botao ADM */}
+            <Button
               onClick={() => setLoginMode("admin")}
-              className="w-full group relative overflow-hidden rounded-xl bg-zinc-900 dark:bg-zinc-700 p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-14 text-sm font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-white transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-3"
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                  <ShieldCheck className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <span className="block text-base font-semibold text-white">Administrador</span>
-                  <span className="block text-xs text-zinc-400">Acesso com credenciais</span>
-                </div>
-                <ArrowLeft className="h-5 w-5 text-white/60 rotate-180 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </button>
+              <ShieldCheck className="h-5 w-5" />
+              ADM
+            </Button>
 
-            {/* Botao Operador - Visual melhorado */}
-            <button
+            {/* Botao Operador */}
+            <Button
               onClick={handleOperatorAccess}
               disabled={isLoading}
-              className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 p-4 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              variant="outline"
+              className="w-full h-14 text-sm font-semibold border-2 border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/20 dark:text-orange-400 dark:border-orange-500 transition-all duration-200 flex items-center justify-center gap-3"
             >
               {isLoading ? (
-                <div className="flex items-center justify-center gap-3">
-                  <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="text-base font-semibold text-white">Entrando...</span>
-                </div>
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Entrando...
+                </span>
               ) : (
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                    <User className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <span className="block text-base font-semibold text-white">Operador</span>
-                    <span className="block text-xs text-white/80">Acesso direto ao roteiro</span>
-                  </div>
-                  <ArrowLeft className="h-5 w-5 text-white/80 rotate-180 group-hover:translate-x-1 transition-transform" />
-                </div>
+                <>
+                  <User className="h-5 w-5" />
+                  Operador
+                </>
               )}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -265,7 +252,7 @@ export const LoginForm = memo(function LoginForm() {
                 </Alert>
               )}
 
-              {/* Botao */}
+              {/* Botao Entrar */}
               <Button
                 type="submit"
                 className="w-full h-12 text-sm font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-white transition-all duration-200 shadow-sm hover:shadow-md"
