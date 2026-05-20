@@ -3,35 +3,41 @@
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useCachedResultCodes } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff, Info, X } from "lucide-react"
+import { Search, Tags, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { STATIC_TABULATIONS, type StaticTabulation } from "@/components/admin-tabs/result-codes-tab"
 
 interface OperatorResultCodesModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+// Converter tabulacoes estaticas para formato do componente
+interface TabulationDisplay {
+  id: string
+  name: string
+  description: string
+  color: string
+  category: "before" | "after"
+}
+
 export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultCodesModalProps) {
-  const { resultCodes: resultCodesData, loading } = useCachedResultCodes()
   const [searchQuery, setSearchQuery] = useState("")
   const [globalZoom, setGlobalZoom] = useState(100)
   const [activeCategory, setActiveCategory] = useState<"all" | "before" | "after">("all")
   const [showDescriptions, setShowDescriptions] = useState(true)
-  const [selectedTabulation, setSelectedTabulation] = useState<typeof tabulations[0] | null>(null)
+  const [selectedTabulation, setSelectedTabulation] = useState<TabulationDisplay | null>(null)
 
-  // Map Supabase data to component format
-  const tabulations = useMemo(() => resultCodesData
-    .filter((t: any) => t.is_active)
-    .map((t: any) => ({
-      id: t.id,
+  // Usar tabulacoes estaticas do codigo (sem consulta ao banco)
+  const tabulations: TabulationDisplay[] = useMemo(() => 
+    STATIC_TABULATIONS.map((t, index) => ({
+      id: `static-${index}`,
       name: t.name,
-      description: t.description || "",
-      color: t.color || "#3b82f6",
-      category: t.category || "before",
-      isActive: t.is_active,
-    })), [resultCodesData])
+      description: t.description,
+      color: t.phase === "before" ? "#f59e0b" : "#22c55e",
+      category: t.phase,
+    })), [])
 
   // Filter by search
   const filteredTabulations = useMemo(() => {
@@ -90,7 +96,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     return result.length
   }, [tabulations, searchQuery])
 
-  const renderTabulationCard = (tabulation: typeof tabulations[0], category: "before" | "after") => {
+  const renderTabulationCard = (tabulation: TabulationDisplay, category: "before" | "after") => {
     const isBefore = category === "before"
     return (
       <div
@@ -155,7 +161,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     iconBg
   }: { 
     type: "before" | "after"
-    tabulations: typeof beforeTabulations
+    tabulations: TabulationDisplay[]
     icon: typeof ShieldQuestion
     title: string
     subtitle: string
@@ -165,7 +171,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     iconBg: string
   }) => (
     <div className={cn("rounded-xl border-2 overflow-hidden", borderColor)}>
-      {/* Header da seção */}
+      {/* Header da secao */}
       <div className={cn("p-4", bgColor)}>
         <div className="flex items-start gap-3">
           <div className={cn("p-2.5 rounded-xl", iconBg)}>
@@ -188,7 +194,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
       </div>
       
-      {/* Lista de tabulações */}
+      {/* Lista de tabulacoes */}
       <div className="p-4 bg-card">
         {tabulations.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
@@ -333,12 +339,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-y-auto bg-muted/30">
           <div className="p-5">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
-                <p className="text-muted-foreground">Carregando tabulacoes...</p>
-              </div>
-            ) : tabulations.length === 0 ? (
+            {tabulations.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                   <Tags className="h-8 w-8 text-muted-foreground" />
@@ -359,7 +360,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
                 "grid gap-5",
                 activeCategory === "all" ? "lg:grid-cols-2" : "grid-cols-1 max-w-3xl mx-auto"
               )}>
-                {/* Coluna: Antes da confirmação de CPF */}
+                {/* Coluna: Antes da confirmacao de CPF */}
                 {(activeCategory === "all" || activeCategory === "before") && (
                   <CategorySection
                     type="before"
@@ -374,7 +375,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
                   />
                 )}
 
-                {/* Coluna: Depois da confirmação de CPF */}
+                {/* Coluna: Depois da confirmacao de CPF */}
                 {(activeCategory === "all" || activeCategory === "after") && (
                   <CategorySection
                     type="after"
