@@ -413,26 +413,75 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
       </DialogContent>
 
-      {/* Modal de descricao da tabulacao */}
+      {/* Modal de descricao da tabulacao - Visual melhorado */}
       {selectedTabulation && (
         <Dialog open={!!selectedTabulation} onOpenChange={() => setSelectedTabulation(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: selectedTabulation.color }}
-                />
-                {selectedTabulation.name}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="mt-2">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {selectedTabulation.description || "Esta tabulacao nao possui descricao."}
-              </p>
+          <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+            {/* Header com cor da categoria */}
+            <div 
+              className={cn(
+                "px-6 py-5",
+                selectedTabulation.category === "before" 
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500" 
+                  : "bg-gradient-to-r from-emerald-500 to-green-500"
+              )}
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm flex-shrink-0">
+                  <div
+                    className="w-4 h-4 rounded-full ring-2 ring-white/50"
+                    style={{ backgroundColor: selectedTabulation.color }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                    {selectedTabulation.category === "before" ? "Antes do CPF" : "Depois do CPF"}
+                  </span>
+                  <h3 className="text-lg font-bold text-white mt-1 leading-snug">
+                    {selectedTabulation.name}
+                  </h3>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button variant="outline" size="sm" onClick={() => setSelectedTabulation(null)}>
+            
+            {/* Conteudo da descricao */}
+            <div className="px-6 py-6">
+              <div className="flex items-start gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg flex-shrink-0",
+                  selectedTabulation.category === "before"
+                    ? "bg-amber-100 dark:bg-amber-900/30"
+                    : "bg-emerald-100 dark:bg-emerald-900/30"
+                )}>
+                  <Info className={cn(
+                    "h-5 w-5",
+                    selectedTabulation.category === "before"
+                      ? "text-amber-600 dark:text-amber-400"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  )} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                    Descricao
+                  </h4>
+                  <p className="text-base text-foreground leading-relaxed">
+                    {selectedTabulation.description || "Esta tabulacao nao possui descricao."}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t bg-muted/30 flex justify-end">
+              <Button 
+                onClick={() => setSelectedTabulation(null)}
+                className={cn(
+                  "px-6",
+                  selectedTabulation.category === "before"
+                    ? "bg-amber-500 hover:bg-amber-600 text-white"
+                    : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                )}
+              >
                 Fechar
               </Button>
             </div>
