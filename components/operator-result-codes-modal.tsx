@@ -3,35 +3,41 @@
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { useCachedResultCodes } from "@/hooks/use-cached-data"
-import { Search, Tags, Loader2, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff, Info, X } from "lucide-react"
+import { Search, Tags, ZoomIn, ZoomOut, ShieldCheck, ShieldQuestion, CheckCircle2, Eye, EyeOff, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { STATIC_TABULATIONS, type StaticTabulation } from "@/components/admin-tabs/result-codes-tab"
 
 interface OperatorResultCodesModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+// Converter tabulacoes estaticas para formato do componente
+interface TabulationDisplay {
+  id: string
+  name: string
+  description: string
+  color: string
+  category: "before" | "after"
+}
+
 export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultCodesModalProps) {
-  const { resultCodes: resultCodesData, loading } = useCachedResultCodes()
   const [searchQuery, setSearchQuery] = useState("")
   const [globalZoom, setGlobalZoom] = useState(100)
   const [activeCategory, setActiveCategory] = useState<"all" | "before" | "after">("all")
   const [showDescriptions, setShowDescriptions] = useState(true)
-  const [selectedTabulation, setSelectedTabulation] = useState<typeof tabulations[0] | null>(null)
+  const [selectedTabulation, setSelectedTabulation] = useState<TabulationDisplay | null>(null)
 
-  // Map Supabase data to component format
-  const tabulations = useMemo(() => resultCodesData
-    .filter((t: any) => t.is_active)
-    .map((t: any) => ({
-      id: t.id,
+  // Usar tabulacoes estaticas do codigo (sem consulta ao banco)
+  const tabulations: TabulationDisplay[] = useMemo(() => 
+    STATIC_TABULATIONS.map((t, index) => ({
+      id: `static-${index}`,
       name: t.name,
-      description: t.description || "",
-      color: t.color || "#3b82f6",
-      category: t.category || "before",
-      isActive: t.is_active,
-    })), [resultCodesData])
+      description: t.description,
+      color: t.phase === "before" ? "#f59e0b" : "#22c55e",
+      category: t.phase,
+    })), [])
 
   // Filter by search
   const filteredTabulations = useMemo(() => {
@@ -90,7 +96,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     return result.length
   }, [tabulations, searchQuery])
 
-  const renderTabulationCard = (tabulation: typeof tabulations[0], category: "before" | "after") => {
+  const renderTabulationCard = (tabulation: TabulationDisplay, category: "before" | "after") => {
     const isBefore = category === "before"
     return (
       <div
@@ -155,7 +161,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     iconBg
   }: { 
     type: "before" | "after"
-    tabulations: typeof beforeTabulations
+    tabulations: TabulationDisplay[]
     icon: typeof ShieldQuestion
     title: string
     subtitle: string
@@ -165,7 +171,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
     iconBg: string
   }) => (
     <div className={cn("rounded-xl border-2 overflow-hidden", borderColor)}>
-      {/* Header da seção */}
+      {/* Header da secao */}
       <div className={cn("p-4", bgColor)}>
         <div className="flex items-start gap-3">
           <div className={cn("p-2.5 rounded-xl", iconBg)}>
@@ -188,7 +194,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
       </div>
       
-      {/* Lista de tabulações */}
+      {/* Lista de tabulacoes */}
       <div className="p-4 bg-card">
         {tabulations.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
@@ -333,12 +339,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-y-auto bg-muted/30">
           <div className="p-5">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-orange-500 mb-4" />
-                <p className="text-muted-foreground">Carregando tabulacoes...</p>
-              </div>
-            ) : tabulations.length === 0 ? (
+            {tabulations.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                   <Tags className="h-8 w-8 text-muted-foreground" />
@@ -359,7 +360,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
                 "grid gap-5",
                 activeCategory === "all" ? "lg:grid-cols-2" : "grid-cols-1 max-w-3xl mx-auto"
               )}>
-                {/* Coluna: Antes da confirmação de CPF */}
+                {/* Coluna: Antes da confirmacao de CPF */}
                 {(activeCategory === "all" || activeCategory === "before") && (
                   <CategorySection
                     type="before"
@@ -374,7 +375,7 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
                   />
                 )}
 
-                {/* Coluna: Depois da confirmação de CPF */}
+                {/* Coluna: Depois da confirmacao de CPF */}
                 {(activeCategory === "all" || activeCategory === "after") && (
                   <CategorySection
                     type="after"
@@ -412,26 +413,75 @@ export function OperatorResultCodesModal({ open, onOpenChange }: OperatorResultC
         </div>
       </DialogContent>
 
-      {/* Modal de descricao da tabulacao */}
+      {/* Modal de descricao da tabulacao - Visual melhorado */}
       {selectedTabulation && (
         <Dialog open={!!selectedTabulation} onOpenChange={() => setSelectedTabulation(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: selectedTabulation.color }}
-                />
-                {selectedTabulation.name}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="mt-2">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {selectedTabulation.description || "Esta tabulacao nao possui descricao."}
-              </p>
+          <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
+            {/* Header com cor da categoria */}
+            <div 
+              className={cn(
+                "px-6 py-5",
+                selectedTabulation.category === "before" 
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500" 
+                  : "bg-gradient-to-r from-emerald-500 to-green-500"
+              )}
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm flex-shrink-0">
+                  <div
+                    className="w-4 h-4 rounded-full ring-2 ring-white/50"
+                    style={{ backgroundColor: selectedTabulation.color }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-medium text-white/80 uppercase tracking-wide">
+                    {selectedTabulation.category === "before" ? "Antes do CPF" : "Depois do CPF"}
+                  </span>
+                  <h3 className="text-lg font-bold text-white mt-1 leading-snug">
+                    {selectedTabulation.name}
+                  </h3>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button variant="outline" size="sm" onClick={() => setSelectedTabulation(null)}>
+            
+            {/* Conteudo da descricao */}
+            <div className="px-6 py-6">
+              <div className="flex items-start gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg flex-shrink-0",
+                  selectedTabulation.category === "before"
+                    ? "bg-amber-100 dark:bg-amber-900/30"
+                    : "bg-emerald-100 dark:bg-emerald-900/30"
+                )}>
+                  <Info className={cn(
+                    "h-5 w-5",
+                    selectedTabulation.category === "before"
+                      ? "text-amber-600 dark:text-amber-400"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  )} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                    Descricao
+                  </h4>
+                  <p className="text-base text-foreground leading-relaxed">
+                    {selectedTabulation.description || "Esta tabulacao nao possui descricao."}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t bg-muted/30 flex justify-end">
+              <Button 
+                onClick={() => setSelectedTabulation(null)}
+                className={cn(
+                  "px-6",
+                  selectedTabulation.category === "before"
+                    ? "bg-amber-500 hover:bg-amber-600 text-white"
+                    : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                )}
+              >
                 Fechar
               </Button>
             </div>
