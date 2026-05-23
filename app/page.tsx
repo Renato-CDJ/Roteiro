@@ -10,7 +10,7 @@ function AnimatedTitle() {
   return (
     <div className="relative cursor-default select-none py-4 w-full flex justify-center">
       <svg 
-        viewBox="0 0 600 120" 
+        viewBox="0 0 600 170" 
         className="w-full max-w-[500px] h-auto overflow-visible"
         role="img" 
         aria-label="Roteiro"
@@ -57,7 +57,7 @@ function AnimatedTitle() {
               x="-200" 
               y="0" 
               width="150" 
-              height="120" 
+              height="170" 
               fill="url(#shineHighlight)"
               style={{
                 animation: "sweep 4.5s linear infinite",
@@ -76,9 +76,9 @@ function AnimatedTitle() {
         {/* Sombra do texto */}
         <text 
           x="300" 
-          y="85" 
+          y="90" 
           textAnchor="middle" 
-          fontSize="105" 
+          fontSize="145" 
           fontWeight="800"
           fontFamily="'Arial Black', 'Helvetica Neue', sans-serif"
           letterSpacing="-2"
@@ -92,9 +92,9 @@ function AnimatedTitle() {
         <g mask="url(#shineMask)">
           <text 
             x="300" 
-            y="85" 
+            y="90" 
             textAnchor="middle" 
-            fontSize="105" 
+            fontSize="145" 
             fontWeight="800"
             fontFamily="'Arial Black', 'Helvetica Neue', sans-serif"
             letterSpacing="-2"
@@ -105,19 +105,16 @@ function AnimatedTitle() {
           </text>
         </g>
 
-        {/* Barra laranja decorativa abaixo com animação de stretch */}
-        <rect 
-          x="100" 
-          y="100" 
-          width="400" 
-          height="4" 
-          rx="2"
-          fill="#ff6600"
-          style={{
-            animation: "barStretch 2.5s ease-in-out infinite",
-            transformOrigin: "300px 102px",
-          }}
-        />
+        {/* Barra laranja decorativa abaixo com animação de stretch - visual de linha afilada nas pontas */}
+        <g style={{
+          animation: "barStretch 2.5s ease-in-out infinite",
+          transformOrigin: "300px 115px",
+        }}>
+          <polygon 
+            points="50,115 300,110 550,115 300,120" 
+            fill="#ff6600"
+          />
+        </g>
 
         <style>
           {`
