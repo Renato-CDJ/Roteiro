@@ -78,9 +78,9 @@ function AnimatedTitle() {
         {/* Sombra do texto */}
         <text 
           x="300" 
-          y="90" 
+          y="95" 
           textAnchor="middle" 
-          fontSize="112" 
+          fontSize="135" 
           fontWeight="900"
           fontFamily="system-ui, -apple-system, sans-serif"
           letterSpacing="4"
@@ -94,9 +94,9 @@ function AnimatedTitle() {
         <g mask="url(#shineMask)">
           <text 
             x="300" 
-            y="90" 
+            y="95" 
             textAnchor="middle" 
-            fontSize="112" 
+            fontSize="135" 
             fontWeight="900"
             fontFamily="system-ui, -apple-system, sans-serif"
             letterSpacing="4"
@@ -110,15 +110,20 @@ function AnimatedTitle() {
           </text>
         </g>
 
-        {/* Barras laranjas decorativas abaixo */}
+        {/* Barras laranjas decorativas abaixo com animação de stretch */}
         <g filter="url(#barFX)">
           <rect 
             x="150" 
-            y="105" 
+            y="115" 
             width="300" 
             height="5" 
             rx="2.5"
             fill="url(#barGrad)"
+            className="animate-bar-stretch"
+            style={{
+              animation: "barStretch 3s ease-in-out infinite",
+              transformOrigin: "center",
+            }}
           />
         </g>
 
@@ -130,6 +135,14 @@ function AnimatedTitle() {
             }
             .shine-rect {
               transform-origin: center;
+            }
+            @keyframes barStretch {
+              0%   { transform: scaleX(1)    scaleY(1);    }
+              20%  { transform: scaleX(1.15) scaleY(0.85); }
+              40%  { transform: scaleX(0.88) scaleY(1.12); }
+              60%  { transform: scaleX(1.12) scaleY(0.88); }
+              80%  { transform: scaleX(0.92) scaleY(1.08); }
+              100% { transform: scaleX(1)    scaleY(1);    }
             }
           `}
         </style>
@@ -173,23 +186,9 @@ export default function HomePage() {
           {/* Titulo */}
           <div className="mb-6 sm:mb-8 text-center">
             <AnimatedTitle />
-            
-<p
-              className="text-zinc-600 dark:text-zinc-300 text-xl sm:text-2xl font-semibold tracking-wide inline-block"
-              style={{ animation: "stretchText 3s ease-in-out infinite" }}
-            >
+            <p className="text-zinc-600 dark:text-zinc-300 text-xl sm:text-2xl font-semibold tracking-wide">
               Sistema de Atendimento
             </p>
-            <style>{`
-              @keyframes stretchText {
-                0%   { transform: scaleX(1)    scaleY(1);    }
-                20%  { transform: scaleX(1.08) scaleY(0.92); }
-                40%  { transform: scaleX(0.94) scaleY(1.06); }
-                60%  { transform: scaleX(1.05) scaleY(0.95); }
-                80%  { transform: scaleX(0.97) scaleY(1.03); }
-                100% { transform: scaleX(1)    scaleY(1);    }
-              }
-            `}</style>
           </div>
 
           {/* Formulario */}
