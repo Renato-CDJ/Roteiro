@@ -76,49 +76,48 @@ function AnimatedTitle() {
         {/* Sombra do texto */}
         <text 
           x="300" 
-          y="95" 
+          y="85" 
           textAnchor="middle" 
-          fontSize="135" 
-          fontWeight="900"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          letterSpacing="4"
-          fill="rgba(0,0,0,0.25)"
-          transform="translate(3, 6)"
+          fontSize="105" 
+          fontWeight="800"
+          fontFamily="'Arial Black', 'Helvetica Neue', sans-serif"
+          letterSpacing="-2"
+          fill="rgba(0,0,0,0.3)"
+          transform="translate(2, 4)"
         >
-          ROTEIRO
+          Roteiro
         </text>
 
-        {/* Texto principal laranja sólido */}
-        <text 
-          x="300" 
-          y="95" 
-          textAnchor="middle" 
-          fontSize="135" 
-          fontWeight="900"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          letterSpacing="4"
-          fill="#ff6600"
-          filter="url(#orangeFX)"
-        >
-          ROTEIRO
-        </text>
-
-        {/* Barras laranjas decorativas abaixo com animação de stretch */}
-        <g filter="url(#barFX)">
-          <rect 
-            x="150" 
-            y="115" 
-            width="300" 
-            height="5" 
-            rx="2.5"
-            fill="url(#barGrad)"
-            className="animate-bar-stretch"
-            style={{
-              animation: "barStretch 3s ease-in-out infinite",
-              transformOrigin: "center",
-            }}
-          />
+        {/* Texto principal laranja com mascara de brilho */}
+        <g mask="url(#shineMask)">
+          <text 
+            x="300" 
+            y="85" 
+            textAnchor="middle" 
+            fontSize="105" 
+            fontWeight="800"
+            fontFamily="'Arial Black', 'Helvetica Neue', sans-serif"
+            letterSpacing="-2"
+            fill="#ff6600"
+            filter="url(#orangeFX)"
+          >
+            Roteiro
+          </text>
         </g>
+
+        {/* Barra laranja decorativa abaixo com animação de stretch */}
+        <rect 
+          x="100" 
+          y="100" 
+          width="400" 
+          height="4" 
+          rx="2"
+          fill="#ff6600"
+          style={{
+            animation: "barStretch 2.5s ease-in-out infinite",
+            transformOrigin: "300px 102px",
+          }}
+        />
 
         <style>
           {`
@@ -130,9 +129,9 @@ function AnimatedTitle() {
               transform-origin: center;
             }
             @keyframes barStretch {
-              0%   { transform: scaleX(1);    }
-              50%  { transform: scaleX(1.4); }
-              100% { transform: scaleX(1);    }
+              0%   { transform: scaleX(0.6); }
+              50%  { transform: scaleX(1); }
+              100% { transform: scaleX(0.6); }
             }
           `}
         </style>
