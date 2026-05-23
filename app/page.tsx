@@ -16,13 +16,11 @@ function AnimatedTitle() {
         aria-label="Roteiro"
       >
         <defs>
-          {/* Gradiente laranja para o texto */}
+          {/* Gradiente laranja sólido para o texto */}
           <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ff5722"/>
-            <stop offset="25%" stopColor="#ff7043"/>
-            <stop offset="50%" stopColor="#ff9800"/>
-            <stop offset="75%" stopColor="#ff7043"/>
-            <stop offset="100%" stopColor="#ff5722"/>
+            <stop offset="0%" stopColor="#ff6600"/>
+            <stop offset="50%" stopColor="#ff6600"/>
+            <stop offset="100%" stopColor="#ff6600"/>
           </linearGradient>
 
           {/* Gradiente laranja para barras decorativas */}
@@ -90,25 +88,20 @@ function AnimatedTitle() {
           ROTEIRO
         </text>
 
-        {/* Texto principal laranja com mascara de brilho */}
-        <g mask="url(#shineMask)">
-          <text 
-            x="300" 
-            y="95" 
-            textAnchor="middle" 
-            fontSize="135" 
-            fontWeight="900"
-            fontFamily="system-ui, -apple-system, sans-serif"
-            letterSpacing="4"
-            fill="url(#orangeGrad)"
-            stroke="rgba(255,255,255,0.3)"
-            strokeWidth="1.5"
-            paintOrder="stroke fill"
-            filter="url(#orangeFX)"
-          >
-            ROTEIRO
-          </text>
-        </g>
+        {/* Texto principal laranja sólido */}
+        <text 
+          x="300" 
+          y="95" 
+          textAnchor="middle" 
+          fontSize="135" 
+          fontWeight="900"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          letterSpacing="4"
+          fill="#ff6600"
+          filter="url(#orangeFX)"
+        >
+          ROTEIRO
+        </text>
 
         {/* Barras laranjas decorativas abaixo com animação de stretch */}
         <g filter="url(#barFX)">
@@ -137,12 +130,9 @@ function AnimatedTitle() {
               transform-origin: center;
             }
             @keyframes barStretch {
-              0%   { transform: scaleX(1)    scaleY(1);    }
-              20%  { transform: scaleX(1.15) scaleY(0.85); }
-              40%  { transform: scaleX(0.88) scaleY(1.12); }
-              60%  { transform: scaleX(1.12) scaleY(0.88); }
-              80%  { transform: scaleX(0.92) scaleY(1.08); }
-              100% { transform: scaleX(1)    scaleY(1);    }
+              0%   { transform: scaleX(1);    }
+              50%  { transform: scaleX(1.4); }
+              100% { transform: scaleX(1);    }
             }
           `}
         </style>
