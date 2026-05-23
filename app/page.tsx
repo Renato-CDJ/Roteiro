@@ -10,73 +10,61 @@ function AnimatedTitle() {
   return (
     <div className="relative cursor-default select-none py-4 w-full flex justify-center">
       <svg 
-        viewBox="0 0 600 170" 
-        className="w-full max-w-[500px] h-auto overflow-visible"
+        viewBox="20 0 660 145"
+        className="w-full max-w-[520px] h-auto overflow-visible"
         role="img" 
         aria-label="Roteiro"
       >
         <defs>
-          {/* Gradiente laranja sólido para o texto */}
-          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ff6600"/>
-            <stop offset="50%" stopColor="#ff6600"/>
-            <stop offset="100%" stopColor="#ff6600"/>
-          </linearGradient>
-
-          {/* Gradiente laranja para barras decorativas */}
-          <linearGradient id="barGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ffb300"/>
-            <stop offset="50%" stopColor="#ff8f00"/>
-            <stop offset="100%" stopColor="#ff6d00"/>
-          </linearGradient>
-
-          {/* Gradiente do brilho que varre */}
-          <linearGradient id="shineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="white" stopOpacity="0"/>
-            <stop offset="0.45" stopColor="white" stopOpacity="0.75"/>
-            <stop offset="0.55" stopColor="white" stopOpacity="0.95"/>
-            <stop offset="1" stopColor="white" stopOpacity="0"/>
-          </linearGradient>
-
           {/* Filtro de sombra e brilho para efeito 3D */}
-          <filter id="orangeFX" x="-15%" y="-25%" width="130%" height="150%">
-            <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="rgba(255,87,34,0.4)"/>
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(255,255,255,0.2)"/>
+          <filter id="orangeFX" x="-15%" y="-30%" width="130%" height="160%">
+            <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="rgba(255,87,34,0.5)"/>
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="rgba(255,140,0,0.3)"/>
           </filter>
 
-          {/* Filtro para as barras */}
-          <filter id="barFX" x="-15%" y="-25%" width="130%" height="150%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="rgba(0,0,0,0.4)"/>
-          </filter>
-
-          {/* Mascara de brilho varrendo - exatamente como no original */}
+          {/* Mascara de brilho varrendo */}
           <mask id="shineMask">
-            <rect width="100%" height="100%" fill="white"/>
+            <rect x="0" y="0" width="700" height="145" fill="white"/>
             <rect 
-              className="shine-rect" 
               x="-200" 
               y="0" 
-              width="150" 
-              height="170" 
+              width="160" 
+              height="145" 
               fill="url(#shineHighlight)"
-              style={{
-                animation: "sweep 4.5s linear infinite",
-              }}
+              style={{ animation: "sweep 4.5s linear infinite" }}
             />
           </mask>
 
           <linearGradient id="shineHighlight" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="black" stopOpacity="0"/>
-            <stop offset="0.45" stopColor="white" stopOpacity="0.85"/>
+            <stop offset="0"    stopColor="black" stopOpacity="0"/>
+            <stop offset="0.4"  stopColor="white" stopOpacity="0.7"/>
             <stop offset="0.55" stopColor="white" stopOpacity="1"/>
-            <stop offset="1" stopColor="black" stopOpacity="0"/>
+            <stop offset="1"    stopColor="black" stopOpacity="0"/>
           </linearGradient>
+
+          {/* Gradiente da barra: transparente → laranja → branco (pico) → laranja → transparente */}
+          <linearGradient id="barLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#ff6600" stopOpacity="0"/>
+            <stop offset="25%"  stopColor="#ff6600" stopOpacity="1"/>
+            <stop offset="50%"  stopColor="#ffcc88" stopOpacity="1"/>
+            <stop offset="75%"  stopColor="#ff6600" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#ff6600" stopOpacity="0"/>
+          </linearGradient>
+
+          {/* Glow da barra */}
+          <filter id="barGlow" x="-20%" y="-200%" width="140%" height="500%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
         {/* Sombra do texto */}
         <text 
-          x="300" 
-          y="90" 
+          x="350" 
+          y="100" 
           textAnchor="middle" 
           fontSize="145" 
           fontWeight="800"
@@ -91,8 +79,8 @@ function AnimatedTitle() {
         {/* Texto principal laranja com mascara de brilho */}
         <g mask="url(#shineMask)">
           <text 
-            x="300" 
-            y="90" 
+            x="350" 
+            y="100" 
             textAnchor="middle" 
             fontSize="145" 
             fontWeight="800"
@@ -105,30 +93,30 @@ function AnimatedTitle() {
           </text>
         </g>
 
-        {/* Barra laranja decorativa abaixo com animação de stretch - visual de linha afilada nas pontas */}
-        <g style={{
-          animation: "barStretch 2.5s ease-in-out infinite",
-          transformOrigin: "300px 115px",
-        }}>
-          <polygon 
-            points="50,115 300,110 550,115 300,120" 
-            fill="#ff6600"
-          />
+        {/* Barra fina laranja afilada nas pontas com animação de encolher/esticar */}
+        <g
+          filter="url(#barGlow)"
+          style={{
+            animation: "barStretch 2.8s ease-in-out infinite",
+            transformOrigin: "350px 125px",
+          }}
+        >
+          {/* Linha principal */}
+          <line x1="100" y1="125" x2="600" y2="125" stroke="url(#barLineGrad)" strokeWidth="2.5" strokeLinecap="round"/>
+          {/* Brilho central mais intenso */}
+          <ellipse cx="350" cy="125" rx="80" ry="1.5" fill="#ffcc88" opacity="0.9"/>
         </g>
 
         <style>
           {`
             @keyframes sweep {
-              0% { transform: translateX(-200px) skewX(-18deg); }
-              100% { transform: translateX(800px) skewX(-18deg); }
-            }
-            .shine-rect {
-              transform-origin: center;
+              0%   { transform: translateX(-200px) skewX(-18deg); }
+              100% { transform: translateX(900px)  skewX(-18deg); }
             }
             @keyframes barStretch {
-              0%   { transform: scaleX(0.6); }
-              50%  { transform: scaleX(1); }
-              100% { transform: scaleX(0.6); }
+              0%   { transform: scaleX(0.45); opacity: 0.6; }
+              50%  { transform: scaleX(1);    opacity: 1;   }
+              100% { transform: scaleX(0.45); opacity: 0.6; }
             }
           `}
         </style>
@@ -167,7 +155,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 overflow-x-hidden relative">
         <div className="w-full max-w-md px-2 sm:px-0">
           {/* Titulo */}
           <div className="mb-6 sm:mb-8 text-center">
@@ -179,6 +167,26 @@ export default function HomePage() {
 
           {/* Formulario */}
           <LoginForm />
+        </div>
+
+        {/* Crédito - canto inferior direito */}
+        <div className="absolute bottom-4 right-5 select-none" aria-label="Desenvolvido por Renato Calixto">
+          <span
+            className="text-zinc-400 dark:text-zinc-600 text-xs font-mono overflow-hidden whitespace-nowrap inline-block"
+            style={{ animation: "typeCredit 6s ease-in-out infinite" }}
+          >
+            Desenvolvido por: Renato Calixto
+          </span>
+          <style>{`
+            @keyframes typeCredit {
+              0%   { width: 0ch;   opacity: 0;   }
+              5%   { opacity: 1;                 }
+              55%  { width: 33ch;  opacity: 1;   }
+              75%  { width: 33ch;  opacity: 1;   }
+              90%  { width: 0ch;   opacity: 0;   }
+              100% { width: 0ch;   opacity: 0;   }
+            }
+          `}</style>
         </div>
     </div>
   )
