@@ -10,7 +10,7 @@ function AnimatedTitle() {
   return (
     <div className="relative cursor-default select-none py-4 w-full flex justify-center">
       <svg 
-        viewBox="20 0 660 145"
+        viewBox="20 -30 660 190"
         className="w-full max-w-[520px] h-auto overflow-visible"
         role="img" 
         aria-label="Roteiro"
@@ -24,12 +24,12 @@ function AnimatedTitle() {
 
           {/* Mascara de brilho varrendo */}
           <mask id="shineMask">
-            <rect x="0" y="0" width="700" height="145" fill="white"/>
+            <rect x="0" y="-30" width="700" height="190" fill="white"/>
             <rect 
               x="-200" 
-              y="0" 
+              y="-30" 
               width="160" 
-              height="145" 
+              height="190" 
               fill="url(#shineHighlight)"
               style={{ animation: "sweep 4.5s linear infinite" }}
             />
